@@ -1,0 +1,21 @@
+{
+  "shops": [
+    { "name": "Eden-Noniewicza" },
+    { "name": "Lewiatan-Waryńskiego" },
+    { "name": "Lewiatan-Sikorskiego" },
+    { "name": "Lewiatan-Putry" },
+    { "name": "Lewiatan-Świerkowa" },
+    { "name": "Lewiatan-W.Polskiego" },
+    { "name": "Stan-Maja" }
+  ],
+  "prices": {
+    "Kartacze": 6,
+    "Babka": 14,
+    "Kiszka": 20
+  },
+  "products": [
+    { "name": "Kartacze" },
+    { "name": "Babka" },
+    { "name": "Kiszka" }
+  ]
+}
