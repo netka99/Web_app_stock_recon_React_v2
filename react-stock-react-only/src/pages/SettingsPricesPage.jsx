@@ -1,64 +1,25 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
-import { useEffect, useState } from 'react'
-//, useContext
-// import ReactDOM from 'react-dom/client'
+import { useContext } from 'react'
 import {
   Navbar,
   Sidebar,
   Footer,
   Spinner,
 } from '../components/index'
-import { fetchData, updateDataOnApi } from '../api/fetchAPI'
+import { PricesContext } from '../context/index'
 
 const SettingsPricesPage = () => {
-  const [pricesData, setPricesData] = useState(null)
-  const [isDisabled, setIsDisabled] = useState(true)
-  const [isSent, setIsSent] = useState(false)
-
+  const {
+    pricesData,
+    isDisabled,
+    isSent,
+    handleUpdate,
+    handleChangePrices,
+    handleSavePrices,
+  } = useContext(PricesContext)
   const pageTitle = 'Ustawienia - Ceny'
-
-  useEffect(() => {
-    fetchData('http://localhost:3001/prices')
-      .then((data) => setPricesData(data))
-      .catch((error) =>
-        console.error('Error fetching data:', error),
-      )
-  }, [])
-
-  const handleUpdate = (e) => {
-    const { id, value } = e.target
-    setPricesData({
-      ...pricesData,
-      [id]: Number(value),
-    })
-  }
-
-  const handleChangePrices = () => {
-    setIsDisabled(false)
-    console.log(pricesData)
-  }
-
-  const handleSavePrices = async () => {
-    try {
-      const response = await updateDataOnApi(
-        pricesData,
-        'http://localhost:3001/prices',
-      )
-      console.log('Response status:', response.status)
-      console.log('Response data:', response.data)
-      if (response.status === 200) {
-        setIsSent(true)
-      } else {
-        setIsSent(false)
-      }
-    } catch (error) {
-      console.error('Error saving data:', error)
-      setIsSent(false)
-    }
-    setIsDisabled(true)
-  }
 
   return (
     <main>
