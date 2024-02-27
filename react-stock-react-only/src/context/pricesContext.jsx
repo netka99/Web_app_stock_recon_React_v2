@@ -31,6 +31,7 @@ export const PricesProvider = ({ children }) => {
 
   const handleChangePrices = () => {
     setIsDisabled(false)
+    setIsSent(false)
     console.log(pricesData)
   }
 
