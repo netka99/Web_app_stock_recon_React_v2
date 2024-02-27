@@ -1,21 +1,51 @@
 {
   "shops": [
-    { "name": "Eden-Noniewicza" },
-    { "name": "Lewiatan-Waryńskiego" },
-    { "name": "Lewiatan-Sikorskiego" },
-    { "name": "Lewiatan-Putry" },
-    { "name": "Lewiatan-Świerkowa" },
-    { "name": "Lewiatan-W.Polskiego" },
-    { "name": "Stan-Maja" }
+    {
+      "name": "Eden-Noniewicza",
+      "id": "c1d8"
+    },
+    {
+      "name": "Lewiatan-Waryńskiego",
+      "id": "212b"
+    },
+    {
+      "name": "Lewiatan-Sikorskiego",
+      "id": "9e21"
+    },
+    {
+      "name": "Lewiatan-Putry",
+      "id": "1050"
+    },
+    {
+      "name": "Lewiatan-Świerkowa",
+      "id": "6219"
+    },
+    {
+      "name": "Lewiatan-W.Polskiego",
+      "id": "65ac"
+    },
+    {
+      "name": "Stan-Maja",
+      "id": "91b2"
+    }
   ],
   "prices": {
-    "Kartacze": 6,
-    "Babka": 14,
-    "Kiszka": 20
+    "Kartacze": 10,
+    "Babka": 17,
+    "Kiszka": 21
   },
   "products": [
-    { "name": "Kartacze" },
-    { "name": "Babka" },
-    { "name": "Kiszka" }
+    {
+      "name": "Kartacze",
+      "id": "919d"
+    },
+    {
+      "name": "Babka",
+      "id": "bf63"
+    },
+    {
+      "name": "Kiszka",
+      "id": "244a"
+    }
   ]
 }

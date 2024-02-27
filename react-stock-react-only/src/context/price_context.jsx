@@ -19,6 +19,12 @@ const priceReducer = (state, action) => {
       return {
         ...state,
         ...action.prices,
+        loading: false,
+      }
+    case 'SET_LOADING':
+      return {
+        ...state,
+        loading: action.loading,
       }
     default:
       return state
@@ -36,12 +42,15 @@ export const usePrices = () => {
 }
 
 export const PriceProvider = ({ children }) => {
-  const [prices, dispatch] = useReducer(priceReducer, {})
+  const [prices, dispatch] = useReducer(priceReducer, {
+    loading: true,
+  })
   const apiUrl = import.meta.env.VITE_APP_PRICE_API
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        dispatch({ type: 'SET_LOADING', loading: true })
         const response = await fetch(apiUrl)
         if (!response.ok) {
           throw new Error('Network response was not ok')
@@ -50,11 +59,12 @@ export const PriceProvider = ({ children }) => {
         dispatch({ type: 'LOAD_PRICES', prices: result })
       } catch (error) {
         console.error('Error fetching data:', error)
+        dispatch({ type: 'SET_LOADING', loading: false })
       }
     }
 
     fetchData()
-  }, [dispatch])
+  }, [dispatch, apiUrl])
 
   PriceProvider.propTypes = {
     children: PropTypes.node,
@@ -66,6 +76,34 @@ export const PriceProvider = ({ children }) => {
       productName,
       newPrice,
     })
+    updatePrices({
+      ...prices,
+      [productName]: parseFloat(newPrice),
+    })
+  }
+
+  const updatePrices = async (productName, newPrice) => {
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productName,
+          newPrice,
+        }),
+      })
+      const data = await response.json()
+      console.log('Data:', data)
+      if (!response.ok) {
+        throw new Error(
+          'Failed to update prices on the server',
+        )
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
   }
 
   return (
