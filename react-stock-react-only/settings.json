@@ -30,9 +30,9 @@
     }
   ],
   "prices": {
-    "Kartacze": 10,
-    "Babka": 6,
-    "Kiszka": 20
+    "Kartacze": 8.5,
+    "Babka": 17,
+    "Kiszka": 18
   },
   "products": [
     {

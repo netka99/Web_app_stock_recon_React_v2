@@ -134,14 +134,10 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 4rem);
+  height: calc(100vh - 1rem);
 
-  @media screen and (min-width: ${size.mobileL}) and (max-width: ${size.tabletL}) {
-    width: 80%;
-  }
-
-  @media screen and (max-width: ${size.mobileL}) {
-    width: 90%;
+  @media screen and (max-width: ${size.tablet}) {
+    height: calc(100vh - 5rem);
   }
 
   .formContainer {
@@ -157,6 +153,10 @@ const Container = styled.div`
     box-shadow:
       0 4px 8px 0 rgba(0, 0, 0, 0.2),
       0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    @media screen and (max-width: ${size.mobileL}) {
+      padding: 0.8rem 0.8rem;
+    }
   }
 
   .product_container {
@@ -169,6 +169,10 @@ const Container = styled.div`
     box-shadow:
       0 4px 8px 0 rgba(0, 0, 0, 0.2),
       0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    @media screen and (max-width: ${size.mobileL}) {
+      margin: 0.7rem auto 0.7rem auto;
+    }
   }
 
   .image_label {
@@ -183,10 +187,17 @@ const Container = styled.div`
       padding-left: 10px;
     }
 
+    @media screen and (max-width: ${size.mobileL}) {
+      margin: 0 0.5rem 0 0.5rem;
+    }
+
     img {
       width: 55px;
       border-radius: 25px;
       margin-right: 1rem;
+      @media screen and (max-width: ${size.mobileL}) {
+        margin-right: 0.5rem;
+      }
     }
 
     label {
@@ -209,6 +220,9 @@ const Container = styled.div`
     @media screen and (max-width: ${size.tablet}) {
       flex: 78%;
     }
+    @media screen and (max-width: ${size.mobileL}) {
+      margin: 0 0.5rem 0 0.5rem;
+    }
 
     input {
       width: 5rem;
@@ -219,6 +233,11 @@ const Container = styled.div`
       border: 1px solid #a3a3a3;
       text-align: right;
 
+      @media screen and (max-width: ${size.mobileL}) {
+        font-size: 0.9rem;
+        width: 3rem;
+      }
+
       &:hover {
         border: 1px solid #6b6b6b;
       }
@@ -226,8 +245,8 @@ const Container = styled.div`
     p {
       margin: 0px 20px 0px 10px;
 
-      @media screen and (max-width: $tablet) {
-        margin: 0px 10px 0px 0px;
+      @media screen and (max-width: ${size.mobileL}) {
+        margin: 0px 10px 0px 5px;
       }
     }
   }
@@ -255,8 +274,8 @@ const Container = styled.div`
     margin-right: 1rem;
     flex-direction: column;
     align-items: flex-end;
-}
   }
+
   .button_save {
     width: 7rem;
     border: none;

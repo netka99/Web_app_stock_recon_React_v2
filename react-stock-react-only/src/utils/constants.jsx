@@ -4,7 +4,7 @@ import chart from '../assets/chart-pie-solid.svg'
 import summary from '../assets/summary.svg'
 import cog from '../assets/cog-solid.svg'
 import priceTag from '../assets/price-tag.svg'
-import store from '../assets/store-alt-solid.svg'
+import store from '../assets/store-img.svg'
 
 export const homeLabels = [
   {
