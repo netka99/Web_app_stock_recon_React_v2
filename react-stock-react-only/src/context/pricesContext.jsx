@@ -9,13 +9,13 @@ import PropTypes from 'prop-types'
 const PricesContext = createContext()
 
 export const PricesProvider = ({ children }) => {
-  const [pricesData, setPricesData] = useState(null)
+  const [settingsData, setSettingsData] = useState(null)
   const [isDisabled, setIsDisabled] = useState(true)
   const [isSent, setIsSent] = useState(false)
 
   useEffect(() => {
-    fetchData('http://localhost:3001/prices')
-      .then((data) => setPricesData(data))
+    fetchData('http://localhost:8000/settings/aneta')
+      .then((data) => setSettingsData(data))
       .catch((error) =>
         console.error('Error fetching data:', error),
       )
@@ -23,23 +23,31 @@ export const PricesProvider = ({ children }) => {
 
   const handleUpdate = (e) => {
     const { id, value } = e.target
-    setPricesData({
-      ...pricesData,
-      [id]: Number(value),
+    setSettingsData({
+      ...settingsData,
+      prices: {
+        ...settingsData.prices,
+        [id]: Number(value),
+      },
     })
   }
 
   const handleChangePrices = () => {
     setIsDisabled(false)
     setIsSent(false)
-    console.log(pricesData)
+    console.log(settingsData)
   }
 
   const handleSavePrices = async () => {
     try {
+      const updatedPrices = { ...settingsData.prices }
+      const updatedData = {
+        shops: settingsData.shops,
+        prices: updatedPrices,
+      }
       const response = await updateDataOnApi(
-        pricesData,
-        'http://localhost:3001/prices',
+        updatedData,
+        'http://localhost:8000/settings/aneta',
       )
       console.log('Response status:', response.status)
       console.log('Response data:', response.data)
@@ -58,7 +66,7 @@ export const PricesProvider = ({ children }) => {
   return (
     <PricesContext.Provider
       value={{
-        pricesData,
+        settingsData,
         isDisabled,
         isSent,
         handleUpdate,
@@ -72,7 +80,7 @@ export const PricesProvider = ({ children }) => {
 }
 
 PricesProvider.propTypes = {
-  children: PropTypes.node.isRequired, // Validate children prop
+  children: PropTypes.node.isRequired,
 }
 
 export default PricesContext

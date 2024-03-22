@@ -21,13 +21,14 @@ const SettingsShopsPage = () => {
   const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
-    fetchData('http://localhost:3001/shops')
+    fetchData('http://localhost:8000/settings/aneta')
       .then((data) => {
         console.log('Shops:', data)
+        const shopsData = data.shops
         setShops(
-          data.map((shop, index) => ({
-            ...shop,
-            // isEditing: false,
+          shopsData.map((shop, index) => ({
+            name: shop,
+            isEditing: false,
             index: index,
           })),
         )
@@ -70,48 +71,40 @@ const SettingsShopsPage = () => {
       <Container>
         <div className="shopsListSettings">
           {shops ? (
-            // shops.map((shop, index) => (
-            //   <div key={index} className="shop">
-            //     <img
-            //       className="store-picture"
-            //       src={shopImg}
-            //       alt="shop image"
-            //     ></img>
-            //     <div className="store-name">
-            //       {shop.isEditing ? (
-            //         <>
-            //           <input
-            //             value={shop.name}
-            //             onChange={(e) =>
-            //               handleChange(e, index)
-            //             }
-            //           />
-            //           <SaveButton />
-            //         </>
-            //       ) : (
-            //         <>
-            //           <p>{shop.name}</p>
-            //           <EditButton
-            //             onClick={() => {
-            //               toggleEdit(index)
-            //             }}
-            //           />
-            //         </>
-            //       )}
-            //     </div>
-            //     <button
-            //       className="delete-button"
-            //       onClick={() => handleDeleteShop(index)}
-            //     >
-            //       <img
-            //         src={trashImg}
-            //         className="item-picture"
-            //         alt="delete image of trash can"
-            //       />
-            //     </button>
-            //   </div>
-            // ))
-            <ShopList shops={shops} />
+            shops.map((shop, index) => (
+              <div key={index} className="shop">
+                <img
+                  className="store-picture"
+                  src={shopImg}
+                  alt="shop image"
+                ></img>
+                <div className="store-name">
+                  {shop.isEditing ? (
+                    <>
+                      <input
+                        value={shop.name}
+                        onChange={(e) =>
+                          handleChange(e, index)
+                        }
+                      />
+                      <SaveButton />
+                    </>
+                  ) : (
+                    <>
+                      <p>{shop.name}</p>
+                      <EditButton
+                        onClick={() => {
+                          toggleEdit(index)
+                        }}
+                      />
+                    </>
+                  )}
+                </div>
+                <DeleteButton
+                  onClick={() => handleDeleteShop(index)}
+                />
+              </div>
+            ))
           ) : (
             <Spinner />
           )}
@@ -147,17 +140,34 @@ const SaveButton = () => {
   )
 }
 
+const DeleteButton = ({ onClick }) => {
+  return (
+    <button className="delete-button" onClick={onClick}>
+      <img
+        src={trashImg}
+        className="item-picture"
+        alt="delete image of trash can"
+      />
+    </button>
+  )
+}
+
 EditButton.propTypes = {
-  onClick: PropTypes.func.isRequired, // Ensure onClick is a function and is required
+  onClick: PropTypes.func.isRequired,
+}
+DeleteButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
 }
 
 const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  /* height: 95vh; */
-  padding-top: 110px;
-  padding-bottom: 2rem;
+  overflow-y: scroll;
+  height: 85vh;
+  flex-grow: 1;
+  padding-bottom: 8rem;
+
   .shop {
     display: flex;
     align-items: center;

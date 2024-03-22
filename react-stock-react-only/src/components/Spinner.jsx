@@ -59,8 +59,8 @@ const Container = styled.div`
     position: absolute;
     display: inline-block;
     left: 0;
-    width: 4rem;
-    height: 4rem;
+    width: 3rem;
+    height: 3rem;
     background: linear-gradient(
       to bottom right,
       #e51ead,

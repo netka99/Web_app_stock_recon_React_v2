@@ -2,7 +2,11 @@ import * as React from 'react'
 import styled, { css } from 'styled-components'
 import { Link } from 'react-router-dom'
 import { settingsLabels } from '../utils/constants'
-import { Navbar, Sidebar } from '../components/index'
+import {
+  Navbar,
+  Sidebar,
+  Footer,
+} from '../components/index'
 
 const SettingsPage = () => {
   const pageTitle = 'Ustawienia'
@@ -35,6 +39,7 @@ const SettingsPage = () => {
           })}
         </div>
       </ButtonSection>
+      <Footer />
     </main>
   )
 }
@@ -43,7 +48,8 @@ const ButtonSection = styled.section`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 4rem);
+  height: 65vh;
+  padding-bottom: 5rem;
 
   .labelsContainer {
     display: flex;

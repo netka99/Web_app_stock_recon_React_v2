@@ -14,7 +14,7 @@ import { pictures } from '../utils/productPictures'
 
 const SettingsPricesPage = () => {
   const {
-    pricesData,
+    settingsData,
     isDisabled,
     isSent,
     handleUpdate,
@@ -44,14 +44,14 @@ const SettingsPricesPage = () => {
     <main>
       <Navbar pageTitle={pageTitle} />
 
-      {pricesData ? (
+      {settingsData ? (
         <Container>
           <form
             className="formContainer"
             onSubmit={(e) => e.preventDefault()}
           >
             <div className="container">
-              {Object.entries(pricesData).map(
+              {Object.entries(settingsData.prices).map(
                 ([productName, price]) => (
                   <div
                     className="product_container"

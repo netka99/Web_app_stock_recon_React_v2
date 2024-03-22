@@ -35,7 +35,7 @@ const Navbar = ({ pageTitle }) => {
             <Link to="/">Home</Link>
           </li>
           <li>
-            <Link to="/sale">Sprzedaż</Link>
+            <Link to="/sprzedaz">Sprzedaż</Link>
           </li>
           <li>
             <Link to="/zestawienie">Zestawienie</Link>
@@ -65,7 +65,7 @@ const NavContainer = styled.nav`
   height: 4rem;
   background: linear-gradient(45deg, #4a1bb4, #6a18a4);
   box-shadow: 5px 6px 6px rgba(0, 0, 0, 0.25);
-  margin: 0;
+  margin: 0 0 6rem 0;
 
   .nav-logo {
     height: 3rem;
