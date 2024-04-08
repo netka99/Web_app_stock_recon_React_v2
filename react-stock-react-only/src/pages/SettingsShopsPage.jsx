@@ -7,7 +7,6 @@ import {
   Sidebar,
   Footer,
   Spinner,
-  ShopList,
 } from '../components/index'
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
 import shopImg from '../assets/store-img.svg'
@@ -17,62 +16,139 @@ import trashImg from '../assets/delete.png'
 
 const SettingsShopsPage = () => {
   const pageTitle = 'Ustawienia - Sklepy'
+  const [dataAll, setDataAll] = useState(null)
   const [shops, setShops] = useState(null)
-  const [isEditing, setIsEditing] = useState(false)
+  const [message, setMessage] = useState(false)
+  const [showMessageSaved, setShowMessageSaved] =
+    useState(false)
+  const [showMessageDeleted, setShowMessageDeleted] =
+    useState(false)
+
+  const generateId = () => {
+    return '_' + Math.random().toString(36).slice(2, 9)
+  }
 
   useEffect(() => {
     fetchData('http://localhost:8000/settings/aneta')
       .then((data) => {
-        console.log('Shops:', data)
-        const shopsData = data.shops
-        setShops(
-          shopsData.map((shop, index) => ({
-            name: shop,
-            isEditing: false,
-            index: index,
-          })),
-        )
+        const shopsData = data.shops.map((shop) => ({
+          id: generateId(),
+          name: shop,
+          isEditing: false,
+        }))
+        setDataAll(data)
+        setShops(shopsData)
+        console.log(shops)
+        console.log('dataAll:', data)
       })
       .catch((error) =>
         console.error('Error fetching data:', error),
       )
   }, [])
 
-  const handleChange = (e, index) => {
+  useEffect(() => {
+    if (shops !== null) {
+      saveShopsOnApi()
+    }
+  }, [shops])
+
+  const handleChange = (e, id) => {
     const { value } = e.target
     setShops((prevShops) =>
       prevShops.map((shop) =>
-        shop.index === index
-          ? { ...shop, name: value }
-          : shop,
+        shop.id === id ? { ...shop, name: value } : shop,
       ),
     )
   }
 
-  const handleDeleteShop = (index) => {
+  const handleDeleteShop = (id) => {
     setShops((prevShops) =>
-      prevShops.filter((shop) => shop.index !== index),
+      prevShops.filter((shop) => shop.id !== id),
     )
+    if (message) {
+      setShowMessageDeleted(true)
+      setTimeout(() => {
+        setShowMessageDeleted(false)
+      }, 5000)
+      setMessage(false)
+    }
   }
 
-  const toggleEdit = (index) => {
+  const toggleEdit = (id) => {
     setShops((prevShops) =>
       prevShops.map((shop) =>
-        shop.index === index
+        shop.id === id
           ? { ...shop, isEditing: true }
           : shop,
       ),
     )
   }
 
+  const saveShop = (id) => {
+    setShops((prevShops) =>
+      prevShops.map((shop) =>
+        shop.id === id
+          ? { ...shop, isEditing: false }
+          : shop,
+      ),
+    )
+    if (message) {
+      setShowMessageSaved(true)
+      setTimeout(() => {
+        setShowMessageSaved(false)
+      }, 5000)
+      setMessage(false)
+    }
+  }
+
+  const saveShopsOnApi = async () => {
+    try {
+      const updatedShops = shops.map((shop) => shop.name)
+      const updatedData = {
+        shops: updatedShops,
+        prices: dataAll.prices,
+      }
+      const response = await updateDataOnApi(
+        updatedData,
+        'http://localhost:8000/settings/aneta',
+      )
+      console.log('Response status:', response.status)
+      console.log('Response data:', response.data)
+      if (response.status === 200) {
+        setMessage(true)
+        console.log('data sent')
+      } else {
+        console.log('data not sent')
+      }
+    } catch (error) {
+      console.error('Error saving shops:', error)
+    }
+  }
+
   return (
     <main>
       <Navbar pageTitle={pageTitle} />
       <Container>
+        <div
+          className={
+            showMessageDeleted
+              ? 'message visible'
+              : 'message'
+          }
+        >
+          Sklep został skasowany !
+        </div>
+        <div
+          className={
+            showMessageSaved ? 'message visible' : 'message'
+          }
+        >
+          Nowa nazwa sklepu została zapisana
+        </div>
         <div className="shopsListSettings">
           {shops ? (
-            shops.map((shop, index) => (
-              <div key={index} className="shop">
+            shops.map((shop) => (
+              <div key={shop.id} className="shop">
                 <img
                   className="store-picture"
                   src={shopImg}
@@ -84,24 +160,31 @@ const SettingsShopsPage = () => {
                       <input
                         value={shop.name}
                         onChange={(e) =>
-                          handleChange(e, index)
+                          handleChange(e, shop.id)
                         }
                       />
-                      <SaveButton />
+                      <SaveButton
+                        onClick={() => {
+                          saveShop(shop.id)
+                          saveShopsOnApi()
+                        }}
+                      />
                     </>
                   ) : (
                     <>
                       <p>{shop.name}</p>
                       <EditButton
                         onClick={() => {
-                          toggleEdit(index)
+                          toggleEdit(shop.id)
                         }}
                       />
                     </>
                   )}
                 </div>
                 <DeleteButton
-                  onClick={() => handleDeleteShop(index)}
+                  onClick={() => {
+                    handleDeleteShop(shop.id)
+                  }}
                 />
               </div>
             ))
@@ -128,9 +211,9 @@ const EditButton = ({ onClick }) => {
   )
 }
 
-const SaveButton = () => {
+const SaveButton = ({ onClick }) => {
   return (
-    <button className="edit-button">
+    <button className="edit-button" onClick={onClick}>
       <img
         className="item-picture"
         src={saveImg}
@@ -155,18 +238,34 @@ const DeleteButton = ({ onClick }) => {
 EditButton.propTypes = {
   onClick: PropTypes.func.isRequired,
 }
+SaveButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
+}
 DeleteButton.propTypes = {
   onClick: PropTypes.func.isRequired,
 }
 
 const Container = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow-y: scroll;
   height: 85vh;
   flex-grow: 1;
   padding-bottom: 8rem;
+
+  .message {
+    padding-bottom: 1rem;
+    color: #ef3a4f;
+    font-style: italic;
+    font-weight: bold;
+    display: none;
+  }
+
+  .visible {
+    display: block;
+  }
 
   .shop {
     display: flex;
@@ -231,12 +330,12 @@ const Container = styled.div`
         sepia(87%) saturate(3694%) hue-rotate(335deg)
         brightness(99%) contrast(89%);
     }
-    &:focus,
+    /* &:focus,
     &:hover {
       filter: brightness(0) saturate(100%) invert(30%)
         sepia(76%) saturate(2026%) hue-rotate(335deg)
         brightness(72%) contrast(96%);
-    }
+    } */
   }
 
   .show {

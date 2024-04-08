@@ -15,17 +15,14 @@ export const fetchData = async (url) => {
 }
 
 // Function to update data on the API
-export const updateDataOnApi = async (
-  updatedPrices,
-  url,
-) => {
+export const updateDataOnApi = async (updatedData, url) => {
   try {
     const response = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(updatedPrices),
+      body: JSON.stringify(updatedData),
     })
     if (!response.ok) {
       throw new Error('Failed to update data on API')
