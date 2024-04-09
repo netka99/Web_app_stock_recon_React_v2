@@ -4,6 +4,7 @@ import Footer from './Footer'
 import NavbarMain from './NavbarMain'
 import Spinner from './Spinner'
 import ShopList from './SettingsShop'
+import ErrorNotification from './ErrorNotification'
 
 export {
   Navbar,
@@ -12,4 +13,5 @@ export {
   NavbarMain,
   Spinner,
   ShopList,
+  ErrorNotification,
 }

@@ -9,6 +9,7 @@ import {
   Spinner,
 } from '../components/index'
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
+import ErrorNotification from '../components/ErrorNotification'
 import shopImg from '../assets/store-img.svg'
 import editImg from '../assets/edit.png'
 import saveImg from '../assets/save-icon.png'
@@ -23,9 +24,17 @@ const SettingsShopsPage = () => {
     useState(false)
   const [showMessageDeleted, setShowMessageDeleted] =
     useState(false)
+  const [showError, setShowError] = useState(false)
+  const errorMessage =
+    'Dane nie zostały pobrane lub zapisane, skontaktuj się z administratorem!'
 
   const generateId = () => {
     return '_' + Math.random().toString(36).slice(2, 9)
+  }
+
+  //to close error window
+  const handleClose = () => {
+    setShowError(false)
   }
 
   useEffect(() => {
@@ -119,9 +128,11 @@ const SettingsShopsPage = () => {
         console.log('data sent')
       } else {
         console.log('data not sent')
+        setShowError(true)
       }
     } catch (error) {
       console.error('Error saving shops:', error)
+      setShowError(true)
     }
   }
 
@@ -129,6 +140,14 @@ const SettingsShopsPage = () => {
     <main>
       <Navbar pageTitle={pageTitle} />
       <Container>
+        <div>
+          {showError && (
+            <ErrorNotification
+              message={errorMessage}
+              onClose={handleClose}
+            />
+          )}
+        </div>
         <div
           className={
             showMessageDeleted
