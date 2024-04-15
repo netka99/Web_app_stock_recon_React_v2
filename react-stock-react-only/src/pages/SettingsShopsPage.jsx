@@ -7,9 +7,10 @@ import {
   Sidebar,
   Footer,
   Spinner,
+  AddShop,
+  ErrorNotification,
 } from '../components/index'
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
-import ErrorNotification from '../components/ErrorNotification'
 import shopImg from '../assets/store-img.svg'
 import editImg from '../assets/edit.png'
 import saveImg from '../assets/save-icon.png'
@@ -20,9 +21,12 @@ const SettingsShopsPage = () => {
   const [dataAll, setDataAll] = useState(null)
   const [shops, setShops] = useState(null)
   const [message, setMessage] = useState(false)
+  const [messageTest, setMessageTest] = useState(false)
   const [showMessageSaved, setShowMessageSaved] =
     useState(false)
   const [showMessageDeleted, setShowMessageDeleted] =
+    useState(false)
+  const [showMessageAdded, setShowMessageAdded] =
     useState(false)
   const [showError, setShowError] = useState(false)
   const errorMessage =
@@ -37,6 +41,16 @@ const SettingsShopsPage = () => {
     setShowError(false)
   }
 
+  const triggerMessage = (stateMessage) => {
+    if (message) {
+      stateMessage(true)
+      setTimeout(() => {
+        stateMessage(false)
+      }, 5000)
+      setMessage(false)
+    }
+  }
+
   useEffect(() => {
     fetchData('http://localhost:8000/settings/aneta')
       .then((data) => {
@@ -45,6 +59,7 @@ const SettingsShopsPage = () => {
           name: shop,
           isEditing: false,
         }))
+        setMessage(false)
         setDataAll(data)
         setShops(shopsData)
         console.log(shops)
@@ -60,6 +75,40 @@ const SettingsShopsPage = () => {
       saveShopsOnApi()
     }
   }, [shops])
+
+  const handleMessage = (messageType) => {
+    getMessageText(messageType)
+    setMessageTest(messageType)
+    setTimeout(() => {
+      setMessageTest(false)
+    }, 5000)
+  }
+
+  const getMessageText = (messageType) => {
+    switch (messageType) {
+      case 'added':
+        return 'Sklep został dodany!'
+      case 'deleted':
+        return 'Sklep został skasowany!'
+      default:
+        return ''
+    }
+  }
+
+  console.log('message', messageTest)
+
+  const handleAddShop = (shopName) => {
+    setShops([
+      ...shops,
+      {
+        id: generateId(),
+        name: shopName,
+        isEditing: false,
+      },
+    ])
+    handleMessage('added')
+    // triggerMessage(setShowMessageAdded)
+  }
 
   const handleChange = (e, id) => {
     const { value } = e.target
@@ -140,6 +189,19 @@ const SettingsShopsPage = () => {
     <main>
       <Navbar pageTitle={pageTitle} />
       <Container>
+        {messageTest ? (
+          <div>{getMessageText(messageTest)}</div>
+        ) : (
+          <div>Error</div>
+        )}
+        {/* <div
+          className={
+            showMessageAdded ? 'message visible' : 'message'
+          }
+        >
+          Sklep został dodany!
+        </div> */}
+        <AddShop onAddShop={handleAddShop} />
         <div>
           {showError && (
             <ErrorNotification
@@ -148,7 +210,8 @@ const SettingsShopsPage = () => {
             />
           )}
         </div>
-        <div
+
+        {/* <div
           className={
             showMessageDeleted
               ? 'message visible'
@@ -156,7 +219,7 @@ const SettingsShopsPage = () => {
           }
         >
           Sklep został skasowany !
-        </div>
+        </div> */}
         <div
           className={
             showMessageSaved ? 'message visible' : 'message'
@@ -270,9 +333,10 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   overflow-y: scroll;
-  height: 85vh;
+  /* height: 100vh; */
   flex-grow: 1;
-  padding-bottom: 8rem;
+  margin-bottom: 8rem;
+  margin-top: 6rem;
 
   .message {
     padding-bottom: 1rem;
