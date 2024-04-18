@@ -6,6 +6,7 @@ import Spinner from './Spinner'
 import ShopList from './SettingsShop'
 import ErrorNotification from './ErrorNotification'
 import AddShop from './AddShop'
+import ShopItem from './ShopItemSettings'
 
 export {
   Navbar,
@@ -16,4 +17,5 @@ export {
   ShopList,
   ErrorNotification,
   AddShop,
+  ShopItem,
 }
