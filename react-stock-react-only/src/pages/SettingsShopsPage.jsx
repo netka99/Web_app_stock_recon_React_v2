@@ -1,7 +1,12 @@
 import React from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer } from 'react'
 import styled from 'styled-components'
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
+import {
+  actionTypes,
+  shopReducer,
+} from '../reducers/shops_settings_reducer'
+
 import {
   Navbar,
   Sidebar,
@@ -15,9 +20,16 @@ const pageTitle = 'Ustawienia - Sklepy'
 const { VITE_APP_SETTINGS_API } = import.meta.env
 
 const SettingsShopsPage = () => {
+  const initialShopsState = {
+    shops: null,
+  }
   const [dataAll, setDataAll] = useState(null)
-  const [shops, setShops] = useState(null)
+  // const [shops, setShops] = useState(null)
   const [messageText, setmessageText] = useState(false)
+  const [state, dispatch] = useReducer(
+    shopReducer,
+    initialShopsState,
+  )
 
   const generateId = () => {
     return '_' + Math.random().toString(36).slice(2, 9)
@@ -32,8 +44,11 @@ const SettingsShopsPage = () => {
           isEditing: false,
         }))
         setDataAll(data)
-        setShops(shopsData)
-        console.log(shops)
+        // setShops(shopsData)
+        dispatch({
+          type: actionTypes.SET_SHOPS,
+          payload: shopsData,
+        })
         console.log('dataAll:', data)
       })
       .catch((error) =>
@@ -42,10 +57,10 @@ const SettingsShopsPage = () => {
   }, [])
 
   useEffect(() => {
-    if (shops !== null) {
+    if (state.shops !== null) {
       saveShopsOnApi()
     }
-  }, [shops])
+  }, [state.shops])
 
   const handleMessage = (messageType) => {
     getMessageText(messageType)
@@ -71,57 +86,52 @@ const SettingsShopsPage = () => {
   }
 
   const handleAddShop = (shopName) => {
-    setShops([
-      ...shops,
-      {
+    dispatch({
+      type: actionTypes.ADD_SHOP,
+      payload: {
         id: generateId(),
         name: shopName,
-        isEditing: false,
       },
-    ])
+    })
     handleMessage('added')
   }
 
   const handleChange = (e, id) => {
     const { value } = e.target
-    setShops((prevShops) =>
-      prevShops.map((shop) =>
-        shop.id === id ? { ...shop, name: value } : shop,
-      ),
-    )
+    dispatch({
+      type: actionTypes.CHANGE_SHOP,
+      payload: { id, name: value },
+    })
   }
 
   const handleDeleteShop = (id) => {
-    setShops((prevShops) =>
-      prevShops.filter((shop) => shop.id !== id),
-    )
+    dispatch({
+      type: actionTypes.DELETE_SHOP,
+      payload: { id },
+    })
     handleMessage('deleted')
   }
 
   const toggleEdit = (id) => {
-    setShops((prevShops) =>
-      prevShops.map((shop) =>
-        shop.id === id
-          ? { ...shop, isEditing: true }
-          : shop,
-      ),
-    )
+    dispatch({
+      type: actionTypes.TOGGLE_EDIT,
+      payload: { id },
+    })
   }
 
   const saveShop = (id) => {
-    setShops((prevShops) =>
-      prevShops.map((shop) =>
-        shop.id === id
-          ? { ...shop, isEditing: false }
-          : shop,
-      ),
-    )
+    dispatch({
+      type: actionTypes.SAVE_SHOP,
+      payload: { id },
+    })
     handleMessage('saved')
   }
 
   const saveShopsOnApi = async () => {
     try {
-      const updatedShops = shops.map((shop) => shop.name)
+      const updatedShops = state.shops.map(
+        (shop) => shop.name,
+      )
       const updatedData = {
         shops: updatedShops,
         prices: dataAll.prices,
@@ -155,8 +165,8 @@ const SettingsShopsPage = () => {
           </div>
         )}
         <div className="shopsListSettings">
-          {shops ? (
-            shops.map((shop) => (
+          {state.shops ? (
+            state.shops.map((shop) => (
               <ShopItem
                 key={shop.id}
                 id={shop.id}
