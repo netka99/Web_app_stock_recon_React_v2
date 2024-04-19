@@ -7,6 +7,8 @@ import ShopList from './SettingsShop'
 import ErrorNotification from './ErrorNotification'
 import AddShop from './AddShop'
 import ShopItem from './ShopItemSettings'
+import ItemSale from './ItemSale'
+import ItemShopContainer from './ItemShopContainer'
 
 export {
   Navbar,
@@ -18,4 +20,6 @@ export {
   ErrorNotification,
   AddShop,
   ShopItem,
+  ItemSale,
+  ItemShopContainer,
 }
