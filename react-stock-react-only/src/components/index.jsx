@@ -9,6 +9,7 @@ import AddShop from './AddShop'
 import ShopItem from './ShopItemSettings'
 import ItemSale from './ItemSale'
 import ItemShopContainer from './ItemShopContainer'
+import DatePicker from './Date'
 
 export {
   Navbar,
@@ -22,4 +23,5 @@ export {
   ShopItem,
   ItemSale,
   ItemShopContainer,
+  DatePicker,
 }

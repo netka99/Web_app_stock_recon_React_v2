@@ -6,6 +6,7 @@ import {
   Sidebar,
   Footer,
   ItemShopContainer,
+  DatePicker,
 } from '../components/index'
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
 import { pictures } from '../utils/productPictures'
@@ -59,6 +60,7 @@ const SalePage = () => {
       <Navbar pageTitle={pageTitle} />
       <Sidebar />
       <Container>
+        <DatePicker />
         <ItemShopContainer
           imageProduct={imageProduct}
           productName={productName}
