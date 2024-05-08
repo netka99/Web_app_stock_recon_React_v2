@@ -1,15 +1,9 @@
 import React from 'react'
-import { useState, useEffect } from 'react'
+// import { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import PropTypes from 'prop-types'
 
-const DatePicker = () => {
-  const today = new Date().toISOString().split('T')[0]
-  const [todaysDate, setTodaysDate] = useState(today)
-
-  useEffect(() => {
-    console.log('Selected date changed:', todaysDate)
-  }, [todaysDate])
-
+const DatePicker = ({ todaysDate, setTodaysDate }) => {
   return (
     <DateContainer>
       <input
@@ -22,6 +16,11 @@ const DatePicker = () => {
       />
     </DateContainer>
   )
+}
+
+DatePicker.propTypes = {
+  todaysDate: PropTypes.string.isRequired,
+  setTodaysDate: PropTypes.func.isRequired,
 }
 const DateContainer = styled.div`
   display: flex;

@@ -8,6 +8,7 @@ const ItemSale = ({
   saleType,
   unit,
   id,
+  value,
 }) => {
   return (
     <Container>
@@ -20,14 +21,17 @@ const ItemSale = ({
         <p>{productName}</p>
       </div>
       <div className="item-input">
-        <label htmlFor={id}>{saleType}</label>
-        <input
-          type="number"
-          min="0"
-          //   onInput="undefined"
-          name={id}
-        ></input>
-        <p className="item-units">{unit}</p>
+        <div className="item-input-container">
+          <label htmlFor={id}>{saleType}</label>
+          <input
+            type="number"
+            min="0"
+            value={value}
+            //   onInput="undefined"
+            name={id}
+          ></input>
+          <p className="item-units">{unit}</p>
+        </div>
       </div>
     </Container>
   )
@@ -39,12 +43,62 @@ ItemSale.propTypes = {
   saleType: PropTypes.string.isRequired,
   unit: PropTypes.string.isRequired,
   id: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
 }
 
 const Container = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
-  /* height: calc(100vh - 1rem); */
+  flex-direction: row;
+  width: 95%;
+  background-color: #f6f6f6;
+  margin: 10px auto 10px auto;
+  padding: 0.5rem 0rem;
+  border-radius: 10px;
+  box-shadow:
+    0 4px 8px 0 rgba(0, 0, 0, 0.2),
+    0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+  .item-description {
+    flex: 1 1 33.33%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .item-picture {
+    width: 55px;
+    border-radius: 25px;
+  }
+
+  .item-description p {
+    color: #292929;
+    font-weight: bold;
+  }
+
+  .item-input {
+    flex: 1 1 66.67%;
+  }
+  .item-input-container {
+    display: flex;
+    align-items: center;
+    gap: 1.2em;
+    justify-content: flex-end;
+    margin: 10px 0px 10px 0px;
+
+    label {
+      margin-right: 20%;
+    }
+
+    input {
+      width: 5em;
+      height: 1.8em;
+      border-radius: 5px;
+      border: 1px solid #a3a3a3;
+    }
+
+    p {
+      margin: 0px 20px 0px 0px;
+    }
+  }
 `
 export default ItemSale
