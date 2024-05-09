@@ -9,7 +9,14 @@ const ItemSale = ({
   unit,
   id,
   value,
+  disabled,
+  onChange,
 }) => {
+  const handleChange = (e) => {
+    const newValue = parseFloat(e.target.value)
+    onChange(isNaN(newValue) ? 0 : newValue)
+  }
+
   return (
     <Container>
       <div className="item-description">
@@ -27,8 +34,9 @@ const ItemSale = ({
             type="number"
             min="0"
             value={value}
-            //   onInput="undefined"
             name={id}
+            onChange={handleChange}
+            disabled={disabled}
           ></input>
           <p className="item-units">{unit}</p>
         </div>
@@ -43,7 +51,9 @@ ItemSale.propTypes = {
   saleType: PropTypes.string.isRequired,
   unit: PropTypes.string.isRequired,
   id: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
+  value: PropTypes.number,
+  disabled: PropTypes.bool.isRequired,
+  onChange: PropTypes.func,
 }
 
 const Container = styled.div`
@@ -73,6 +83,7 @@ const Container = styled.div`
   .item-description p {
     color: #292929;
     font-weight: bold;
+    padding-left: 0.5rem;
   }
 
   .item-input {

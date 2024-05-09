@@ -15,10 +15,14 @@ export const fetchData = async (url) => {
 }
 
 // Function to update data on the API
-export const updateDataOnApi = async (updatedData, url) => {
+export const updateDataOnApi = async (
+  updatedData,
+  url,
+  method,
+) => {
   try {
     const response = await fetch(url, {
-      method: 'PUT',
+      method: method,
       headers: {
         'Content-Type': 'application/json',
       },

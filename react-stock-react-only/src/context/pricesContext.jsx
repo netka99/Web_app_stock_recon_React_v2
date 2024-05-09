@@ -48,6 +48,7 @@ export const PricesProvider = ({ children }) => {
       const response = await updateDataOnApi(
         updatedData,
         'http://localhost:8000/settings/aneta',
+        'PUT',
       )
       console.log('Response status:', response.status)
       console.log('Response data:', response.data)

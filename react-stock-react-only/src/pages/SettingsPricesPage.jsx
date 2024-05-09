@@ -10,7 +10,7 @@ import {
 } from '../components/index'
 import { PricesContext } from '../context/index'
 import { size } from '../styles/devices'
-import { pictures } from '../utils/productPictures'
+import { pictures } from '../utils/productDetails'
 
 const SettingsPricesPage = () => {
   const {

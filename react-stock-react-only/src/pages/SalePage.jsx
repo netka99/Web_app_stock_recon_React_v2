@@ -9,8 +9,8 @@ import {
   DatePicker,
   Spinner,
 } from '../components/index'
-import { fetchData } from '../api/fetchAPI'
-// import { pictures } from '../utils/productPictures'
+import { fetchData, updateDataOnApi } from '../api/fetchAPI'
+import { pictures, units } from '../utils/productDetails'
 const { VITE_APP_SETTINGS_API, VITE_APP_SALES_API } =
   import.meta.env
 
@@ -29,12 +29,8 @@ const SalePage = () => {
   const today = new Date().toISOString().split('T')[0]
   const [todaysDate, setTodaysDate] = useState(today)
 
-  const imageProduct = 'path_to_image'
-  const productName = 'Kartacze'
-  const saleType = 'Sale Type'
-  const unit = 'Unit'
+  const saleType = 'Sprzedaż'
   const id = 1
-  const quantity = 1
   const apiWithDate = `${VITE_APP_SALES_API}?start=${todaysDate}&end=${todaysDate}`
 
   useEffect(() => {
@@ -61,7 +57,7 @@ const SalePage = () => {
         ),
       )
     filterByProduct(saleByProduct)
-  }, [saleByProduct])
+  }, [saleByProduct, todaysDate])
   console.log(shopsprices)
   console.log(sale)
 
@@ -72,6 +68,19 @@ const SalePage = () => {
   useEffect(() => {
     console.log('Selected date changed:', todaysDate)
   }, [todaysDate])
+
+  const saveData = (quantity, shopName) => {
+    console.log('Button clicked!:', quantity, shopName)
+    const data = {
+      id: null,
+      product: saleByProduct,
+      shop: shopName,
+      quantity: quantity,
+      date: todaysDate,
+      is_discounted: 0,
+    }
+    updateDataOnApi(data, VITE_APP_SALES_API, 'POST')
+  }
 
   return (
     <StyledMain>
@@ -99,10 +108,10 @@ const SalePage = () => {
           shopsprices.shops.map((shop) => (
             <ItemShopContainer
               key={shop}
-              imageProduct={imageProduct}
-              productName={shop}
+              imageProduct={pictures[saleByProduct]}
+              productName={saleByProduct}
               saleType={saleType}
-              unit={unit}
+              unit={units[saleByProduct]}
               id={id}
               shopName={shop}
               value={
@@ -115,8 +124,16 @@ const SalePage = () => {
                   ?.reduce(
                     (acc, curr) => acc + curr.quantity,
                     0,
-                  ) ?? ''
+                  ) ?? 0
               }
+              disabled={
+                sale?.some(
+                  (s) =>
+                    s.shop === shop &&
+                    s.product === saleByProduct,
+                ) ?? false
+              }
+              saveData={saveData}
             />
           ))
         ) : (

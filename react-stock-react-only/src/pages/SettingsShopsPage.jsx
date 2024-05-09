@@ -139,6 +139,7 @@ const SettingsShopsPage = () => {
       const response = await updateDataOnApi(
         updatedData,
         VITE_APP_SETTINGS_API,
+        'PUT',
       )
       console.log('Response status:', response.status)
       console.log('Response data:', response.data)

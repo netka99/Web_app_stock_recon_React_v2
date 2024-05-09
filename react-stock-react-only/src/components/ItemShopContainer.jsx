@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import StoreImg from '../assets/store-img.svg'
@@ -13,7 +13,23 @@ const ItemShopContainer = ({
   id,
   shopName,
   value,
+  disabled,
+  saveData,
 }) => {
+  const [inputValue, setInputValue] = useState(value)
+
+  useEffect(() => {
+    setInputValue(value) // Update input value when value prop changes
+  }, [value])
+
+  const handleChange = (newValue) => {
+    setInputValue(newValue) // Update input value locally
+  }
+
+  const handleSaveData = () => {
+    saveData(inputValue, shopName)
+  }
+
   return (
     <Container>
       <div className="header">
@@ -37,11 +53,17 @@ const ItemShopContainer = ({
         saleType={saleType}
         unit={unit}
         id={id}
-        value={value}
+        value={inputValue}
+        disabled={disabled}
+        onChange={handleChange}
       />
       <div className="saving-buttons">
         <button className="add-sale">＋</button>
-        <button className="save-sale">
+        <button
+          className="save-sale"
+          onClick={handleSaveData}
+          disabled={disabled}
+        >
           Zapisz sprzedaż
         </button>
       </div>
@@ -56,7 +78,10 @@ ItemShopContainer.propTypes = {
   unit: PropTypes.string.isRequired,
   id: PropTypes.number.isRequired,
   shopName: PropTypes.string.isRequired,
-  value: PropTypes.number.isRequired,
+  value: PropTypes.number,
+  disabled: PropTypes.bool.isRequired,
+  saveData: PropTypes.func,
+  onChange: PropTypes.func,
 }
 
 const Container = styled.div`

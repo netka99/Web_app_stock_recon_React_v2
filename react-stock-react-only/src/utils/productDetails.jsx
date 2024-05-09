@@ -7,3 +7,9 @@ export const pictures = {
   Babka: Babka,
   Kiszka: Kiszka,
 }
+
+export const units = {
+  Kartacze: 'szt.',
+  Babka: 'kg',
+  Kiszka: 'kg',
+}
