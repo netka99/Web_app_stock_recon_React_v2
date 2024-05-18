@@ -23,6 +23,7 @@ const SalePage = () => {
   const [sale, setSale] = useState(null)
   const [saleByProduct, setSaleByProduct] =
     useState('Kartacze')
+  // const [typeOfSale, setTypeOfSale] = useState('sale')
 
   // const [returns, setReturns] = useState(null)
 
@@ -91,17 +92,53 @@ const SalePage = () => {
           todaysDate={todaysDate}
           setTodaysDate={setTodaysDate}
         />
-        <div>
+        <div className="saleReturn">
+          <button className="saleReturnButtons checked">
+            Sprzedaż
+          </button>
+          <button className="saleReturnButtons">
+            Zwrot
+          </button>
+        </div>
+        <div className="products">
           <button
+            className={
+              saleByProduct === 'Kartacze'
+                ? 'productButton active'
+                : 'productButton'
+            }
             onClick={() => filterByProduct('Kartacze')}
           >
-            Kartacze
+            <img
+              src={pictures.Kartacze}
+              alt="image of Kartacze"
+            />
           </button>
-          <button onClick={() => filterByProduct('Babka')}>
-            Babka
+          <button
+            className={
+              saleByProduct === 'Babka'
+                ? 'productButton active'
+                : 'productButton'
+            }
+            onClick={() => filterByProduct('Babka')}
+          >
+            <img
+              src={pictures.Babka}
+              alt="image of Babka"
+            />
           </button>
-          <button onClick={() => filterByProduct('Kiszka')}>
-            Kiszka
+          <button
+            className={
+              saleByProduct === 'Kiszka'
+                ? 'productButton active'
+                : 'productButton'
+            }
+            onClick={() => filterByProduct('Kiszka')}
+          >
+            <img
+              src={pictures.Kiszka}
+              alt="image of Kiszka"
+            />
           </button>
         </div>
         {shopsprices ? (
@@ -162,6 +199,88 @@ const Container = styled.div`
 
   h1 {
     font-size: 60px;
+  }
+
+  .products {
+    padding: 1.5rem 0rem 3rem 0rem;
+  }
+
+  .productButton {
+    background: #fff;
+    box-shadow:
+      4px 6px 6px 1px rgba(0, 0, 0, 0.3),
+      -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    padding: 4px 8px 3px;
+
+    img {
+      width: 55px;
+      border-radius: 25px;
+      padding: 5px 10px;
+    }
+  }
+
+  .productButton.active {
+    background-color: #f6f6f6;
+    box-shadow:
+      inset 3px 3px 8px 0 rgba(0, 0, 0, 0.3),
+      inset -6px -6px 10px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .productButton:nth-of-type(2) {
+    margin: 0rem 2rem;
+
+    /* @media screen and (max-width: $mobileL) {
+      margin: 0rem 1rem;
+    } */
+  }
+
+  .saleReturn {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .saleReturnButtons {
+    width: 15rem;
+    border: none;
+    padding: 1rem 2rem;
+    margin: 0 1rem;
+    position: relative;
+    line-height: 24px;
+    overflow: hidden;
+    text-align: center;
+    z-index: 1;
+    display: inline-block;
+    border-radius: 15px;
+    background-color: #fdfdfd;
+    font-size: 1.1rem;
+    font-weight: bold;
+    outline: none;
+    height: 100%;
+    cursor: pointer;
+    box-shadow:
+      6px 6px 8px 0 rgba(0, 0, 0, 0.3),
+      -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* @media screen and (max-width: $mobileL) {
+      padding: 10px 35px;
+    } */
+  }
+
+  .saleReturnButtons.checked {
+    color: #5c35b6;
+    background: linear-gradient(45deg, #e3e3e3, #ede8e8);
+    font-weight: bold;
+    font-size: 1.2rem;
+    transition: 0.2s ease-in-out;
+    box-shadow:
+      inset 3px 3px 8px 0 rgba(0, 0, 0, 0.3),
+      inset -6px -6px 10px 0 rgba(255, 255, 255, 0.5);
   }
 `
 export default SalePage
