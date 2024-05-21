@@ -7,10 +7,10 @@ const ItemSale = ({
   productName,
   saleType,
   unit,
-  id,
   value,
   disabled,
   onChange,
+  shopName,
 }) => {
   const handleChange = (e) => {
     const newValue = parseFloat(e.target.value)
@@ -29,12 +29,12 @@ const ItemSale = ({
       </div>
       <div className="item-input">
         <div className="item-input-container">
-          <label htmlFor={id}>{saleType}</label>
+          <label htmlFor={shopName}>{saleType}</label>
           <input
             type="number"
             min="0"
             value={value}
-            name={id}
+            name={shopName}
             onChange={handleChange}
             disabled={disabled}
           ></input>
@@ -50,10 +50,10 @@ ItemSale.propTypes = {
   productName: PropTypes.string.isRequired,
   saleType: PropTypes.string.isRequired,
   unit: PropTypes.string.isRequired,
-  id: PropTypes.number.isRequired,
   value: PropTypes.number,
   disabled: PropTypes.bool.isRequired,
   onChange: PropTypes.func,
+  shopName: PropTypes.string.isRequired,
 }
 
 const Container = styled.div`

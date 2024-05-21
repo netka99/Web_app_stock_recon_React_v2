@@ -3,20 +3,20 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import StoreImg from '../assets/store-img.svg'
 
-import Item from './ItemSale'
+import { ExtraSale, ItemSale } from '../components/index'
 
 const ItemShopContainer = ({
   imageProduct,
   productName,
   saleType,
   unit,
-  id,
   shopName,
   value,
   disabled,
   saveData,
 }) => {
   const [inputValue, setInputValue] = useState(value)
+  const [extraSale, setExtraSale] = useState(false)
 
   useEffect(() => {
     setInputValue(value) // Update input value when value prop changes
@@ -28,6 +28,13 @@ const ItemShopContainer = ({
 
   const handleSaveData = () => {
     saveData(inputValue, shopName)
+  }
+
+  const openExtraSale = () => {
+    setExtraSale(true)
+    setTimeout(() => {
+      setExtraSale(true)
+    }, 500)
   }
 
   return (
@@ -47,18 +54,23 @@ const ItemShopContainer = ({
           </button>
         </div>
       </div>
-      <Item
+      <ItemSale
         imageProduct={imageProduct}
         productName={productName}
         saleType={saleType}
         unit={unit}
-        id={id}
+        shopName={shopName}
         value={inputValue}
         disabled={disabled}
         onChange={handleChange}
       />
       <div className="saving-buttons">
-        <button className="add-sale">＋</button>
+        <button
+          onClick={openExtraSale}
+          className="add-sale"
+        >
+          ＋
+        </button>
         <button
           className="save-sale"
           onClick={handleSaveData}
@@ -67,6 +79,13 @@ const ItemShopContainer = ({
           Zapisz sprzedaż
         </button>
       </div>
+      {extraSale && (
+        <ExtraSale
+          unit={unit}
+          shopName={shopName}
+          saveData={saveData}
+        />
+      )}
     </Container>
   )
 }
@@ -76,7 +95,6 @@ ItemShopContainer.propTypes = {
   productName: PropTypes.string.isRequired,
   saleType: PropTypes.string.isRequired,
   unit: PropTypes.string.isRequired,
-  id: PropTypes.number.isRequired,
   shopName: PropTypes.string.isRequired,
   value: PropTypes.number,
   disabled: PropTypes.bool.isRequired,

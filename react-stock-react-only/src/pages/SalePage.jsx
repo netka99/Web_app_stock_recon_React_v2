@@ -31,7 +31,6 @@ const SalePage = () => {
   const [todaysDate, setTodaysDate] = useState(today)
 
   const saleType = 'Sprzedaż'
-  const id = 1
   const apiWithDate = `${VITE_APP_SALES_API}?start=${todaysDate}&end=${todaysDate}`
 
   useEffect(() => {
@@ -142,14 +141,13 @@ const SalePage = () => {
           </button>
         </div>
         {shopsprices ? (
-          shopsprices.shops.map((shop) => (
+          shopsprices.shops.map((shop, index) => (
             <ItemShopContainer
-              key={shop}
+              key={`${shop}-${index}`}
               imageProduct={pictures[saleByProduct]}
               productName={saleByProduct}
               saleType={saleType}
               unit={units[saleByProduct]}
-              id={id}
               shopName={shop}
               value={
                 sale
