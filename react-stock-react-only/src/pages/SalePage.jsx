@@ -69,7 +69,7 @@ const SalePage = () => {
     console.log('Selected date changed:', todaysDate)
   }, [todaysDate])
 
-  const saveData = (quantity, shopName) => {
+  const saveData = async (quantity, shopName) => {
     console.log('Button clicked!:', quantity, shopName)
     const data = {
       id: null,
@@ -79,7 +79,20 @@ const SalePage = () => {
       date: todaysDate,
       is_discounted: 0,
     }
-    updateDataOnApi(data, VITE_APP_SALES_API, 'POST')
+    try {
+      const result = await updateDataOnApi(
+        data,
+        VITE_APP_SALES_API,
+        'POST',
+      )
+      return result
+    } catch (error) {
+      console.error('Error updating data', error)
+      return {
+        status: 500,
+        data: { message: 'Failed to save data' },
+      }
+    }
   }
 
   return (

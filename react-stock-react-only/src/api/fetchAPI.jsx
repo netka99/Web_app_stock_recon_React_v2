@@ -35,6 +35,12 @@ export const updateDataOnApi = async (
     console.log('Sent:', data)
     return { status: response.status, data: data }
   } catch (error) {
-    throw new Error(`Error updating data: ${error.message}`)
+    console.log('Error updating data:', error)
+    return {
+      status: 500,
+      data: {
+        message: `Error updating data: ${error.message}`,
+      },
+    }
   }
 }

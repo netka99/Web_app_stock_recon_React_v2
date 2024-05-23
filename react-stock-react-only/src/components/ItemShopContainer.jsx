@@ -17,6 +17,7 @@ const ItemShopContainer = ({
 }) => {
   const [inputValue, setInputValue] = useState(value)
   const [extraSale, setExtraSale] = useState(false)
+  const [messageText, setMessageText] = useState(false)
 
   useEffect(() => {
     setInputValue(value) // Update input value when value prop changes
@@ -26,8 +27,13 @@ const ItemShopContainer = ({
     setInputValue(newValue) // Update input value locally
   }
 
-  const handleSaveData = () => {
-    saveData(inputValue, shopName)
+  const handleSaveData = async () => {
+    const result = await saveData(inputValue, shopName)
+    if (result && result.status !== 200) {
+      handleMessage('errorSave')
+    } else {
+      handleMessage('saleSaved')
+    }
   }
 
   const openExtraSale = () => {
@@ -35,6 +41,27 @@ const ItemShopContainer = ({
     setTimeout(() => {
       setExtraSale(true)
     }, 500)
+  }
+
+  const handleMessage = (messageType) => {
+    getMessageText(messageType)
+    setMessageText(messageType)
+    setTimeout(() => {
+      setMessageText(false)
+    }, 9000)
+  }
+
+  const getMessageText = (messageType) => {
+    switch (messageType) {
+      case 'saleSaved':
+        return 'Sprzedaż została zapisana!'
+      case 'errorSave':
+        return 'Problem z wysłaniem danych do bazy danych!'
+      case 'returnSaved':
+        return 'Zwrot został zapisany!'
+      default:
+        return ''
+    }
   }
 
   return (
@@ -54,6 +81,11 @@ const ItemShopContainer = ({
           </button>
         </div>
       </div>
+      {messageText && (
+        <div className="error-notification">
+          {getMessageText(messageText)}
+        </div>
+      )}
       <ItemSale
         imageProduct={imageProduct}
         productName={productName}
@@ -248,6 +280,20 @@ const Container = styled.div`
         cursor: pointer;
       }
     }
+  }
+
+  .error-notification {
+    background-color: #f8d7da;
+    border: 1px solid #e74c3c;
+    width: 50%;
+    padding: 0.3rem;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto 0.5rem auto;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
   }
 `
 export default ItemShopContainer

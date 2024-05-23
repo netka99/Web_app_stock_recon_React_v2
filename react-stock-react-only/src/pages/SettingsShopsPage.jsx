@@ -24,7 +24,6 @@ const SettingsShopsPage = () => {
     shops: null,
   }
   const [dataAll, setDataAll] = useState(null)
-  // const [shops, setShops] = useState(null)
   const [messageText, setmessageText] = useState(false)
   const [state, dispatch] = useReducer(
     shopReducer,
@@ -44,7 +43,6 @@ const SettingsShopsPage = () => {
           isEditing: false,
         }))
         setDataAll(data)
-        // setShops(shopsData)
         dispatch({
           type: actionTypes.SET_SHOPS,
           payload: shopsData,
@@ -67,7 +65,7 @@ const SettingsShopsPage = () => {
     setmessageText(messageType)
     setTimeout(() => {
       setmessageText(false)
-    }, 5000)
+    }, 10000)
   }
 
   const getMessageText = (messageType) => {

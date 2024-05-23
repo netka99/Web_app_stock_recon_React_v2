@@ -35,7 +35,7 @@ const SettingsPricesPage = () => {
       setShowSaveMsg(true)
       const timer = setTimeout(() => {
         setShowSaveMsg(false)
-      }, 5000)
+      }, 9000)
       return () => clearTimeout(timer)
     }
   }, [isSent])
