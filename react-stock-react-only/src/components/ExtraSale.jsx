@@ -1,15 +1,14 @@
-import React, { useState } from 'react'
+import React, { useState, forwardRef } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import truck from '../assets/delivery-truck.svg'
 
-const ExtraSale = ({ unit, shopName, saveData }) => {
+const ExtraSale = forwardRef(function ExtraSale(
+  { unit, shopName, handleMessage, handleSaveData },
+  ref,
+) {
   const [extraInputValue, setExtraInputValue] = useState(0)
   const [disabled, setDisabled] = useState(false)
-
-  // useEffect(() => {
-  //   setExtraInputValue(extraValue)
-  // }, [extraValue])
 
   const handleChangeExtra = (e) => {
     const value =
@@ -18,7 +17,7 @@ const ExtraSale = ({ unit, shopName, saveData }) => {
   }
 
   return (
-    <Container>
+    <Container ref={ref}>
       <div className="extra-sale-container">
         <div className="image-description">
           <img
@@ -45,7 +44,8 @@ const ExtraSale = ({ unit, shopName, saveData }) => {
       <div className="sale-extra-sale">
         <button
           onClick={() => {
-            saveData(extraInputValue, shopName)
+            handleSaveData(extraInputValue, shopName)
+            handleMessage('saleSaved')
             setDisabled(true)
           }}
           className="sale-extra-sale-button"
@@ -56,7 +56,7 @@ const ExtraSale = ({ unit, shopName, saveData }) => {
       </div>
     </Container>
   )
-}
+})
 
 ExtraSale.propTypes = {
   unit: PropTypes.string.isRequired,
@@ -64,6 +64,8 @@ ExtraSale.propTypes = {
   onChange: PropTypes.func,
   shopName: PropTypes.string.isRequired,
   saveData: PropTypes.func,
+  handleMessage: PropTypes.func,
+  handleSaveData: PropTypes.func,
 }
 
 const Container = styled.div`

@@ -11,6 +11,7 @@ const ItemSale = ({
   disabled,
   onChange,
   shopName,
+  isSaleSaved,
 }) => {
   const handleChange = (e) => {
     const newValue = parseFloat(e.target.value)
@@ -36,7 +37,7 @@ const ItemSale = ({
             value={value}
             name={shopName}
             onChange={handleChange}
-            disabled={disabled}
+            disabled={disabled || isSaleSaved}
           ></input>
           <p className="item-units">{unit}</p>
         </div>
@@ -54,6 +55,7 @@ ItemSale.propTypes = {
   disabled: PropTypes.bool.isRequired,
   onChange: PropTypes.func,
   shopName: PropTypes.string.isRequired,
+  isSaleSaved: PropTypes.bool,
 }
 
 const Container = styled.div`

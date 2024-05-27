@@ -23,6 +23,7 @@ const SalePage = () => {
   const [sale, setSale] = useState(null)
   const [saleByProduct, setSaleByProduct] =
     useState('Kartacze')
+
   // const [typeOfSale, setTypeOfSale] = useState('sale')
 
   // const [returns, setReturns] = useState(null)

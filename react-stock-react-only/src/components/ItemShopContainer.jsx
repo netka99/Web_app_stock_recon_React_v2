@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import StoreImg from '../assets/store-img.svg'
+import Arrow from '../assets/chevron-down.svg'
 
 import { ExtraSale, ItemSale } from '../components/index'
 
@@ -18,10 +19,29 @@ const ItemShopContainer = ({
   const [inputValue, setInputValue] = useState(value)
   const [extraSale, setExtraSale] = useState(false)
   const [messageText, setMessageText] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const contentRef = useRef(null)
+  const contentRefExtra = useRef(null)
+  const [contentHeight, setContentHeight] = useState(0)
+  const [isCheckedButton, setIsCheckedButton] =
+    useState(false)
+  const [isSaleSaved, setIsSaleSaved] = useState(false)
+
+  const toggleAccordion = () => {
+    setIsOpen(!isOpen)
+  }
 
   useEffect(() => {
     setInputValue(value) // Update input value when value prop changes
   }, [value])
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(
+        isOpen ? contentRef.current.scrollHeight : 0,
+      )
+    }
+  }, [isOpen, contentHeight])
 
   const handleChange = (newValue) => {
     setInputValue(newValue) // Update input value locally
@@ -34,10 +54,20 @@ const ItemShopContainer = ({
     } else {
       handleMessage('saleSaved')
     }
+    setIsCheckedButton(true)
+    setIsSaleSaved(true)
   }
 
   const openExtraSale = () => {
     setExtraSale(true)
+    setTimeout(() => {
+      if (contentRefExtra.current) {
+        setContentHeight(
+          contentHeight +
+            contentRefExtra.current.scrollHeight,
+        )
+      }
+    }, 0)
     setTimeout(() => {
       setExtraSale(true)
     }, 500)
@@ -75,9 +105,20 @@ const ItemShopContainer = ({
           <p>{shopName}</p>
         </div>
         <div className="accordion-buttons">
-          <span className="button-checked">✓</span>
-          <button className="accordion-open">
-            <p className="accordion-arrow">˅</p>
+          <span
+            className={`button-checked ${isCheckedButton || disabled ? 'saved' : ''}`}
+          >
+            ✓
+          </span>
+          <button
+            onClick={toggleAccordion}
+            className="accordion-open"
+          >
+            <img
+              className={`accordion-arrow ${isOpen ? 'rotate' : ''}`}
+              src={Arrow}
+              alt="chevron down"
+            />
           </button>
         </div>
       </div>
@@ -86,38 +127,48 @@ const ItemShopContainer = ({
           {getMessageText(messageText)}
         </div>
       )}
-      <ItemSale
-        imageProduct={imageProduct}
-        productName={productName}
-        saleType={saleType}
-        unit={unit}
-        shopName={shopName}
-        value={inputValue}
-        disabled={disabled}
-        onChange={handleChange}
-      />
-      <div className="saving-buttons">
-        <button
-          onClick={openExtraSale}
-          className="add-sale"
-        >
-          ＋
-        </button>
-        <button
-          className="save-sale"
-          onClick={handleSaveData}
-          disabled={disabled}
-        >
-          Zapisz sprzedaż
-        </button>
-      </div>
-      {extraSale && (
-        <ExtraSale
+      <div
+        className={`container-input-sale ${isOpen ? 'open' : ''}`}
+        ref={contentRef}
+        style={{ height: `${contentHeight}px` }}
+      >
+        <ItemSale
+          imageProduct={imageProduct}
+          productName={productName}
+          saleType={saleType}
           unit={unit}
           shopName={shopName}
-          saveData={saveData}
+          value={inputValue}
+          disabled={disabled}
+          onChange={handleChange}
+          isSaleSaved={isSaleSaved}
         />
-      )}
+        <div className="saving-buttons">
+          <button
+            onClick={openExtraSale}
+            className="add-sale"
+          >
+            ＋
+          </button>
+          <button
+            className="save-sale"
+            onClick={handleSaveData}
+            disabled={isSaleSaved || disabled}
+          >
+            Zapisz sprzedaż
+          </button>
+        </div>
+
+        {extraSale && (
+          <ExtraSale
+            unit={unit}
+            shopName={shopName}
+            handleSaveData={handleSaveData}
+            handleMessage={handleMessage}
+            ref={contentRefExtra}
+          />
+        )}
+      </div>
     </Container>
   )
 }
@@ -187,6 +238,10 @@ const Container = styled.div`
     box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.3);
   }
 
+  .button-checked.saved {
+    color: white;
+  }
+
   .accordion-open {
     background: linear-gradient(
       to bottom right,
@@ -213,11 +268,27 @@ const Container = styled.div`
   }
 
   .accordion-arrow {
-    font-size: 2rem;
-    font-weight: 500;
-    color: white;
+    width: 25px;
+    padding: 8px 0px;
     margin: 0;
     transition: 0.3s ease-in-out;
+    filter: invert(100%) sepia(44%) saturate(124%)
+      hue-rotate(254deg) brightness(114%) contrast(88%);
+  }
+
+  .accordion-arrow.rotate {
+    transform: rotate(-180deg);
+    transform-origin: center center;
+  }
+
+  .container-input-sale {
+    overflow: hidden;
+    transition: height 0.3s ease;
+    height: 0;
+  }
+
+  .container-input-sale.open {
+    transition: height 0.3s ease;
   }
 
   .saving-buttons {
@@ -284,16 +355,18 @@ const Container = styled.div`
 
   .error-notification {
     background-color: #f8d7da;
-    border: 1px solid #e74c3c;
     width: 50%;
     padding: 0.3rem;
-    border-radius: 4px;
+    border-radius: 8px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin: 0 auto 0.5rem auto;
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
+    box-shadow:
+      0 3px 6px 0 rgba(0, 0, 0, 0.2),
+      0 3px 10px 0 rgba(0, 0, 0, 0.19);
   }
 `
 export default ItemShopContainer
