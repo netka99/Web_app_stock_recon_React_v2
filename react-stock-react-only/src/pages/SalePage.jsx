@@ -8,6 +8,7 @@ import {
   ItemShopContainer,
   DatePicker,
   Spinner,
+  SummarySale,
 } from '../components/index'
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
 import { pictures, units } from '../utils/productDetails'
@@ -59,8 +60,7 @@ const SalePage = () => {
       )
     filterByProduct(saleByProduct)
   }, [saleByProduct, todaysDate])
-  console.log(shopsprices)
-  console.log(sale)
+  console.log('Data Sale', sale)
 
   const filterByProduct = (productName) => {
     setSaleByProduct(productName)
@@ -189,6 +189,7 @@ const SalePage = () => {
           <Spinner />
         )}
       </Container>
+      <SummarySale sale={sale} />
       <Footer />
     </StyledMain>
   )
@@ -206,7 +207,7 @@ const Container = styled.div`
   overflow-y: scroll;
   min-height: 70vh;
   padding-top: 3rem;
-  padding-bottom: 7rem;
+  padding-bottom: 2rem;
   flex-grow: 1;
 
   h1 {

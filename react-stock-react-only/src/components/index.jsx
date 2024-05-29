@@ -11,6 +11,7 @@ import ItemSale from './ItemSale'
 import ItemShopContainer from './ItemShopContainer'
 import DatePicker from './Date'
 import ExtraSale from './ExtraSale'
+import SummarySale from './SummarySale'
 
 export {
   Navbar,
@@ -26,4 +27,5 @@ export {
   ItemShopContainer,
   DatePicker,
   ExtraSale,
+  SummarySale,
 }
