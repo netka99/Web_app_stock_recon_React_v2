@@ -2,24 +2,55 @@ import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 
-const SummarySale = ({ sale }) => {
-  const [kartaczeSale, setKartaczeSale] = useState(0)
-  const [babkaSale, setBabkaSale] = useState(0)
-  const [kiszkaSale, setKiszkaSale] = useState(0)
+const SummarySale = ({ sale, sentQuantities, returns }) => {
+  const [totals, setTotals] = useState({
+    kartaczeSale: 0,
+    kartaczeReturn: 0,
+    babkaSale: 0,
+    babkaReturn: 0,
+    kiszkaSale: 0,
+    kiszkaReturn: 0,
+  })
 
-  const calculationByProduct = (productType) => {
+  const calculationByProduct = (productType, saleType) => {
     return (
-      sale
+      saleType
+        ?.filter((p) => p.product === productType)
+        ?.reduce((acc, curr) => acc + curr.quantity, 0) ?? 0
+    )
+  }
+
+  const calculationNewSale = (saleType, productType) => {
+    return (
+      sentQuantities
+        ?.filter((t) => t.saleType === saleType)
         ?.filter((p) => p.product === productType)
         ?.reduce((acc, curr) => acc + curr.quantity, 0) ?? 0
     )
   }
 
   useEffect(() => {
-    setKartaczeSale(calculationByProduct('Kartacze'))
-    setBabkaSale(calculationByProduct('Babka'))
-    setKiszkaSale(calculationByProduct('Kiszka'))
-  }, [sale])
+    setTotals({
+      kartaczeSale:
+        calculationByProduct('Kartacze', sale) +
+        calculationNewSale('Sprzedaż', 'Kartacze'),
+      kartaczeReturn:
+        calculationByProduct('Kartacze', returns) +
+        calculationNewSale('Zwrot', 'Kartacze'),
+      babkaSale:
+        calculationByProduct('Babka', sale) +
+        calculationNewSale('Sprzedaż', 'Babka'),
+      babkaReturn:
+        calculationByProduct('Babka', returns) +
+        calculationNewSale('Zwrot', 'Babka'),
+      kiszkaSale:
+        calculationByProduct('Kiszka', sale) +
+        calculationNewSale('Sprzedaż', 'Kiszka'),
+      kiszkaReturn:
+        calculationByProduct('Kiszka', returns) +
+        calculationNewSale('Zwrot', 'Kiszka'),
+    })
+  }, [sale, sentQuantities, returns])
 
   return (
     <Container>
@@ -35,26 +66,26 @@ const SummarySale = ({ sale }) => {
           <p>Zwrot</p>
         </div>
         <div className="quantities">
-          <p>{kartaczeSale} szt</p>
-          <p>0 szt</p>
+          <p>{totals.kartaczeSale} szt</p>
+          <p>{totals.kartaczeReturn} szt</p>
         </div>
         <div className="quantities">
-          <p>{babkaSale} kg</p>
-          <p>0.00 kg</p>
+          <p>{totals.babkaSale} kg</p>
+          <p>{totals.babkaReturn} kg</p>
         </div>
         <div className="quantities">
-          <p>{kiszkaSale} kg</p>
-          <p>0.00 kg</p>
+          <p>{totals.kiszkaSale} kg</p>
+          <p>{totals.kiszkaReturn} kg</p>
         </div>
         <div className="sum sum-title">Suma</div>
         <div className="sum sum-quantities">
-          {kartaczeSale} szt
+          {totals.kartaczeSale - totals.kartaczeReturn} szt
         </div>
         <div className="sum sum-quantities">
-          {babkaSale} kg
+          {totals.babkaSale - totals.babkaReturn} kg
         </div>
         <div className="sum sum-quantities">
-          {kiszkaSale} kg
+          {totals.kiszkaSale - totals.kiszkaReturn} kg
         </div>
       </div>
     </Container>
@@ -69,6 +100,21 @@ SummarySale.propTypes = {
       shop: PropTypes.string,
       date: PropTypes.string,
       is_discounted: PropTypes.number,
+    }),
+  ),
+  sentQuantities: PropTypes.arrayOf(
+    PropTypes.shape({
+      saleType: PropTypes.string,
+      product: PropTypes.string,
+      quantity: PropTypes.number,
+    }),
+  ),
+  returns: PropTypes.arrayOf(
+    PropTypes.shape({
+      product: PropTypes.string,
+      quantity: PropTypes.number,
+      shop: PropTypes.string,
+      date: PropTypes.string,
     }),
   ),
 }

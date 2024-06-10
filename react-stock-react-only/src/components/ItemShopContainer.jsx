@@ -15,6 +15,9 @@ const ItemShopContainer = ({
   value,
   disabled,
   saveData,
+  isSale,
+  isShopDisabled,
+  // isReturnSaved,
 }) => {
   const [inputValue, setInputValue] = useState(value)
   const [extraSale, setExtraSale] = useState(false)
@@ -23,9 +26,6 @@ const ItemShopContainer = ({
   const contentRef = useRef(null)
   const contentRefExtra = useRef(null)
   const [contentHeight, setContentHeight] = useState(0)
-  const [isCheckedButton, setIsCheckedButton] =
-    useState(false)
-  const [isSaleSaved, setIsSaleSaved] = useState(false)
 
   const toggleAccordion = () => {
     setIsOpen(!isOpen)
@@ -33,7 +33,7 @@ const ItemShopContainer = ({
 
   useEffect(() => {
     setInputValue(value) // Update input value when value prop changes
-  }, [value])
+  }, [value, saleType])
 
   useEffect(() => {
     if (contentRef.current) {
@@ -52,10 +52,12 @@ const ItemShopContainer = ({
     if (result && result.status !== 200) {
       handleMessage('errorSave')
     } else {
-      handleMessage('saleSaved')
+      if (isSale) {
+        handleMessage('saleSaved')
+      } else if (!isSale) {
+        handleMessage('returnSaved')
+      }
     }
-    setIsCheckedButton(true)
-    setIsSaleSaved(true)
   }
 
   const openExtraSale = () => {
@@ -106,7 +108,7 @@ const ItemShopContainer = ({
         </div>
         <div className="accordion-buttons">
           <span
-            className={`button-checked ${isCheckedButton || disabled ? 'saved' : ''}`}
+            className={`button-checked ${isShopDisabled(shopName) ? 'saved' : ''}`}
           >
             ✓
           </span>
@@ -141,7 +143,8 @@ const ItemShopContainer = ({
           value={inputValue}
           disabled={disabled}
           onChange={handleChange}
-          isSaleSaved={isSaleSaved}
+          isShopDisabled={isShopDisabled}
+          // isReturnSaved={isReturnSaved}
         />
         <div className="saving-buttons">
           <button
@@ -153,9 +156,9 @@ const ItemShopContainer = ({
           <button
             className="save-sale"
             onClick={handleSaveData}
-            disabled={isSaleSaved || disabled}
+            disabled={isShopDisabled(shopName)}
           >
-            Zapisz sprzedaż
+            {isSale ? 'Zapisz sprzedaż' : 'Zapisz zwrot'}
           </button>
         </div>
 
@@ -180,9 +183,11 @@ ItemShopContainer.propTypes = {
   unit: PropTypes.string.isRequired,
   shopName: PropTypes.string.isRequired,
   value: PropTypes.number,
-  disabled: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool,
   saveData: PropTypes.func,
   onChange: PropTypes.func,
+  isSale: PropTypes.bool,
+  isShopDisabled: PropTypes.func,
 }
 
 const Container = styled.div`
@@ -294,7 +299,7 @@ const Container = styled.div`
   .saving-buttons {
     display: flex;
     justify-content: flex-end;
-    padding: 10px 30px 20px 30px;
+    padding: 10px 15px 20px 15px;
 
     button {
       border: none;
@@ -304,7 +309,7 @@ const Container = styled.div`
       font-size: 1rem;
       font-weight: bold;
       box-shadow: 2px 3px 4px 1px rgba(0, 0, 0, 0.3);
-      margin: 0rem 0.5rem;
+      /* margin: 0rem 0.5rem; */
 
       /* @media screen and (max-width: $tablet) {
       font-size: 0.9rem;
@@ -336,7 +341,7 @@ const Container = styled.div`
     }
 
     .save-sale {
-      margin-left: 20%;
+      margin-left: 18%;
       background: linear-gradient(
         to bottom right,
         #e51ead,

@@ -12,8 +12,11 @@ import {
 } from '../components/index'
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
 import { pictures, units } from '../utils/productDetails'
-const { VITE_APP_SETTINGS_API, VITE_APP_SALES_API } =
-  import.meta.env
+const {
+  VITE_APP_SETTINGS_API,
+  VITE_APP_SALES_API,
+  VITE_APP_RETURNS_API,
+} = import.meta.env
 
 //http://localhost:8000/sales?start=2024-04-19&end=2024-04-19
 
@@ -22,18 +25,23 @@ const pageTitle = 'Sprzedaż'
 const SalePage = () => {
   const [shopsprices, setShopsprices] = useState(null)
   const [sale, setSale] = useState(null)
+  const [updatedSale, setUpdatedSale] = useState([])
   const [saleByProduct, setSaleByProduct] =
     useState('Kartacze')
+  const [returns, setReturns] = useState(null)
+  const [updatedReturn, setUpdatedReturn] = useState([])
+  const [sentQuantities, setSentQuantities] = useState([])
+  const [isSale, setIsSale] = useState(true)
+  const [isReturnSaved, setIsReturnSaved] = useState(false)
 
-  // const [typeOfSale, setTypeOfSale] = useState('sale')
-
-  // const [returns, setReturns] = useState(null)
+  const [typeOfSale, setTypeOfSale] = useState('Sprzedaż')
 
   const today = new Date().toISOString().split('T')[0]
   const [todaysDate, setTodaysDate] = useState(today)
+  const [disabledShops, setDisabledShops] = useState([])
 
-  const saleType = 'Sprzedaż'
   const apiWithDate = `${VITE_APP_SALES_API}?start=${todaysDate}&end=${todaysDate}`
+  const apiWithDateReturn = `${VITE_APP_RETURNS_API}?start=${todaysDate}&end=${todaysDate}`
 
   useEffect(() => {
     fetchData(VITE_APP_SETTINGS_API)
@@ -50,7 +58,20 @@ const SalePage = () => {
     fetchData(apiWithDate)
       .then((dataSale) => {
         setSale(dataSale)
+        setUpdatedSale(dataSale)
         console.log('dataAllSale:', dataSale)
+      })
+      .catch((error) =>
+        console.error(
+          'Error fetching data from Sales:',
+          error,
+        ),
+      )
+    fetchData(apiWithDateReturn)
+      .then((dataReturn) => {
+        setReturns(dataReturn)
+        setUpdatedReturn(dataReturn)
+        console.log('dataAllReturn:', dataReturn)
       })
       .catch((error) =>
         console.error(
@@ -61,6 +82,9 @@ const SalePage = () => {
     filterByProduct(saleByProduct)
   }, [saleByProduct, todaysDate])
   console.log('Data Sale', sale)
+  console.log('Data Return', returns)
+  console.log('dataAllSaleUpdated:', updatedSale)
+  console.log('dataAllReturnUpdated:', updatedReturn)
 
   const filterByProduct = (productName) => {
     setSaleByProduct(productName)
@@ -69,6 +93,53 @@ const SalePage = () => {
   useEffect(() => {
     console.log('Selected date changed:', todaysDate)
   }, [todaysDate])
+
+  const valueCurrent = (shop) => {
+    const data = isSale ? updatedSale : updatedReturn
+    return (
+      data
+        ?.filter(
+          (s) =>
+            s.shop === shop && s.product === saleByProduct,
+        )
+        ?.reduce((acc, curr) => acc + curr.quantity, 0) ?? 0
+    )
+  }
+
+  useEffect(
+    (shop) => {
+      valueCurrent(shop)
+    },
+    [updatedSale, updatedSale],
+  )
+
+  const isShopDisabled = (shop) => {
+    const data = isSale ? updatedSale : updatedReturn
+    return (
+      data?.some(
+        (s) =>
+          s.shop === shop && s.product === saleByProduct,
+      ) ?? false
+    )
+  }
+
+  useEffect(() => {
+    const updateDisabledShops = () => {
+      if (shopsprices) {
+        const disabled = shopsprices.shops.map((shop) =>
+          isShopDisabled(shop),
+        )
+        setDisabledShops(disabled)
+      }
+    }
+    updateDisabledShops()
+  }, [
+    shopsprices,
+    updatedSale,
+    updatedReturn,
+    isSale,
+    saleByProduct,
+  ])
 
   const saveData = async (quantity, shopName) => {
     console.log('Button clicked!:', quantity, shopName)
@@ -80,12 +151,52 @@ const SalePage = () => {
       date: todaysDate,
       is_discounted: 0,
     }
+    const dataReturn = {
+      id: null,
+      product: saleByProduct,
+      shop: shopName,
+      quantity: quantity,
+      date: todaysDate,
+    }
+    const newSaveItem = {
+      product: saleByProduct,
+      shop: shopName,
+      quantity: quantity,
+      date: todaysDate,
+      checked: true,
+    }
+
     try {
-      const result = await updateDataOnApi(
-        data,
-        VITE_APP_SALES_API,
-        'POST',
-      )
+      let result
+      if (isSale) {
+        result = await updateDataOnApi(
+          data,
+          VITE_APP_SALES_API,
+          'POST',
+        )
+        setUpdatedSale([...updatedSale, newSaveItem])
+      } else {
+        result = await updateDataOnApi(
+          dataReturn,
+          VITE_APP_RETURNS_API,
+          'POST',
+        )
+        setUpdatedReturn([...updatedReturn, newSaveItem])
+        setIsReturnSaved(true)
+      }
+
+      const newSentQuantity = {
+        saleType: typeOfSale,
+        product: saleByProduct,
+        quantity: quantity,
+      }
+
+      setSentQuantities((prev) => {
+        const updatedQuantities = [...prev, newSentQuantity]
+        console.log('NewSentQuantities:', updatedQuantities) // Log after state update
+        return updatedQuantities
+      })
+
       return result
     } catch (error) {
       console.error('Error updating data', error)
@@ -104,12 +215,25 @@ const SalePage = () => {
         <DatePicker
           todaysDate={todaysDate}
           setTodaysDate={setTodaysDate}
+          setSentQuantities={setSentQuantities}
         />
         <div className="saleReturn">
-          <button className="saleReturnButtons checked">
+          <button
+            onClick={() => {
+              setTypeOfSale('Sprzedaż')
+              setIsSale(true)
+            }}
+            className={`saleReturnButtons ${isSale ? 'checked' : ''}`}
+          >
             Sprzedaż
           </button>
-          <button className="saleReturnButtons">
+          <button
+            onClick={() => {
+              setTypeOfSale('Zwrot')
+              setIsSale(false)
+            }}
+            className={`saleReturnButtons ${!isSale ? 'checked' : ''}`}
+          >
             Zwrot
           </button>
         </div>
@@ -160,36 +284,27 @@ const SalePage = () => {
               key={`${shop}-${index}`}
               imageProduct={pictures[saleByProduct]}
               productName={saleByProduct}
-              saleType={saleType}
+              saleType={typeOfSale}
               unit={units[saleByProduct]}
               shopName={shop}
-              value={
-                sale
-                  ?.filter(
-                    (s) =>
-                      s.shop === shop &&
-                      s.product === saleByProduct,
-                  )
-                  ?.reduce(
-                    (acc, curr) => acc + curr.quantity,
-                    0,
-                  ) ?? 0
-              }
-              disabled={
-                sale?.some(
-                  (s) =>
-                    s.shop === shop &&
-                    s.product === saleByProduct,
-                ) ?? false
-              }
+              value={valueCurrent(shop)}
+              // disabled={disabledControl(shop)}
+              disabled={disabledShops[index]}
               saveData={saveData}
+              isSale={isSale}
+              isReturnSaved={isReturnSaved}
+              isShopDisabled={isShopDisabled}
             />
           ))
         ) : (
           <Spinner />
         )}
       </Container>
-      <SummarySale sale={sale} />
+      <SummarySale
+        sale={sale}
+        returns={returns}
+        sentQuantities={sentQuantities}
+      />
       <Footer />
     </StyledMain>
   )

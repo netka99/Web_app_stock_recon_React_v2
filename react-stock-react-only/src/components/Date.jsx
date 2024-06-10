@@ -3,7 +3,11 @@ import React from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 
-const DatePicker = ({ todaysDate, setTodaysDate }) => {
+const DatePicker = ({
+  todaysDate,
+  setTodaysDate,
+  setSentQuantities,
+}) => {
   return (
     <DateContainer>
       <input
@@ -11,6 +15,7 @@ const DatePicker = ({ todaysDate, setTodaysDate }) => {
         type="date"
         onChange={(e) => {
           setTodaysDate(e.target.value)
+          setSentQuantities([])
         }}
         required
       />
@@ -21,6 +26,7 @@ const DatePicker = ({ todaysDate, setTodaysDate }) => {
 DatePicker.propTypes = {
   todaysDate: PropTypes.string.isRequired,
   setTodaysDate: PropTypes.func.isRequired,
+  setSentQuantities: PropTypes.func,
 }
 const DateContainer = styled.div`
   display: flex;
