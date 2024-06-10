@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
+import { size } from '../styles/devices'
 
 const ItemSale = ({
   imageProduct,
@@ -29,11 +30,14 @@ const ItemSale = ({
       </div>
       <div className="item-input">
         <div className="item-input-container">
-          <label htmlFor={shopName}>{saleType}</label>
+          <label htmlFor={`input-${shopName}`}>
+            {saleType}
+          </label>
           <input
             type="number"
             min="0"
             value={value}
+            id={`input-${shopName}`}
             name={shopName}
             onChange={handleChange}
             disabled={isShopDisabled(shopName)}
@@ -69,22 +73,40 @@ const Container = styled.div`
     0 4px 8px 0 rgba(0, 0, 0, 0.2),
     0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
+  @media screen and (max-width: ${size.tabletS}) {
+    /* font-size: 0.9rem; */
+    flex-direction: column;
+  }
+
   .item-description {
     flex: 1 1 33.33%;
     display: flex;
     justify-content: center;
     align-items: center;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      justify-content: flex-start;
+    }
   }
 
   .item-picture {
     width: 55px;
     border-radius: 25px;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      width: 45px;
+      padding-left: 5px;
+    }
   }
 
   .item-description p {
     color: #292929;
     font-weight: bold;
     padding-left: 0.5rem;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      padding-left: 5px;
+    }
   }
 
   .item-input {
@@ -97,8 +119,16 @@ const Container = styled.div`
     justify-content: flex-end;
     margin: 10px 0px 10px 0px;
 
+    @media screen and (max-width: ${size.tabletS}) {
+      gap: 0.5rem;
+    }
+
     label {
       margin-right: 20%;
+
+      @media screen and (max-width: ${size.tabletS}) {
+        margin-right: 0%;
+      }
     }
 
     input {
@@ -106,10 +136,18 @@ const Container = styled.div`
       height: 1.8em;
       border-radius: 5px;
       border: 1px solid #a3a3a3;
+
+      @media screen and (max-width: ${size.tabletS}) {
+        text-align: center;
+      }
     }
 
     p {
       margin: 0px 20px 0px 0px;
+
+      @media screen and (max-width: ${size.tabletS}) {
+        margin: 0px 9px 0px 0px;
+      }
     }
   }
 `

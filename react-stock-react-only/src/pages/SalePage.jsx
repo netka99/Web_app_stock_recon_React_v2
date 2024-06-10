@@ -17,6 +17,7 @@ const {
   VITE_APP_SALES_API,
   VITE_APP_RETURNS_API,
 } = import.meta.env
+import { size } from '../styles/devices'
 
 //http://localhost:8000/sales?start=2024-04-19&end=2024-04-19
 
@@ -312,9 +313,13 @@ const SalePage = () => {
 const StyledMain = styled.main`
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  max-width: 100%;
 `
 
 const Container = styled.div`
+  overflow-x: hidden;
+  max-width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -325,12 +330,17 @@ const Container = styled.div`
   padding-bottom: 2rem;
   flex-grow: 1;
 
+  @media screen and (max-width: ${size.tabletS}) {
+    padding-top: 1rem;
+  }
+
   h1 {
     font-size: 60px;
   }
 
   .products {
     padding: 1.5rem 0rem 3rem 0rem;
+    max-width: 100%;
   }
 
   .productButton {
@@ -360,14 +370,15 @@ const Container = styled.div`
   .productButton:nth-of-type(2) {
     margin: 0rem 2rem;
 
-    /* @media screen and (max-width: $mobileL) {
-      margin: 0rem 1rem;
-    } */
+    @media screen and (max-width: ${size.tabletS}) {
+      margin: 0rem 0.5rem;
+    }
   }
 
   .saleReturn {
     display: flex;
     flex-direction: row;
+    max-width: 100%;
   }
 
   .saleReturnButtons {
@@ -395,9 +406,9 @@ const Container = styled.div`
     align-items: center;
     justify-content: center;
 
-    /* @media screen and (max-width: $mobileL) {
+    @media screen and (max-width: ${size.tabletS}) {
       padding: 10px 35px;
-    } */
+    }
   }
 
   .saleReturnButtons.checked {

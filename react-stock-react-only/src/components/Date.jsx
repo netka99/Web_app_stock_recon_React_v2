@@ -2,6 +2,7 @@ import React from 'react'
 // import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
+import { size } from '../styles/devices'
 
 const DatePicker = ({
   todaysDate,
@@ -34,9 +35,9 @@ const DateContainer = styled.div`
   justify-content: center;
   padding: 2rem;
 
-  /* @media screen and (max-width: $tablet) {
+  @media screen and (max-width: ${size.tablet}) {
     padding: 1rem;
-  } */
+  }
 
   span::after {
     padding-left: 5px;

@@ -70,22 +70,28 @@ const SummarySale = ({ sale, sentQuantities, returns }) => {
           <p>{totals.kartaczeReturn} szt</p>
         </div>
         <div className="quantities">
-          <p>{totals.babkaSale} kg</p>
-          <p>{totals.babkaReturn} kg</p>
+          <p>{totals.babkaSale.toFixed(2)} kg</p>
+          <p>{totals.babkaReturn.toFixed(2)} kg</p>
         </div>
         <div className="quantities">
-          <p>{totals.kiszkaSale} kg</p>
-          <p>{totals.kiszkaReturn} kg</p>
+          <p>{totals.kiszkaSale.toFixed(2)} kg</p>
+          <p>{totals.kiszkaReturn.toFixed(2)} kg</p>
         </div>
         <div className="sum sum-title">Suma</div>
         <div className="sum sum-quantities">
           {totals.kartaczeSale - totals.kartaczeReturn} szt
         </div>
         <div className="sum sum-quantities">
-          {totals.babkaSale - totals.babkaReturn} kg
+          {(totals.babkaSale - totals.babkaReturn).toFixed(
+            2,
+          )}{' '}
+          kg
         </div>
         <div className="sum sum-quantities">
-          {totals.kiszkaSale - totals.kiszkaReturn} kg
+          {(
+            totals.kiszkaSale - totals.kiszkaReturn
+          ).toFixed(2)}{' '}
+          kg
         </div>
       </div>
     </Container>

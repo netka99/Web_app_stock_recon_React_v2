@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import StoreImg from '../assets/store-img.svg'
 import Arrow from '../assets/chevron-down.svg'
+import { size } from '../styles/devices'
 
 import { ExtraSale, ItemSale } from '../components/index'
 
@@ -80,7 +81,7 @@ const ItemShopContainer = ({
     setMessageText(messageType)
     setTimeout(() => {
       setMessageText(false)
-    }, 9000)
+    }, 5000)
   }
 
   const getMessageText = (messageType) => {
@@ -158,7 +159,14 @@ const ItemShopContainer = ({
             onClick={handleSaveData}
             disabled={isShopDisabled(shopName)}
           >
-            {isSale ? 'Zapisz sprzedaż' : 'Zapisz zwrot'}
+            {/* {isSale ? 'Zapisz sprzedaż' : 'Zapisz zwrot'} */}
+            {isShopDisabled(shopName)
+              ? isSale
+                ? 'Sprzedaż zapisana'
+                : 'Zwrot zapisany'
+              : isSale
+                ? 'Zapisz sprzedaż'
+                : 'Zapisz zwrot'}
           </button>
         </div>
 
@@ -199,6 +207,10 @@ const Container = styled.div`
     0 4px 8px 0 rgba(0, 0, 0, 0.2),
     0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
+  @media screen and (max-width: ${size.tabletS}) {
+    width: 95%;
+  }
+
   .header {
     display: flex;
     align-content: space-between;
@@ -226,6 +238,10 @@ const Container = styled.div`
     align-items: center;
     gap: 1.3rem;
     padding: 10px;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      gap: 0.5rem;
+    }
   }
 
   .button-checked {
@@ -241,6 +257,10 @@ const Container = styled.div`
     border-radius: 25px;
     font-weight: bold;
     box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.3);
+
+    @media screen and (max-width: ${size.tabletS}) {
+      font-size: 1rem;
+    }
   }
 
   .button-checked.saved {
@@ -257,6 +277,10 @@ const Container = styled.div`
     border-radius: 15px;
     border: none;
     box-shadow: 2px 3px 4px 1px rgba(0, 0, 0, 0.3);
+
+    @media screen and (max-width: ${size.tabletS}) {
+      padding: 2px 1rem 2px 1rem;
+    }
 
     &:hover {
       background: linear-gradient(
@@ -279,6 +303,10 @@ const Container = styled.div`
     transition: 0.3s ease-in-out;
     filter: invert(100%) sepia(44%) saturate(124%)
       hue-rotate(254deg) brightness(114%) contrast(88%);
+
+    @media screen and (max-width: ${size.tabletS}) {
+      width: 18px;
+    }
   }
 
   .accordion-arrow.rotate {
