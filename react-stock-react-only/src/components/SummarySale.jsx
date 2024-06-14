@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
+import { size } from '../styles/devices'
 
 const SummarySale = ({ sale, sentQuantities, returns }) => {
   const [totals, setTotals] = useState({
@@ -138,9 +139,10 @@ const Container = styled.div`
   margin-bottom: 7rem;
   flex-grow: 1;
   height: 100%;
-  /* @media screen and (max-width: $tablet) {
-    width: 85%;
-  } */
+
+  @media screen and (max-width: ${size.tabletS}) {
+    width: 95%;
+  }
 
   .summary {
     display: grid;
@@ -149,9 +151,9 @@ const Container = styled.div`
     margin: 0;
     align-items: center;
 
-    /* @media screen and (max-width: $tablet) {
+    @media screen and (max-width: ${size.tabletS}) {
       grid-template-columns: 1fr 1fr 1fr 1fr;
-    } */
+    }
   }
 
   .title-main > p,
@@ -160,6 +162,11 @@ const Container = styled.div`
     font-weight: bold;
     color: #333232;
     padding-left: 1rem;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      font-size: 1rem;
+      padding-left: 5px;
+    }
   }
 
   .title-first {
@@ -185,9 +192,9 @@ const Container = styled.div`
     color: #4a1bb4;
     margin-bottom: 0.5rem;
 
-    /* @media screen and (max-width: $tablet) {
+    @media screen and (max-width: ${size.tabletS}) {
       font-size: 1rem;
-    } */
+    }
   }
 
   .types {
@@ -197,10 +204,10 @@ const Container = styled.div`
       color: #4f4f4f;
       padding-left: 1em;
 
-      /* @media screen and (max-width: $tablet) {
+      @media screen and (max-width: ${size.tabletS}) {
         font-size: 1rem;
         padding-left: 0em;
-      } */
+      }
     }
   }
 
@@ -211,10 +218,11 @@ const Container = styled.div`
     font-size: 1.1rem;
     font-weight: bold;
     color: #4f4f4f;
-    /* 
-    @media screen and (max-width: $tablet) {
+
+    @media screen and (max-width: ${size.tabletS}) {
       font-size: 1rem;
-    } */
+      padding-left: 5px;
+    }
     p {
       margin-bottom: 0.5rem;
       margin-top: 0.5rem;
@@ -225,21 +233,22 @@ const Container = styled.div`
     margin-top: 0.5rem;
   }
 
-  /* .sum-title {
-    @media screen and (max-width: $tablet) {
+  .sum-title {
+    @media screen and (max-width: ${size.tabletS}t) {
       font-size: 1rem;
       padding-left: 0rem;
     }
-  } */
+  }
 
   .sum-quantities {
     font-size: 1.1rem;
     font-weight: bold;
     color: #4a1bb4;
 
-    /* @media screen and (max-width: $tablet) {
+    @media screen and (max-width: ${size.tabletS}) {
       font-size: 1rem;
-    } */
+      padding-left: 5px;
+    }
   }
 `
 export default SummarySale

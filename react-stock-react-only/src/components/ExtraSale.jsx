@@ -1,21 +1,64 @@
-import React, { useState, forwardRef } from 'react'
+import React, {
+  useState,
+  forwardRef,
+  useEffect,
+} from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import truck from '../assets/delivery-truck.svg'
+import { size } from '../styles/devices'
 
 const ExtraSale = forwardRef(function ExtraSale(
-  { unit, shopName, handleMessage, handleSaveData },
+  {
+    unit,
+    shopName,
+    // handleMessage,
+    handleSaveData,
+    saleType,
+    extraShopDisabled,
+    saveExtraData,
+    // valueExtra,
+    isSale,
+    // disabledExtraShops,
+    extraSaleValues,
+    extraReturnValues,
+    productName,
+    todaysDate,
+  },
   ref,
 ) {
   const [extraInputValue, setExtraInputValue] = useState(0)
-  const [disabled, setDisabled] = useState(false)
+
+  const extraValueCurrent = (shop) => {
+    const data = isSale
+      ? extraSaleValues
+      : extraReturnValues
+    const currentValue =
+      data?.find(
+        (s) => s.shop === shop && s.product === productName,
+      )?.quantity ?? 0
+    return currentValue
+  }
+
+  useEffect(() => {
+    const currentValue = extraValueCurrent(shopName)
+    setExtraInputValue(currentValue)
+  }, [
+    extraSaleValues,
+    extraReturnValues,
+    productName,
+    isSale,
+    shopName,
+    todaysDate,
+  ])
 
   const handleChangeExtra = (e) => {
     const value =
-      e.target.value !== '' ? parseFloat(e.target.value) : 0
+      e.target.value !== ''
+        ? parseInt(e.target.value, 10)
+        : 0
     setExtraInputValue(value)
   }
-
   return (
     <Container ref={ref}>
       <div className="extra-sale-container">
@@ -25,17 +68,17 @@ const ExtraSale = forwardRef(function ExtraSale(
             alt="icon of truck"
             className="extra-image"
           />
-          <p>Extra dowóz</p>
+          <p>Extra</p>
         </div>
         <div className="extra-sale">
           <div className="extra-sale-input">
-            <label htmlFor={shopName}>Sprzedaż</label>
+            <label htmlFor={shopName}>{saleType}</label>
             <input
               type="number"
               min="0"
               value={extraInputValue}
               onChange={handleChangeExtra}
-              disabled={disabled}
+              disabled={extraShopDisabled(shopName)}
             />
             <p className="item-units">{unit}</p>
           </div>
@@ -44,14 +87,14 @@ const ExtraSale = forwardRef(function ExtraSale(
       <div className="sale-extra-sale">
         <button
           onClick={() => {
-            handleSaveData(extraInputValue, shopName)
-            handleMessage('saleSaved')
-            setDisabled(true)
+            handleSaveData(extraInputValue, saveExtraData)
           }}
           className="sale-extra-sale-button"
-          disabled={disabled}
+          disabled={extraShopDisabled(shopName)}
         >
-          Zapisz dowóz
+          {extraShopDisabled(shopName)
+            ? 'Zapisane'
+            : 'Zapisz'}
         </button>
       </div>
     </Container>
@@ -60,12 +103,38 @@ const ExtraSale = forwardRef(function ExtraSale(
 
 ExtraSale.propTypes = {
   unit: PropTypes.string.isRequired,
+  todaysDate: PropTypes.string,
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
   shopName: PropTypes.string.isRequired,
   saveData: PropTypes.func,
   handleMessage: PropTypes.func,
   handleSaveData: PropTypes.func,
+  saleType: PropTypes.string.isRequired,
+  extraShopDisabled: PropTypes.func,
+  saveExtraData: PropTypes.func,
+  isSale: PropTypes.bool,
+  valueExtra: PropTypes.array,
+  productName: PropTypes.string,
+  extraSaleValues: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+      product: PropTypes.string,
+      shop: PropTypes.string,
+      quantity: PropTypes.number,
+      date: PropTypes.string,
+      is_discounted: PropTypes.number,
+    }),
+  ),
+  extraReturnValues: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+      product: PropTypes.string,
+      shop: PropTypes.string,
+      quantity: PropTypes.number,
+      date: PropTypes.string,
+    }),
+  ),
 }
 
 const Container = styled.div`
@@ -84,12 +153,20 @@ const Container = styled.div`
     width: 100%;
     display: flex;
     flex-direction: row;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      flex-direction: column;
+    }
   }
   .image-description {
     flex: 1 1 33.33%;
     display: flex;
     justify-content: center;
     align-items: center;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      justify-content: flex-start;
+    }
 
     p {
       color: #292929;
@@ -101,6 +178,10 @@ const Container = styled.div`
   .extra-image {
     width: 55px;
     border-radius: 25px;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      width: 45px;
+    }
   }
 
   .extra-sale {
@@ -114,8 +195,16 @@ const Container = styled.div`
     justify-content: flex-end;
     margin: 10px 0px 10px 0px;
 
+    @media screen and (max-width: ${size.tabletS}) {
+      gap: 0.5rem;
+    }
+
     label {
       margin-right: 20%;
+
+      @media screen and (max-width: ${size.tabletS}) {
+        margin-right: 0%;
+      }
     }
 
     input {
@@ -123,10 +212,18 @@ const Container = styled.div`
       height: 1.8em;
       border-radius: 5px;
       border: 1px solid #a3a3a3;
+
+      @media screen and (max-width: ${size.tabletS}) {
+        text-align: center;
+      }
     }
 
     p {
       margin: 0px 20px 0px 0px;
+
+      @media screen and (max-width: ${size.tabletS}) {
+        margin: 0px 9px 0px 0px;
+      }
     }
   }
 
@@ -134,6 +231,10 @@ const Container = styled.div`
     display: flex;
     justify-content: flex-end;
     padding: 0.3rem 0.8rem 0.5rem 0;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      padding: 0.3rem 15px 0.5rem 0;
+    }
   }
 
   .sale-extra-sale-button {
@@ -150,6 +251,10 @@ const Container = styled.div`
       #d2d1d2,
       #6f6f6f
     );
+
+    @media screen and (max-width: ${size.tabletS}) {
+      margin: 0rem 0rem;
+    }
 
     &:hover {
       background: linear-gradient(

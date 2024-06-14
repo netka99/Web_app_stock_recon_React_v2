@@ -14,11 +14,17 @@ const ItemShopContainer = ({
   unit,
   shopName,
   value,
+  valueExtra,
   disabled,
   saveData,
   isSale,
   isShopDisabled,
-  // isReturnSaved,
+  extraShopDisabled,
+  saveExtraData,
+  disabledExtraShops,
+  extraReturnValues,
+  extraSaleValues,
+  todaysDate,
 }) => {
   const [inputValue, setInputValue] = useState(value)
   const [extraSale, setExtraSale] = useState(false)
@@ -44,12 +50,20 @@ const ItemShopContainer = ({
     }
   }, [isOpen, contentHeight])
 
+  //responsible to close all containers whenever product, type of sale, date is changed
+  useEffect(() => {
+    setIsOpen(false)
+  }, [todaysDate, isSale, productName])
+
   const handleChange = (newValue) => {
     setInputValue(newValue) // Update input value locally
   }
 
-  const handleSaveData = async () => {
-    const result = await saveData(inputValue, shopName)
+  const handleSaveData = async (
+    valueofData,
+    savingData,
+  ) => {
+    const result = await savingData(valueofData, shopName)
     if (result && result.status !== 200) {
       handleMessage('errorSave')
     } else {
@@ -145,7 +159,6 @@ const ItemShopContainer = ({
           disabled={disabled}
           onChange={handleChange}
           isShopDisabled={isShopDisabled}
-          // isReturnSaved={isReturnSaved}
         />
         <div className="saving-buttons">
           <button
@@ -156,10 +169,11 @@ const ItemShopContainer = ({
           </button>
           <button
             className="save-sale"
-            onClick={handleSaveData}
+            onClick={() => {
+              handleSaveData(inputValue, saveData)
+            }}
             disabled={isShopDisabled(shopName)}
           >
-            {/* {isSale ? 'Zapisz sprzedaż' : 'Zapisz zwrot'} */}
             {isShopDisabled(shopName)
               ? isSale
                 ? 'Sprzedaż zapisana'
@@ -177,6 +191,16 @@ const ItemShopContainer = ({
             handleSaveData={handleSaveData}
             handleMessage={handleMessage}
             ref={contentRefExtra}
+            saleType={saleType}
+            extraShopDisabled={extraShopDisabled}
+            saveExtraData={saveExtraData}
+            isSale={isSale}
+            disabledExtraShops={disabledExtraShops}
+            valueExtra={valueExtra}
+            extraReturnValues={extraReturnValues}
+            extraSaleValues={extraSaleValues}
+            productName={productName}
+            todaysDate={todaysDate}
           />
         )}
       </div>
@@ -186,16 +210,40 @@ const ItemShopContainer = ({
 
 ItemShopContainer.propTypes = {
   imageProduct: PropTypes.string.isRequired,
+  todaysDate: PropTypes.string,
   productName: PropTypes.string.isRequired,
   saleType: PropTypes.string.isRequired,
   unit: PropTypes.string.isRequired,
   shopName: PropTypes.string.isRequired,
   value: PropTypes.number,
+  valueExtra: PropTypes.number,
   disabled: PropTypes.bool,
   saveData: PropTypes.func,
   onChange: PropTypes.func,
   isSale: PropTypes.bool,
   isShopDisabled: PropTypes.func,
+  extraShopDisabled: PropTypes.func,
+  saveExtraData: PropTypes.func,
+  disabledExtraShops: PropTypes.bool,
+  extraSaleValues: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+      product: PropTypes.string,
+      shop: PropTypes.string,
+      quantity: PropTypes.number,
+      date: PropTypes.string,
+      is_discounted: PropTypes.number,
+    }),
+  ),
+  extraReturnValues: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+      product: PropTypes.string,
+      shop: PropTypes.string,
+      quantity: PropTypes.number,
+      date: PropTypes.string,
+    }),
+  ),
 }
 
 const Container = styled.div`

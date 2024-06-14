@@ -32,14 +32,18 @@ const SalePage = () => {
   const [returns, setReturns] = useState(null)
   const [updatedReturn, setUpdatedReturn] = useState([])
   const [sentQuantities, setSentQuantities] = useState([])
+  const [extraSaleValues, setExtraSaleValues] = useState([])
+  const [extraReturnValues, setExtraReturnValues] =
+    useState([])
   const [isSale, setIsSale] = useState(true)
   const [isReturnSaved, setIsReturnSaved] = useState(false)
-
   const [typeOfSale, setTypeOfSale] = useState('Sprzedaż')
 
   const today = new Date().toISOString().split('T')[0]
   const [todaysDate, setTodaysDate] = useState(today)
   const [disabledShops, setDisabledShops] = useState([])
+  const [disabledExtraShops, setDisabledExtraShops] =
+    useState([])
 
   const apiWithDate = `${VITE_APP_SALES_API}?start=${todaysDate}&end=${todaysDate}`
   const apiWithDateReturn = `${VITE_APP_RETURNS_API}?start=${todaysDate}&end=${todaysDate}`
@@ -86,12 +90,16 @@ const SalePage = () => {
   console.log('Data Return', returns)
   console.log('dataAllSaleUpdated:', updatedSale)
   console.log('dataAllReturnUpdated:', updatedReturn)
+  console.log('data Extra Sale:', extraSaleValues)
+  console.log('data Extra Return:', extraReturnValues)
 
   const filterByProduct = (productName) => {
     setSaleByProduct(productName)
   }
 
   useEffect(() => {
+    setExtraSaleValues([])
+    setExtraReturnValues([])
     console.log('Selected date changed:', todaysDate)
   }, [todaysDate])
 
@@ -111,11 +119,23 @@ const SalePage = () => {
     (shop) => {
       valueCurrent(shop)
     },
-    [updatedSale, updatedSale],
+    [updatedSale, updatedReturn, todaysDate],
   )
 
   const isShopDisabled = (shop) => {
     const data = isSale ? updatedSale : updatedReturn
+    return (
+      data?.some(
+        (s) =>
+          s.shop === shop && s.product === saleByProduct,
+      ) ?? false
+    )
+  }
+
+  const extraShopDisabled = (shop) => {
+    const data = isSale
+      ? extraSaleValues
+      : extraReturnValues
     return (
       data?.some(
         (s) =>
@@ -140,6 +160,25 @@ const SalePage = () => {
     updatedReturn,
     isSale,
     saleByProduct,
+  ])
+
+  useEffect(() => {
+    const updateDisabledExtraShops = () => {
+      if (shopsprices) {
+        const disabled = shopsprices.shops.map((shop) =>
+          extraShopDisabled(shop),
+        )
+        setDisabledExtraShops(disabled)
+      }
+    }
+    updateDisabledExtraShops()
+  }, [
+    shopsprices,
+    extraSaleValues,
+    extraReturnValues,
+    isSale,
+    saleByProduct,
+    todaysDate,
   ])
 
   const saveData = async (quantity, shopName) => {
@@ -198,6 +237,70 @@ const SalePage = () => {
         return updatedQuantities
       })
 
+      return result
+    } catch (error) {
+      console.error('Error updating data', error)
+      return {
+        status: 500,
+        data: { message: 'Failed to save data' },
+      }
+    }
+  }
+
+  const saveExtraData = async (quantity, shopName) => {
+    console.log(
+      'Button clicked Extra!:',
+      quantity,
+      shopName,
+    )
+    const data = {
+      id: null,
+      product: saleByProduct,
+      shop: shopName,
+      quantity: quantity,
+      date: todaysDate,
+      is_discounted: 0,
+    }
+    const dataReturn = {
+      id: null,
+      product: saleByProduct,
+      shop: shopName,
+      quantity: quantity,
+      date: todaysDate,
+    }
+
+    try {
+      let result
+      if (isSale) {
+        result = await updateDataOnApi(
+          data,
+          VITE_APP_SALES_API,
+          'POST',
+        )
+        setExtraSaleValues([...extraSaleValues, data])
+      } else {
+        result = await updateDataOnApi(
+          dataReturn,
+          VITE_APP_RETURNS_API,
+          'POST',
+        )
+        setExtraReturnValues([
+          ...extraReturnValues,
+          dataReturn,
+        ])
+      }
+
+      const newSentQuantity = {
+        saleType: typeOfSale,
+        product: saleByProduct,
+        quantity: quantity,
+      }
+
+      setSentQuantities((prev) => {
+        const updatedQuantities = [...prev, newSentQuantity]
+        console.log('NewSentQuantities:', updatedQuantities) // Log after state update
+        return updatedQuantities
+      })
       return result
     } catch (error) {
       console.error('Error updating data', error)
@@ -289,12 +392,17 @@ const SalePage = () => {
               unit={units[saleByProduct]}
               shopName={shop}
               value={valueCurrent(shop)}
-              // disabled={disabledControl(shop)}
               disabled={disabledShops[index]}
               saveData={saveData}
               isSale={isSale}
               isReturnSaved={isReturnSaved}
               isShopDisabled={isShopDisabled}
+              extraShopDisabled={extraShopDisabled}
+              saveExtraData={saveExtraData}
+              disabledExtraShops={disabledExtraShops[index]}
+              extraSaleValues={extraSaleValues}
+              extraReturnValues={extraReturnValues}
+              todaysDate={todaysDate}
             />
           ))
         ) : (

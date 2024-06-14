@@ -74,7 +74,6 @@ const Container = styled.div`
     0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
   @media screen and (max-width: ${size.tabletS}) {
-    /* font-size: 0.9rem; */
     flex-direction: column;
   }
 
