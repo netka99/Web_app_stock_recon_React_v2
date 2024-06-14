@@ -26,7 +26,7 @@ const DatePicker = ({
 
 DatePicker.propTypes = {
   todaysDate: PropTypes.string.isRequired,
-  setTodaysDate: PropTypes.func.isRequired,
+  setTodaysDate: PropTypes.func,
   setSentQuantities: PropTypes.func,
 }
 const DateContainer = styled.div`

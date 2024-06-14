@@ -11,7 +11,11 @@ import {
   SummarySale,
 } from '../components/index'
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
-import { pictures, units } from '../utils/productDetails'
+import {
+  pictures,
+  units,
+  productsData,
+} from '../utils/productDetails'
 const {
   VITE_APP_SETTINGS_API,
   VITE_APP_SALES_API,
@@ -342,45 +346,22 @@ const SalePage = () => {
           </button>
         </div>
         <div className="products">
-          <button
-            className={
-              saleByProduct === 'Kartacze'
-                ? 'productButton active'
-                : 'productButton'
-            }
-            onClick={() => filterByProduct('Kartacze')}
-          >
-            <img
-              src={pictures.Kartacze}
-              alt="image of Kartacze"
-            />
-          </button>
-          <button
-            className={
-              saleByProduct === 'Babka'
-                ? 'productButton active'
-                : 'productButton'
-            }
-            onClick={() => filterByProduct('Babka')}
-          >
-            <img
-              src={pictures.Babka}
-              alt="image of Babka"
-            />
-          </button>
-          <button
-            className={
-              saleByProduct === 'Kiszka'
-                ? 'productButton active'
-                : 'productButton'
-            }
-            onClick={() => filterByProduct('Kiszka')}
-          >
-            <img
-              src={pictures.Kiszka}
-              alt="image of Kiszka"
-            />
-          </button>
+          {productsData.map((product) => (
+            <button
+              key={product.name}
+              className={
+                saleByProduct === product.name
+                  ? 'productButton active'
+                  : 'productButton'
+              }
+              onClick={() => filterByProduct(product.name)}
+            >
+              <img
+                src={product.image}
+                alt={`image of ${product.name}`}
+              />
+            </button>
+          ))}
         </div>
         {shopsprices ? (
           shopsprices.shops.map((shop, index) => (

@@ -13,3 +13,9 @@ export const units = {
   Babka: 'kg',
   Kiszka: 'kg',
 }
+
+export const productsData = [
+  { name: 'Kartacze', image: Kartacze, units: 'szt.' },
+  { name: 'Babka', image: Babka, units: 'kg' },
+  { name: 'Kiszka', image: Kiszka, units: 'kg' },
+]
