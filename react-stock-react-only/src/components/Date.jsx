@@ -33,7 +33,7 @@ const DateContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1.5rem;
 
   @media screen and (max-width: ${size.tablet}) {
     padding: 1rem;

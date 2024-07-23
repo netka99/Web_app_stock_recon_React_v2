@@ -1,0 +1,19 @@
+import * as React from 'react'
+import { useState, useEffect } from 'react'
+import { fetchData } from '../api/fetchAPI'
+
+const useFetchData = (url, dependencies=[]) => {
+    const [data,setData] = useState(null)
+    const [error, setError] = useState(null)
+
+    useEffect(()=>{
+            fetchData(url)
+    .then(setData)
+    .catch(setError)
+    },dependencies)
+
+    return {data,error}
+
+}
+
+export default useFetchData

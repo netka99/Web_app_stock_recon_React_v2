@@ -12,6 +12,8 @@ import ItemShopContainer from './ItemShopContainer'
 import DatePicker from './Date'
 import ExtraSale from './ExtraSale'
 import SummarySale from './SummarySale'
+import SummaryPerProduct from './SummaryPerProduct'
+import SummaryShopProductDetails from './SummaryShopProductDetails'
 
 export {
   Navbar,
@@ -28,4 +30,6 @@ export {
   DatePicker,
   ExtraSale,
   SummarySale,
+  SummaryPerProduct,
+  SummaryShopProductDetails,
 }

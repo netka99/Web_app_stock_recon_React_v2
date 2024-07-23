@@ -502,7 +502,6 @@ const Container = styled.div`
 
   .saleReturnButtons.checked {
     color: #5c35b6;
-    background: linear-gradient(45deg, #e3e3e3, #ede8e8);
     font-weight: bold;
     font-size: 1.2rem;
     transition: 0.2s ease-in-out;
