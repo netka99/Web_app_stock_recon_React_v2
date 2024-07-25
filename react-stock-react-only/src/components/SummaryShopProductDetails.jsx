@@ -17,6 +17,8 @@ const SummaryShopProductDetails = ({
 }) => {
   const contentRef = useRef(null)
   const [contentHeight, setContentHeight] = useState(0)
+  const [editIndex, setEditIndex] = useState(null)
+  const [editValue,setEditValue] = useState('')
 
   useEffect(() => {
     if (contentRef.current) {
@@ -30,15 +32,23 @@ const SummaryShopProductDetails = ({
 
   const filteredBySaletype = (typeOfData, minus) => {
     return filteredData(shop, typeOfData).map(
-      (item, index) => (
+      (item, idx) => (
         <div
-          key={`${shop}-${index}-sale`}
+          key={`${shop}-${idx}-sale`}
           className="details-row"
         >
           <div className="detailed-date">{item.date}</div>
-          <div className="detailed-quantity">
-            {`${minus}${item.quantity} ${units[productSelected]}`}
-          </div>
+          {editIndex === idx ? (
+            <input
+            type='text'
+            value={}
+            />
+          ) : (
+            <div className="detailed-quantity">
+              {`${minus}${item.quantity} ${units[productSelected]}`}
+            </div>
+          )}
+
           <div className="detailed-price">
             {`${minus}${item.quantity * settingsData.prices[productSelected]} zł`}
           </div>
