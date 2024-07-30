@@ -16,9 +16,11 @@ const SummaryShopProductDetails = ({
   index,
 }) => {
   const contentRef = useRef(null)
+  const inputRef = useRef(null)
   const [contentHeight, setContentHeight] = useState(0)
   const [editIndex, setEditIndex] = useState(null)
-  const [editValue,setEditValue] = useState('')
+  const [editValue, setEditValue] = useState('')
+  const [editType, setEditType] = useState(null)
 
   useEffect(() => {
     if (contentRef.current) {
@@ -30,7 +32,42 @@ const SummaryShopProductDetails = ({
     }
   }, [isOpenIndex, contentRef])
 
-  const filteredBySaletype = (typeOfData, minus) => {
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        inputRef.current &&
+        !inputRef.current.contains(event.target)
+      ) {
+        setEditIndex(null)
+        setEditValue('')
+        setEditType(null)
+      }
+    }
+
+    document.addEventListener(
+      'mousedown',
+      handleClickOutside,
+    )
+
+    return () => {
+      document.removeEventListener(
+        'mousedown',
+        handleClickOutside,
+      )
+    }
+  }, [inputRef])
+
+  const handleEdit = (index, quantity, type) => {
+    setEditIndex(index)
+    setEditValue(quantity)
+    setEditType(type)
+  }
+
+  const filteredBySaletype = (
+    typeOfData,
+    minus,
+    typeOfSale,
+  ) => {
     return filteredData(shop, typeOfData).map(
       (item, idx) => (
         <div
@@ -38,10 +75,13 @@ const SummaryShopProductDetails = ({
           className="details-row"
         >
           <div className="detailed-date">{item.date}</div>
-          {editIndex === idx ? (
+          {editIndex === idx && editType === typeOfSale ? (
             <input
-            type='text'
-            value={}
+              id={`${shop}-${idx}-${typeOfSale}`}
+              type="text"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              ref={inputRef}
             />
           ) : (
             <div className="detailed-quantity">
@@ -52,7 +92,11 @@ const SummaryShopProductDetails = ({
           <div className="detailed-price">
             {`${minus}${item.quantity * settingsData.prices[productSelected]} zł`}
           </div>
-          <EditButton />
+          <EditButton
+            onClick={() =>
+              handleEdit(idx, item.quantity, typeOfSale)
+            }
+          />
         </div>
       ),
     )
@@ -69,10 +113,10 @@ const SummaryShopProductDetails = ({
         }}
       >
         <div className="sale-filered">
-          {filteredBySaletype(saleData, '')}
+          {filteredBySaletype(saleData, '', 'Sale')}
         </div>
         <div className="return-filered">
-          {filteredBySaletype(returnsData, '-')}
+          {filteredBySaletype(returnsData, '-', 'Return')}
         </div>
       </div>
     </Container>
