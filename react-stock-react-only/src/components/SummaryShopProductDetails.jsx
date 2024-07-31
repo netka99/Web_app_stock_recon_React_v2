@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { units } from '../utils/productDetails'
 import editImg from '../assets/edit.png'
 import saveImg from '../assets/save-icon.png'
+import { updateDataOnApi } from '../api/fetchAPI'
 
 const SummaryShopProductDetails = ({
   saleData,
@@ -14,6 +15,8 @@ const SummaryShopProductDetails = ({
   settingsData,
   isOpenIndex,
   index,
+  urlSaleVar,
+  urlReturnVar,
 }) => {
   const contentRef = useRef(null)
   const inputRef = useRef(null)
@@ -36,7 +39,8 @@ const SummaryShopProductDetails = ({
     const handleClickOutside = (event) => {
       if (
         inputRef.current &&
-        !inputRef.current.contains(event.target)
+        !inputRef.current.contains(event.target) &&
+        !event.target.closest('.edit-button')
       ) {
         setEditIndex(null)
         setEditValue('')
@@ -63,6 +67,42 @@ const SummaryShopProductDetails = ({
     setEditType(type)
   }
 
+  const updateItem = async (quantity, dateItem, idItem) => {
+    console.log('save button clicked', quantity, idItem)
+    // const urlSale = `${urlSaleVar}/${id}`
+    const urlSale = 'http://localhost:8000/sales/31'
+
+    const urlReturn = `${urlReturnVar}/${idItem}`
+
+    const data = {
+      id: null,
+      product: productSelected,
+      shop: shop,
+      quantity: quantity,
+      date: dateItem,
+    }
+
+    try {
+      let result
+      if (editType === 'Sale') {
+        result = await updateDataOnApi(data, urlSale, 'PUT')
+      }
+      if (editType === 'Return') {
+        result = await updateDataOnApi(
+          data,
+          urlReturn,
+          'PUT',
+        )
+      }
+    } catch (error) {
+      console.error('Error updating data', error)
+      return {
+        status: 500,
+        data: { message: 'Failed to save data' },
+      }
+    }
+  }
+
   const filteredBySaletype = (
     typeOfData,
     minus,
@@ -76,13 +116,19 @@ const SummaryShopProductDetails = ({
         >
           <div className="detailed-date">{item.date}</div>
           {editIndex === idx && editType === typeOfSale ? (
-            <input
-              id={`${shop}-${idx}-${typeOfSale}`}
-              type="text"
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              ref={inputRef}
-            />
+            <div className="quantity-input">
+              {`${minus}`}
+              <input
+                id={`${shop}-${idx}-${typeOfSale}`}
+                type="text"
+                value={editValue}
+                onChange={(e) =>
+                  setEditValue(e.target.value)
+                }
+                ref={inputRef}
+              />
+              {`${units[productSelected]}`}
+            </div>
           ) : (
             <div className="detailed-quantity">
               {`${minus}${item.quantity} ${units[productSelected]}`}
@@ -92,11 +138,21 @@ const SummaryShopProductDetails = ({
           <div className="detailed-price">
             {`${minus}${item.quantity * settingsData.prices[productSelected]} zł`}
           </div>
-          <EditButton
-            onClick={() =>
-              handleEdit(idx, item.quantity, typeOfSale)
-            }
-          />
+          {editIndex === idx && editType === typeOfSale ? (
+            <SaveButton
+              onClick={(e) => {
+                e.stopPropagation()
+                console.log('clicked')
+                updateItem(editValue, item.date, item.id)
+              }}
+            />
+          ) : (
+            <EditButton
+              onClick={() =>
+                handleEdit(idx, item.quantity, typeOfSale)
+              }
+            />
+          )}
         </div>
       ),
     )
@@ -145,6 +201,8 @@ const SaveButton = ({ onClick }) => (
 
 SummaryShopProductDetails.propTypes = {
   index: PropTypes.number,
+  urlSaleVar: PropTypes.string,
+  urlReturnVar: PropTypes.string,
   saleData: PropTypes.arrayOf(
     PropTypes.shape({
       date: PropTypes.string,
@@ -224,6 +282,16 @@ const Container = styled.div`
     /* justify-content: center; */
     align-items: center;
     padding-left: 25px;
+  }
+
+  .quantity-input {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    input {
+      width: 2.5rem;
+    }
   }
 
   .edit-button,

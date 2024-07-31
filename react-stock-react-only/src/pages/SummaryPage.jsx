@@ -184,6 +184,8 @@ const SummaryPage = () => {
             saleData={sale}
             returnsData={returns}
             productSelected={saleByProduct}
+            urlSaleVar={VITE_APP_SALES_API}
+            urlReturnVar={VITE_APP_RETURNS_API}
           />
         )}
       </Container>
