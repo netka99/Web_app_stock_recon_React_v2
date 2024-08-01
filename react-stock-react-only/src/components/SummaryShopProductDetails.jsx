@@ -5,6 +5,8 @@ import { units } from '../utils/productDetails'
 import editImg from '../assets/edit.png'
 import saveImg from '../assets/save-icon.png'
 import { updateDataOnApi } from '../api/fetchAPI'
+const { VITE_APP_SALES_API, VITE_APP_RETURNS_API } =
+  import.meta.env
 
 const SummaryShopProductDetails = ({
   saleData,
@@ -15,8 +17,6 @@ const SummaryShopProductDetails = ({
   settingsData,
   isOpenIndex,
   index,
-  urlSaleVar,
-  urlReturnVar,
 }) => {
   const contentRef = useRef(null)
   const inputRef = useRef(null)
@@ -24,6 +24,7 @@ const SummaryShopProductDetails = ({
   const [editIndex, setEditIndex] = useState(null)
   const [editValue, setEditValue] = useState('')
   const [editType, setEditType] = useState(null)
+  const [messageText, setMessageText] = useState(false)
 
   useEffect(() => {
     if (contentRef.current) {
@@ -33,7 +34,7 @@ const SummaryShopProductDetails = ({
         setContentHeight(0)
       }
     }
-  }, [isOpenIndex, contentRef])
+  }, [isOpenIndex, contentRef, messageText])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -59,7 +60,7 @@ const SummaryShopProductDetails = ({
         handleClickOutside,
       )
     }
-  }, [inputRef])
+  }, [inputRef, editIndex])
 
   const handleEdit = (index, quantity, type) => {
     setEditIndex(index)
@@ -67,12 +68,30 @@ const SummaryShopProductDetails = ({
     setEditType(type)
   }
 
+  //message displayed on the screen after updated data are saved
+  const getMessageText = (messageType) => {
+    switch (messageType) {
+      case 'dataSaved':
+        return 'Dane zostały poprawnie zapisane!'
+      case 'errorSave':
+        return 'Problem z wysłaniem danych do bazy danych!'
+      default:
+        return ''
+    }
+  }
+
+  const handleMessage = (messageType) => {
+    getMessageText(messageType)
+    setMessageText(messageType)
+    setTimeout(() => {
+      setMessageText(false)
+    }, 5000)
+  }
+
   const updateItem = async (quantity, dateItem, idItem) => {
     console.log('save button clicked', quantity, idItem)
-    // const urlSale = `${urlSaleVar}/${id}`
-    const urlSale = 'http://localhost:8000/sales/31'
-
-    const urlReturn = `${urlReturnVar}/${idItem}`
+    const urlSale = `${VITE_APP_SALES_API}/${idItem}`
+    const urlReturn = `${VITE_APP_RETURNS_API}/${idItem}`
 
     const data = {
       id: null,
@@ -86,6 +105,12 @@ const SummaryShopProductDetails = ({
       let result
       if (editType === 'Sale') {
         result = await updateDataOnApi(data, urlSale, 'PUT')
+        console.log(result.status)
+        if (result && result.status !== 204) {
+          handleMessage('errorSave')
+        } else {
+          handleMessage('dataSaved')
+        }
       }
       if (editType === 'Return') {
         result = await updateDataOnApi(
@@ -93,6 +118,12 @@ const SummaryShopProductDetails = ({
           urlReturn,
           'PUT',
         )
+        console.log(result.status)
+        if (result && result.status !== 204) {
+          handleMessage('errorSave')
+        } else {
+          handleMessage('dataSaved')
+        }
       }
     } catch (error) {
       console.error('Error updating data', error)
@@ -144,14 +175,20 @@ const SummaryShopProductDetails = ({
                 e.stopPropagation()
                 console.log('clicked')
                 updateItem(editValue, item.date, item.id)
+                setEditIndex(null)
               }}
             />
           ) : (
             <EditButton
-              onClick={() =>
+              onClick={() => {
                 handleEdit(idx, item.quantity, typeOfSale)
-              }
+              }}
             />
+          )}
+          {editIndex === idx && messageText && (
+            <div className="error-notification">
+              {getMessageText(messageText)}
+            </div>
           )}
         </div>
       ),
@@ -335,6 +372,18 @@ const Container = styled.div`
 
   .accordion.open {
     transition: 0.3s ease;
+  }
+
+  .error-notification {
+    background-color: #f8d7da;
+    width: 80%;
+    padding: 2px;
+    border-radius: 8px;
+    grid-column: 1 / -1;
+    text-align: center;
+    margin: 20px auto 10px auto;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
   }
 `
 export default SummaryShopProductDetails

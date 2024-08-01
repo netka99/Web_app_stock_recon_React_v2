@@ -31,6 +31,19 @@ export const updateDataOnApi = async (
         `Failed to update data on API: ${response.statusText}`,
       )
     }
+    if (response.status === 204) {
+      // console.log('No content returned')
+      return { status: response.status, data: null }
+    }
+    // Check if the response has content
+    const contentType = response.headers.get('Content-Type')
+    if (
+      !contentType ||
+      !contentType.includes('application/json')
+    ) {
+      throw new Error('Response is not JSON')
+    }
+
     const data = await response.json()
     console.log('Sent:', data)
     return { status: response.status, data: data }
