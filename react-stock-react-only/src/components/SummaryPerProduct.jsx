@@ -13,6 +13,15 @@ const SummaryPerProduct = ({
   productSelected,
 }) => {
   const [isOpenIndex, setIsOpenIndex] = useState([])
+  const [localSaleData, setLocalSaleData] =
+    useState(saleData)
+  const [localReturnData, setLocalReturnData] =
+    useState(returnsData)
+
+  useEffect(() => {
+    setLocalSaleData(saleData)
+    setLocalReturnData(returnsData)
+  }, [saleData, returnsData])
 
   useEffect(() => {}, [isOpenIndex])
 
@@ -40,7 +49,8 @@ const SummaryPerProduct = ({
 
   const totals = (shop) => {
     const totalPerShop =
-      summary(shop, saleData) - summary(shop, returnsData)
+      summary(shop, localSaleData) -
+      summary(shop, localReturnData)
     return totalPerShop
   }
 
@@ -51,6 +61,13 @@ const SummaryPerProduct = ({
           d.shop === shop && d.product === productSelected,
       ) ?? []
     )
+  }
+
+  const handleUpdateLocalSaleData = (newLocalSale) => {
+    setLocalSaleData(newLocalSale)
+  }
+  const handleUpdateLocalReturnData = (newLocalReturn) => {
+    setLocalReturnData(newLocalReturn)
   }
 
   return (
@@ -92,15 +109,19 @@ const SummaryPerProduct = ({
             </div>
             <div className="details-container">
               <SummaryShopProductDetails
-                saleData={saleData}
+                localSaleData={localSaleData}
                 isOpenIndex={isOpenIndex}
-                returnsData={returnsData}
+                localReturnData={localReturnData}
                 productSelected={productSelected}
                 shop={shop}
                 filteredData={filteredData}
                 units={units}
                 settingsData={settingsData}
                 index={index}
+                updateLocalSale={handleUpdateLocalSaleData}
+                updateLocalReturn={
+                  handleUpdateLocalReturnData
+                }
               />
             </div>
           </div>

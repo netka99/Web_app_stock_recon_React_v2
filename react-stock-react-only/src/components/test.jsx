@@ -9,16 +9,14 @@ const { VITE_APP_SALES_API, VITE_APP_RETURNS_API } =
   import.meta.env
 
 const SummaryShopProductDetails = ({
-  localSaleData,
-  localReturnData,
+  saleData,
+  returnsData,
   shop,
   productSelected,
   filteredData,
   settingsData,
   isOpenIndex,
   index,
-  updateLocalSale,
-  updateLocalReturn,
 }) => {
   const contentRef = useRef(null)
   const inputRef = useRef(null)
@@ -27,15 +25,10 @@ const SummaryShopProductDetails = ({
   const [editValue, setEditValue] = useState('')
   const [editType, setEditType] = useState(null)
   const [messageText, setMessageText] = useState(false)
-  // const [localSaleData, setLocalSaleData] =
-  //   useState(saleData)
-  // const [localReturnData, setLocalReturnData] =
-  //   useState(returnsData)
-
-  // useEffect(() => {
-  //   setLocalSaleData(saleData)
-  //   setLocalReturnData(returnsData)
-  // }, [saleData, returnsData])
+  const [localSaleData, setLocalSaleData] =
+    useState(saleData)
+  const [localReturnsData, setLocalReturnsData] =
+    useState(returnsData)
 
   useEffect(() => {
     if (contentRef.current) {
@@ -45,12 +38,7 @@ const SummaryShopProductDetails = ({
         setContentHeight(0)
       }
     }
-  }, [
-    isOpenIndex,
-    contentRef,
-    localSaleData,
-    localReturnData,
-  ])
+  }, [isOpenIndex, contentRef, messageText])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -97,14 +85,14 @@ const SummaryShopProductDetails = ({
   }
 
   const handleMessage = (messageType) => {
-    setMessageText(getMessageText(messageType))
+    getMessageText(messageType)
+    setMessageText(messageType)
     setTimeout(() => {
       setMessageText(false)
     }, 5000)
   }
 
   const updateItem = async (quantity, dateItem, idItem) => {
-    const quantityNumber = Number(quantity)
     console.log('save button clicked', quantity, idItem)
     const urlSale = `${VITE_APP_SALES_API}/${idItem}`
     const urlReturn = `${VITE_APP_RETURNS_API}/${idItem}`
@@ -113,7 +101,7 @@ const SummaryShopProductDetails = ({
       id: null,
       product: productSelected,
       shop: shop,
-      quantity: quantityNumber,
+      quantity: quantity,
       date: dateItem,
     }
 
@@ -126,10 +114,10 @@ const SummaryShopProductDetails = ({
           handleMessage('errorSave')
         } else {
           handleMessage('dataSaved')
-          updateLocalSale((prevData) =>
-            prevData.map((item) =>
-              item.id === idItem
-                ? { ...item, quantity: quantityNumber }
+          setLocalSaleData((prevData) =>
+            prevData.map((item, idx) =>
+              idx === editIndex
+                ? { ...item, quantity: quantity }
                 : item,
             ),
           )
@@ -146,10 +134,10 @@ const SummaryShopProductDetails = ({
           handleMessage('errorSave')
         } else {
           handleMessage('dataSaved')
-          updateLocalReturn((prevData) =>
-            prevData.map((item) =>
-              item.id === idItem
-                ? { ...item, quantity: quantityNumber }
+          setLocalReturnsData((prevData) =>
+            prevData.map((item, idx) =>
+              idx === editIndex
+                ? { ...item, quantity: quantity }
                 : item,
             ),
           )
@@ -169,7 +157,11 @@ const SummaryShopProductDetails = ({
     minus,
     typeOfSale,
   ) => {
-    return filteredData(shop, typeOfData).map(
+    const dataToUse =
+      typeOfSale === 'Sale'
+        ? localSaleData
+        : localReturnsData
+    return filteredData(shop, dataToUse).map(
       (item, idx) => (
         <div
           key={`${shop}-${idx}-sale`}
@@ -204,11 +196,7 @@ const SummaryShopProductDetails = ({
               onClick={(e) => {
                 e.stopPropagation()
                 console.log('clicked')
-                updateItem(
-                  Number(editValue),
-                  item.date,
-                  item.id,
-                )
+                updateItem(editValue, item.date, item.id)
                 setEditIndex(null)
               }}
             />
@@ -218,6 +206,11 @@ const SummaryShopProductDetails = ({
                 handleEdit(idx, item.quantity, typeOfSale)
               }}
             />
+          )}
+          {editIndex === idx && messageText && (
+            <div className="error-notification">
+              {getMessageText(messageText)}
+            </div>
           )}
         </div>
       ),
@@ -234,20 +227,11 @@ const SummaryShopProductDetails = ({
           transition: 'height 0.3s ease',
         }}
       >
-        {messageText && (
-          <div className="error-notification">
-            {messageText}
-          </div>
-        )}
         <div className="sale-filered">
-          {filteredBySaletype(localSaleData, '', 'Sale')}
+          {filteredBySaletype('Sale', '', 'Sale')}
         </div>
         <div className="return-filered">
-          {filteredBySaletype(
-            localReturnData,
-            '-',
-            'Return',
-          )}
+          {filteredBySaletype('Return', '-', 'Return')}
         </div>
       </div>
     </Container>
@@ -275,155 +259,47 @@ const SaveButton = ({ onClick }) => (
 )
 
 SummaryShopProductDetails.propTypes = {
-  index: PropTypes.number,
-  urlSaleVar: PropTypes.string,
-  urlReturnVar: PropTypes.string,
-  localSaleData: PropTypes.arrayOf(
-    PropTypes.shape({
-      date: PropTypes.string,
-      id: PropTypes.number,
-      is_discounted: PropTypes.number,
-      product: PropTypes.string,
-      quantity: PropTypes.number,
-      shop: PropTypes.string,
-    }),
-  ),
-  localReturnData: PropTypes.arrayOf(
-    PropTypes.shape({
-      date: PropTypes.string,
-      id: PropTypes.number,
-      product: PropTypes.string,
-      quantity: PropTypes.number,
-      shop: PropTypes.string,
-    }),
-  ),
-  isOpenIndex: PropTypes.array,
-  shop: PropTypes.string,
-  productSelected: PropTypes.string,
-  filteredData: PropTypes.func,
-  units: PropTypes.shape({
-    Kartacze: PropTypes.string,
-    Babka: PropTypes.string,
-    Kiszka: PropTypes.string,
-  }),
-  settingsData: PropTypes.shape({
-    shops: PropTypes.arrayOf(PropTypes.string).isRequired,
-    prices: PropTypes.shape({
-      Kartacze: PropTypes.number.isRequired,
-      Babka: PropTypes.number.isRequired,
-      Kiszka: PropTypes.number.isRequired,
-    }).isRequired,
-  }).isRequired,
-  updateLocalReturn: PropTypes.func,
-  updateLocalSale: PropTypes.func,
+  saleData: PropTypes.array.isRequired,
+  returnsData: PropTypes.array.isRequired,
+  shop: PropTypes.string.isRequired,
+  productSelected: PropTypes.string.isRequired,
+  filteredData: PropTypes.func.isRequired,
+  settingsData: PropTypes.object.isRequired,
+  isOpenIndex: PropTypes.array.isRequired,
+  index: PropTypes.number.isRequired,
 }
 
-const Button = styled.button`
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-`
-
 const Container = styled.div`
-  font-weight: 400;
-  .details-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    border-bottom: 1px solid #e1e0e0;
-    padding: 10px 0px 3px 2px;
-  }
-
-  .sale-filered {
-    color: rgb(92, 53, 182);
-    padding-bottom: 0.5rem;
-  }
-  .return-filered {
-    color: #e51ead;
-    padding-bottom: 0.5rem;
-  }
-
-  .detailed-quantity {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .detailed-price {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .detailed-date {
-    display: flex;
-    /* justify-content: center; */
-    align-items: center;
-    padding-left: 25px;
-  }
-
-  .quantity-input {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    input {
-      width: 2.5rem;
-    }
-  }
-
-  .edit-button,
-  .delete-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-
-    @media screen and (max-width: $mobileL) {
-      padding-right: 0rem;
-    }
-    img {
-      display: block;
-      width: 20px;
-    }
-  }
-
-  .edit-button {
-    padding-left: 2rem;
-    img {
-      filter: brightness(0) saturate(100%) invert(19%)
-        sepia(77%) saturate(2287%) hue-rotate(247deg)
-        brightness(95%) contrast(93%);
-    }
-    &:focus,
-    &:hover {
-      filter: brightness(0) saturate(100%) invert(13%)
-        sepia(92%) saturate(4907%) hue-rotate(228deg)
-        brightness(88%) contrast(105%);
-    }
-  }
-
   .accordion {
-    transition: height 0.3s ease;
-    height: 100%;
     overflow: hidden;
   }
-
-  .accordion.open {
-    transition: 0.3s ease;
+  .details-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-
+  .quantity-input {
+    display: flex;
+    align-items: center;
+  }
+  .detailed-quantity,
+  .detailed-date,
+  .detailed-price {
+    margin: 0 10px;
+  }
   .error-notification {
-    background-color: #f8d7da;
-    width: 95%;
-    padding: 5px;
-    border-radius: 8px;
-    grid-column: 1 / -1;
-    text-align: center;
-    margin: 10px auto 10px auto;
-    opacity: 1;
-    transition: opacity 0.3s ease-in-out;
+    color: red;
   }
 `
+
+const Button = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  .item-picture {
+    width: 20px;
+    height: 20px;
+  }
+`
+
 export default SummaryShopProductDetails
