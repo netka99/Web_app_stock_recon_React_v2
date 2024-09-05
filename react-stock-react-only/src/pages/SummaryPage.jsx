@@ -80,7 +80,7 @@ const SummaryPage = () => {
     const sortedData = data.sort(
       (a, b) => new Date(a.date) - new Date(b.date),
     )
-    console.log('Sorted data:', sortedData)
+    // console.log('Sorted data:', sortedData)
     return sortedData
   }
 
@@ -126,7 +126,7 @@ const SummaryPage = () => {
 
   useEffect(() => {
     if (settings && sale && returns) {
-      console.log('Data:', settings, sale, returns)
+      // console.log('Data:', settings, sale, returns)
     }
   }, [settings, sale, returns, loading])
 
