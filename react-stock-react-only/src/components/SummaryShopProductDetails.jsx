@@ -334,11 +334,11 @@ const Container = styled.div`
   }
 
   .sale-filered {
-    color: rgb(92, 53, 182);
+    color: #878787;
     padding-bottom: 0.5rem;
   }
   .return-filered {
-    color: #e51ead;
+    color: #b86969;
     padding-bottom: 0.5rem;
   }
 
@@ -392,15 +392,15 @@ const Container = styled.div`
   .edit-button {
     padding-left: 2rem;
     img {
-      filter: brightness(0) saturate(100%) invert(19%)
-        sepia(77%) saturate(2287%) hue-rotate(247deg)
-        brightness(95%) contrast(93%);
+      filter: brightness(0) saturate(100%) invert(24%)
+        sepia(0%) saturate(484%) hue-rotate(174deg)
+        brightness(98%) contrast(86%);
     }
     &:focus,
     &:hover {
-      filter: brightness(0) saturate(100%) invert(13%)
-        sepia(92%) saturate(4907%) hue-rotate(228deg)
-        brightness(88%) contrast(105%);
+      filter: brightness(0) saturate(100%) invert(12%)
+        sepia(79%) saturate(7210%) hue-rotate(259deg)
+        brightness(61%) contrast(139%);
     }
   }
 
@@ -423,7 +423,7 @@ const Container = styled.div`
     text-align: center;
     margin: 10px auto 10px auto;
     opacity: 1;
-    transition: opacity 0.3s ease-in-out;
+    transition: opacity 0.5s ease-in-out;
   }
 `
 export default SummaryShopProductDetails

@@ -174,7 +174,7 @@ const Container = styled.div`
   min-height: 70vh;
   padding-top: 4rem;
   padding-bottom: 0.5rem;
-  margin: 1rem auto 6rem auto;
+  margin: 1rem auto 1rem auto;
   flex-grow: 1;
   position: relative;
   background-color: #ffffff;

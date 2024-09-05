@@ -14,6 +14,7 @@ import ExtraSale from './ExtraSale'
 import SummarySale from './SummarySale'
 import SummaryPerProduct from './SummaryPerProduct'
 import SummaryShopProductDetails from './SummaryShopProductDetails'
+import SummaryTotal from './SummaryTotal'
 
 export {
   Navbar,
@@ -32,4 +33,5 @@ export {
   SummarySale,
   SummaryPerProduct,
   SummaryShopProductDetails,
+  SummaryTotal,
 }

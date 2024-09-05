@@ -8,6 +8,7 @@ import {
   DatePicker,
   Spinner,
   SummaryPerProduct,
+  SummaryTotal,
 } from '../components/index'
 import { size } from '../styles/devices'
 import {
@@ -178,13 +179,21 @@ const SummaryPage = () => {
         </div>
         {loading && <Spinner />}
         {showContainer && settings && (
-          <SummaryPerProduct
-            settingsData={settings}
-            imageProduct={pictures[saleByProduct]}
-            saleData={sale}
-            returnsData={returns}
-            productSelected={saleByProduct}
-          />
+          <div>
+            <SummaryPerProduct
+              settingsData={settings}
+              imageProduct={pictures[saleByProduct]}
+              saleData={sale}
+              returnsData={returns}
+              productSelected={saleByProduct}
+            />
+            <SummaryTotal
+              settingsData={settings}
+              saleData={sale}
+              returnsData={returns}
+              productSelected={saleByProduct}
+            />
+          </div>
         )}
       </Container>
       <Footer />
