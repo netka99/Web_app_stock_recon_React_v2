@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { units } from '../utils/productDetails'
@@ -19,19 +19,19 @@ const SummaryTotal = ({
   return (
     <Container>
       <div className="sum-container">
-        <p>Suma</p>
+        <div className="sum-header">Suma</div>
         <div className="sum-total">{`${summary(saleData) - summary(returnsData)} ${units[productSelected]}`}</div>
         <div className="sum-total-prize">{`${(summary(saleData) - summary(returnsData)) * settingsData.prices[productSelected]} zł`}</div>
       </div>
       <div className="sum-sale">
-        <p>Sprzedaż</p>
-        <div className="sum-total">{`${summary(saleData)} ${units[productSelected]}`}</div>
-        <div className="sum-total-prize">{`${summary(saleData) * settingsData.prices[productSelected]} zł`}</div>
+        <div className="sum-header-sale">Sprzedaż</div>
+        <div className="sum-total">{`  ${summary(saleData)} ${units[productSelected]}`}</div>
+        <div className="sum-total-prize">{`  ${summary(saleData) * settingsData.prices[productSelected]} zł`}</div>
       </div>
       <div className="sum-return">
-        <p>Zwrot</p>
-        <div className="sum-total">{`- ${summary(returnsData)} ${units[productSelected]}`}</div>
-        <div className="sum-total-prize">{`- ${summary(returnsData) * settingsData.prices[productSelected]} zł`}</div>
+        <div className="sum-header-sale">Zwrot</div>
+        <div className="sum-total">{`-${summary(returnsData)} ${units[productSelected]}`}</div>
+        <div className="sum-total-prize">{`-${summary(returnsData) * settingsData.prices[productSelected]} zł`}</div>
       </div>
     </Container>
   )
@@ -90,12 +90,19 @@ const Container = styled.div`
   .sum-return {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
+    width: 95%;
+  }
 
-    p {
-      padding-right: 0rem;
-      margin: 0em 0em;
-      padding-left: 35px;
-    }
+  .sum-header {
+    padding-right: 0rem;
+    margin: 0em 0em;
+    padding-left: 35px;
+  }
+
+  .sum-header-sale {
+    padding-right: 0rem;
+    margin: 0em 0em;
+    padding-left: 35px;
   }
 
   .sum-container {

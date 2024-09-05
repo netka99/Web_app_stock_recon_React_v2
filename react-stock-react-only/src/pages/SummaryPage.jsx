@@ -38,11 +38,13 @@ const SummaryPage = () => {
   const [messageText, setMessageText] = useState('')
   const [showContainer, setShowContainer] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [isOpenIndex, setIsOpenIndex] = useState([])
 
   //url addresses based on start and end date
 
   const filterByProduct = (productName) => {
     setSaleByProduct(productName)
+    setIsOpenIndex([])
   }
 
   const getMessagesText = (messageType) => {
@@ -186,6 +188,8 @@ const SummaryPage = () => {
               saleData={sale}
               returnsData={returns}
               productSelected={saleByProduct}
+              isOpenIndex={isOpenIndex}
+              setIsOpenIndex={setIsOpenIndex}
             />
             <SummaryTotal
               settingsData={settings}

@@ -11,8 +11,9 @@ const SummaryPerProduct = ({
   saleData,
   returnsData,
   productSelected,
+  isOpenIndex,
+  setIsOpenIndex,
 }) => {
-  const [isOpenIndex, setIsOpenIndex] = useState([])
   const [localSaleData, setLocalSaleData] =
     useState(saleData)
   const [localReturnData, setLocalReturnData] =
@@ -134,6 +135,8 @@ const SummaryPerProduct = ({
 SummaryPerProduct.propTypes = {
   imageProduct: PropTypes.string.isRequired,
   shop: PropTypes.string,
+  isOpenIndex: PropTypes.array,
+  setIsOpenIndex: PropTypes.func,
   settingsData: PropTypes.shape({
     shops: PropTypes.arrayOf(PropTypes.string).isRequired,
     prices: PropTypes.shape({
