@@ -14,6 +14,18 @@ import {
   pictures,
 } from '../utils/productDetails'
 import { fetchData } from '../api/fetchAPI'
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ComposedChart,
+} from 'recharts'
 
 const {
   VITE_APP_SETTINGS_API,
@@ -36,9 +48,26 @@ const GraphsPage = () => {
   const [messageText, setMessageText] = useState('')
   const [showContainer, setShowContainer] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [dates, setDates] = useState([])
 
   const filterByProduct = (productName) => {
     setSaleByProduct(productName)
+  }
+
+  const formatDate = (date) => {
+    return date.toISOString().split('T')[0] // Format as YYYY-MM-DD
+  }
+
+  const getDatesBetween = (startDate, endDate) => {
+    let dates = []
+    let currentDate = new Date(startDate)
+
+    while (currentDate <= new Date(endDate)) {
+      dates.push(formatDate(new Date(currentDate)))
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
+    setDates(dates)
+    return dates
   }
 
   const getMessagesText = (messageType) => {
@@ -67,6 +96,8 @@ const GraphsPage = () => {
   const searchByDate = async () => {
     setLoading(true)
     setShowContainer(false)
+    getDatesBetween(startDate, endDate)
+    console.log(getDatesBetween(startDate, endDate))
 
     const urlSales = `${VITE_APP_SALES_API}?start=${startDate}&end=${endDate}`
     const urlReturns = `${VITE_APP_RETURNS_API}?start=${startDate}&end=${endDate}`
@@ -96,11 +127,33 @@ const GraphsPage = () => {
     }
   }
 
+  const summary = (date, data) => {
+    return (
+      data
+        ?.filter(
+          (d) =>
+            d.date === date && d.product === saleByProduct,
+        )
+        ?.reduce((acc, curr) => acc + curr.quantity, 0) ?? 0
+    )
+  }
+
   useEffect(() => {
     if (settings && sale && returns) {
       console.log('Data:', settings, sale, returns)
+      console.log(summary(startDate, sale))
     }
   }, [settings, sale, returns, loading])
+
+  const data = [
+    { name: 'Jan', sales: 4000, returns: 240 },
+    { name: 'Feb', sales: 3000, returns: 139 },
+    { name: 'Mar', sales: 2000, returns: 980 },
+    { name: 'Apr', sales: 2780, returns: 390 },
+    { name: 'May', sales: 1890, returns: 480 },
+    { name: 'Jun', sales: 2390, returns: 380 },
+    { name: 'Jul', sales: 3490, returns: 430 },
+  ]
 
   return (
     <StyledMain>
@@ -133,7 +186,51 @@ const GraphsPage = () => {
             {messageText}
           </div>
         )}
+        <div className="products">
+          {productsData.map((product) => (
+            <button
+              key={product.name}
+              className={
+                saleByProduct === product.name
+                  ? 'productButton active'
+                  : 'productButton'
+              }
+              onClick={() => filterByProduct(product.name)}
+            >
+              <img
+                src={product.image}
+                alt={`image of ${product.name}`}
+              />
+            </button>
+          ))}
+        </div>
         {loading && <Spinner />}
+        {showContainer && settings && (
+          <div className="chart">
+            hello
+            <ComposedChart
+              width={800}
+              height={400}
+              data={data}
+            >
+              <CartesianGrid stroke="#f5f5f5" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar
+                dataKey="sales"
+                barSize={20}
+                fill="#413ea0"
+              />
+              <Line
+                type="monotone"
+                dataKey="returns"
+                stroke="#ff7300"
+              />
+            </ComposedChart>
+          </div>
+        )}
       </Container>
       <Footer />
     </StyledMain>
@@ -265,6 +362,9 @@ const Container = styled.div`
     box-shadow:
       0 3px 6px 0 rgba(0, 0, 0, 0.2),
       0 3px 10px 0 rgba(0, 0, 0, 0.19);
+  }
+  .chart {
+    margin: 3rem auto 4rem auto;
   }
 `
 export default GraphsPage
