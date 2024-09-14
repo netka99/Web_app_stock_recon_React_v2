@@ -7,6 +7,7 @@ import {
   Footer,
   DatePicker,
   Spinner,
+  DropdownMenu,
 } from '../components/index'
 import { size } from '../styles/devices'
 import {
@@ -49,6 +50,8 @@ const GraphsPage = () => {
   const [showContainer, setShowContainer] = useState(false)
   const [loading, setLoading] = useState(false)
   const [dates, setDates] = useState([])
+  const [selectedShop, setSelectedShop] =
+    useState('Wybierz sklep')
 
   const filterByProduct = (productName) => {
     setSaleByProduct(productName)
@@ -63,7 +66,9 @@ const GraphsPage = () => {
     let currentDate = new Date(startDate)
 
     while (currentDate <= new Date(endDate)) {
-      dates.push(formatDate(new Date(currentDate)))
+      dates.push({
+        name: formatDate(new Date(currentDate)),
+      })
       currentDate.setDate(currentDate.getDate() + 1)
     }
     setDates(dates)
@@ -93,11 +98,50 @@ const GraphsPage = () => {
       })
   }
 
+  const summary = (date, data, shop) => {
+    if (shop === 'Wybierz sklep') {
+      return (
+        data
+          ?.filter(
+            (d) =>
+              d.date === date &&
+              d.product === saleByProduct,
+          )
+          ?.reduce((acc, curr) => acc + curr.quantity, 0) ??
+        0
+      )
+    }
+    if (shop !== 'Wybierz sklep') {
+      return (
+        data
+          ?.filter(
+            (d) =>
+              d.date === date &&
+              d.product === saleByProduct &&
+              d.shop === shop,
+          )
+          ?.reduce((acc, curr) => acc + curr.quantity, 0) ??
+        0
+      )
+    }
+  }
+
+  const sumPerDay = () => {
+    const updatedDatesforSale = dates.map((d) => ({
+      ...d,
+      sprzedaż: summary(d.name, sale, selectedShop),
+      zwroty: summary(d.name, returns, selectedShop),
+    }))
+
+    console.log('summary of dates:', updatedDatesforSale)
+
+    setDates(updatedDatesforSale)
+  }
+
   const searchByDate = async () => {
     setLoading(true)
     setShowContainer(false)
     getDatesBetween(startDate, endDate)
-    console.log(getDatesBetween(startDate, endDate))
 
     const urlSales = `${VITE_APP_SALES_API}?start=${startDate}&end=${endDate}`
     const urlReturns = `${VITE_APP_RETURNS_API}?start=${startDate}&end=${endDate}`
@@ -111,6 +155,7 @@ const GraphsPage = () => {
       )
       await fetchDataByAPI(urlSales, (data) => {
         setSale(data)
+
         console.log('Fetched Sales Data:', data)
       })
       await fetchDataByAPI(urlReturns, (data) => {
@@ -127,33 +172,12 @@ const GraphsPage = () => {
     }
   }
 
-  const summary = (date, data) => {
-    return (
-      data
-        ?.filter(
-          (d) =>
-            d.date === date && d.product === saleByProduct,
-        )
-        ?.reduce((acc, curr) => acc + curr.quantity, 0) ?? 0
-    )
-  }
-
   useEffect(() => {
     if (settings && sale && returns) {
-      console.log('Data:', settings, sale, returns)
-      console.log(summary(startDate, sale))
+      sumPerDay()
+      console.log('dates range:', dates)
     }
-  }, [settings, sale, returns, loading])
-
-  const data = [
-    { name: 'Jan', sales: 4000, returns: 240 },
-    { name: 'Feb', sales: 3000, returns: 139 },
-    { name: 'Mar', sales: 2000, returns: 980 },
-    { name: 'Apr', sales: 2780, returns: 390 },
-    { name: 'May', sales: 1890, returns: 480 },
-    { name: 'Jun', sales: 2390, returns: 380 },
-    { name: 'Jul', sales: 3490, returns: 430 },
-  ]
+  }, [settings, sale, returns, saleByProduct, selectedShop])
 
   return (
     <StyledMain>
@@ -204,14 +228,18 @@ const GraphsPage = () => {
             </button>
           ))}
         </div>
+        <DropdownMenu
+          settings={settings}
+          selectedShop={selectedShop}
+          setSelectedShop={setSelectedShop}
+        />
         {loading && <Spinner />}
         {showContainer && settings && (
           <div className="chart">
-            hello
             <ComposedChart
               width={800}
               height={400}
-              data={data}
+              data={dates}
             >
               <CartesianGrid stroke="#f5f5f5" />
               <XAxis dataKey="name" />
@@ -219,13 +247,13 @@ const GraphsPage = () => {
               <Tooltip />
               <Legend />
               <Bar
-                dataKey="sales"
+                dataKey="sprzedaż"
                 barSize={20}
-                fill="#413ea0"
+                fill="rgba(131, 99, 192, 0.5)"
               />
               <Line
                 type="monotone"
-                dataKey="returns"
+                dataKey="zwroty"
                 stroke="#ff7300"
               />
             </ComposedChart>
@@ -312,7 +340,7 @@ const Container = styled.div`
   }
 
   .products {
-    padding: 2rem 0rem 3rem 0rem;
+    padding: 2rem 0rem 1rem 0rem;
     max-width: 100%;
   }
 

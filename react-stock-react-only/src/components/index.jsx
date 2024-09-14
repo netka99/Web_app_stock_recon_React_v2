@@ -15,6 +15,7 @@ import SummarySale from './SummarySale'
 import SummaryPerProduct from './SummaryPerProduct'
 import SummaryShopProductDetails from './SummaryShopProductDetails'
 import SummaryTotal from './SummaryTotal'
+import DropdownMenu from './DropDown'
 
 export {
   Navbar,
@@ -34,4 +35,5 @@ export {
   SummaryPerProduct,
   SummaryShopProductDetails,
   SummaryTotal,
+  DropdownMenu,
 }
