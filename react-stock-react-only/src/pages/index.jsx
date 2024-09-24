@@ -6,6 +6,7 @@ import SettingsPage from './SettingsPage'
 import SettingsPricesPage from './SettingsPricesPage'
 import SettingsShopsPage from './SettingsShopsPage'
 import ErrorPage from './ErrorPage'
+import InvoicePage from './InvoicesPage'
 
 export {
   HomePage,
@@ -16,4 +17,5 @@ export {
   SettingsPricesPage,
   SettingsShopsPage,
   ErrorPage,
+  InvoicePage,
 }

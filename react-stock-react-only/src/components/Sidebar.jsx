@@ -50,6 +50,11 @@ const Sidebar = () => {
             </Link>
           </li>
           <li>
+            <Link to="/faktury" onClick={closeSidebar}>
+              Faktury
+            </Link>
+          </li>
+          <li>
             <Link to="/ustawienia" onClick={closeSidebar}>
               Ustawienia
             </Link>

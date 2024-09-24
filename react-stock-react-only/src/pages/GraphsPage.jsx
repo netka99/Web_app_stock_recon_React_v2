@@ -10,15 +10,10 @@ import {
   DropdownMenu,
 } from '../components/index'
 import { size } from '../styles/devices'
-import {
-  productsData,
-  pictures,
-} from '../utils/productDetails'
+import { productsData } from '../utils/productDetails'
 import { fetchData } from '../api/fetchAPI'
 import {
-  LineChart,
   Line,
-  BarChart,
   Bar,
   XAxis,
   YAxis,

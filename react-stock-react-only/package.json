@@ -12,6 +12,7 @@
     "server": "json-server --watch settings.json --port 3001"
   },
   "dependencies": {
+    "jspdf": "^2.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",

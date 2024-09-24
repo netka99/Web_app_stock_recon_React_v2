@@ -44,6 +44,9 @@ const Navbar = ({ pageTitle }) => {
             <Link to="/wykresy">Wykresy</Link>
           </li>
           <li>
+            <Link to="/faktury">Faktury</Link>
+          </li>
+          <li>
             <Link to="/ustawienia">Ustawienia</Link>
           </li>
         </ul>
