@@ -39,9 +39,20 @@ const InvoicePage = () => {
   const [summaryReturns, setSummaryReturns] = useState({})
   const [totalsOfSale, setTotalsOfSale] = useState({})
   const [checkedItems, setCheckedItems] = useState([])
+  const [city, setCity] = useState('Suwałki')
+  const [invoiceDate, setInvoiceDate] = useState(today)
+  const [endSaleDate, setEndSaleDate] = useState(today)
+  const [paymentDate, setPaymentDate] = useState(today)
+  const [paymentType, setPaymentType] = useState('Przelew')
 
   const formatDate = (date) => {
     return date.toISOString().split('T')[0] // Format as YYYY-MM-DD
+  }
+
+  const updatePaymantDate = () => {
+    const date = new Date()
+    date.setDate(date.getDate() + 7)
+    setPaymentDate(formatDate(date))
   }
 
   const getDatesBetween = (startDate, endDate) => {
@@ -163,6 +174,15 @@ const InvoicePage = () => {
     }
   }
 
+  const productDetails = {
+    Kartacze: {
+      name: 'Ciepłe gotowane kartacze',
+    },
+    Babka: {
+      name: 'Ciepła babka ziemniaczana',
+    },
+  }
+
   useEffect(() => {
     loadSettings()
   }, [])
@@ -185,6 +205,10 @@ const InvoicePage = () => {
       totalsPerProduct()
     }
   }, [summarySale, summaryReturns])
+
+  useEffect(() => {
+    updatePaymantDate()
+  }, [invoiceDate])
 
   return (
     <StyledMain>
@@ -246,6 +270,63 @@ const InvoicePage = () => {
                 </div>
               )}
             </div>
+          </div>
+          <div className="city">
+            <label htmlFor="city">
+              Miejsce wystawienia:
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+            </label>
+          </div>
+          <div className="invoice-date">
+            <label>
+              Data wystawienia:
+              <input
+                type="date"
+                value={invoiceDate}
+                onChange={(e) => {
+                  setInvoiceDate(e.target.value)
+                }}
+              />
+            </label>
+          </div>
+          <div className="sale-end-date">
+            <label>
+              Data zakończenia dostawy/usługi:
+              <input
+                type="date"
+                value={endSaleDate}
+                onChange={(e) => {
+                  setEndSaleDate(e.target.value)
+                }}
+              />
+            </label>
+          </div>
+          <div className="payment-date">
+            <label>
+              Termin płatności:
+              <input
+                type="date"
+                value={paymentDate}
+                onChange={(e) => {
+                  setPaymentDate(e.target.value)
+                }}
+              />
+            </label>
+          </div>
+          <div className="payment-type">
+            <label>
+              <input
+                type="text"
+                value={paymentType}
+                onChange={(e) => {
+                  setPaymentType(e.target.value)
+                }}
+              />
+            </label>
           </div>
           <div className="dateRange">
             <p>Okres sprzedaży</p>
@@ -326,6 +407,78 @@ const InvoicePage = () => {
             )}
           </div>
         </div>
+        <div className="selling-form">
+          {Object.keys(checkedItems).length > 0 && (
+            <>
+              <div className="titles">
+                <div className="number">Lp.</div>
+                <div className="product-name">
+                  Towar/Usługa
+                </div>
+                <div className="product-code">PKWIU</div>
+                <div className="product-unit">J.m.</div>
+                <div className="product-quantity">
+                  Ilość
+                </div>
+                <div className="net-price">Cena netto</div>
+                <div className="vat">VAT</div>
+                <div className="gross-price">
+                  Cena brutto
+                </div>
+                <div className="total-net">
+                  Wartość netto
+                </div>
+                <div className="total-gross">
+                  Wartość brutto
+                </div>
+              </div>
+
+              {Object.keys(checkedItems).map((key) => {
+                if (checkedItems[key]) {
+                  const details = productDetails[key]
+                  return (
+                    <div
+                      className="product-details"
+                      key={key}
+                    >
+                      <div className="number">1</div>
+                      <div className="product-name">
+                        {details.name}
+                      </div>
+                      <div className="product-code">
+                        123
+                      </div>
+                      <div className="product-unit">
+                        {units[key]}
+                      </div>
+                      <div className="product-quantity">
+                        <label>
+                          <input
+                            value={totalsOfSale[key]}
+                            onChange={(e) =>
+                              setTotalsOfSale({
+                                ...totalsOfSale,
+                                [key]: Number(
+                                  e.target.value,
+                                ),
+                              })
+                            }
+                          />
+                        </label>
+                      </div>
+                      <div className="net-price">11</div>
+                      <div className="vat">8%</div>
+                      <div className="gross-price">15</div>
+                      <div className="total-net">2</div>
+                      <div className="total-gross">1</div>
+                    </div>
+                  )
+                }
+                return null // This is added in case the condition is false
+              })}
+            </>
+          )}
+        </div>
         {loading && <Spinner />}
       </Container>
       <Footer />
@@ -375,7 +528,7 @@ const Container = styled.div`
   }
 
   .searchButton {
-    width: 15rem;
+    width: 10rem;
     border: none;
     padding: 1rem 2rem;
     /* margin: 0 1rem; */
