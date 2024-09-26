@@ -44,6 +44,17 @@ const InvoicePage = () => {
   const [endSaleDate, setEndSaleDate] = useState(today)
   const [paymentDate, setPaymentDate] = useState(today)
   const [paymentType, setPaymentType] = useState('Przelew')
+  const [prices, setPrices] = useState({})
+  const [productCode, setProductCode] = useState({
+    Kartacze: '10.85.Z',
+    Babka: '10.85.Z',
+    Kiszka: '10.85.Z',
+  })
+  const [vat, setVat] = useState({
+    Kartacze: 8,
+    Babka: 8,
+    Kiszka: 8,
+  })
 
   const formatDate = (date) => {
     return date.toISOString().split('T')[0] // Format as YYYY-MM-DD
@@ -101,6 +112,7 @@ const InvoicePage = () => {
         VITE_APP_SETTINGS_API,
         (data) => {
           setSettings(data)
+          setPrices(data.prices)
         },
       )
     } catch (error) {
@@ -441,12 +453,31 @@ const InvoicePage = () => {
                       className="product-details"
                       key={key}
                     >
-                      <div className="number">1</div>
+                      <div className="number">
+                        <label>
+                          <input
+                            type="text"
+                            defaultValue="1"
+                            onChange={(e) => e.target.value}
+                          />
+                        </label>
+                      </div>
                       <div className="product-name">
                         {details.name}
                       </div>
                       <div className="product-code">
-                        123
+                        <label>
+                          <input
+                            type="text"
+                            value={productCode[key]}
+                            onChange={(e) =>
+                              setProductCode({
+                                ...productCode,
+                                [key]: e.target.value,
+                              })
+                            }
+                          />
+                        </label>
                       </div>
                       <div className="product-unit">
                         {units[key]}
@@ -466,9 +497,45 @@ const InvoicePage = () => {
                           />
                         </label>
                       </div>
-                      <div className="net-price">11</div>
-                      <div className="vat">8%</div>
-                      <div className="gross-price">15</div>
+                      <div className="net-price">
+                        {Number(
+                          prices[key] /
+                            (1 + vat[key] / 100),
+                        ).toFixed(2)}
+                      </div>
+                      <div className="vat">
+                        <label>
+                          <input
+                            type="number"
+                            value={vat[key]}
+                            onChange={(e) =>
+                              setVat({
+                                ...vat,
+                                [key]: Number(
+                                  e.target.value,
+                                ),
+                              })
+                            }
+                          />{' '}
+                          %
+                        </label>
+                      </div>
+                      <div className="gross-price">
+                        <label>
+                          <input
+                            type="number"
+                            value={prices[key]}
+                            onChange={(e) =>
+                              setPrices({
+                                ...prices,
+                                [key]: Number(
+                                  e.target.value,
+                                ),
+                              })
+                            }
+                          />
+                        </label>
+                      </div>
                       <div className="total-net">2</div>
                       <div className="total-gross">1</div>
                     </div>
@@ -562,6 +629,24 @@ const Container = styled.div`
     box-shadow:
       2px 2px 4px 0 rgba(0, 0, 0, 0.3),
       -8px -8px 16px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .selling-form {
+    background-color: #fdfdfd;
+    width: 95%;
+  }
+
+  .titles,
+  .product-details {
+    display: grid;
+    grid-template-columns: [first] 3rem [line2] 30% repeat(
+        8,
+        1fr
+      );
+
+    input {
+      width: 60%;
+    }
   }
 `
 export default InvoicePage
