@@ -55,6 +55,10 @@ const InvoicePage = () => {
     Babka: 8,
     Kiszka: 8,
   })
+  const [netPrice, setNetPrice] = useState()
+  const [extraProduct, setExtraProduct] = useState([])
+  const [titlesVisibility, setTitlesVisibility] =
+    useState(false)
 
   const formatDate = (date) => {
     return date.toISOString().split('T')[0] // Format as YYYY-MM-DD
@@ -78,6 +82,25 @@ const InvoicePage = () => {
     }
     setDates(dates)
     return dates
+  }
+
+  const calculateNet = (price, vat) => {
+    const net = Number(price / (1 + vat / 100)).toFixed(2)
+
+    return net
+  }
+
+  const netPrices = () => {
+    if (prices) {
+      const updatedNetPrices = {}
+      Object.keys(prices).forEach((key) => {
+        updatedNetPrices[key] = Number(
+          calculateNet(prices[key], vat[key]),
+        )
+      })
+      return updatedNetPrices
+    }
+    return {}
   }
 
   const getMessagesText = (messageType) => {
@@ -195,6 +218,24 @@ const InvoicePage = () => {
     },
   }
 
+  const addExtraProduct = () => {
+    setExtraProduct([
+      ...extraProduct,
+      {
+        product: '',
+        code: '',
+        units: '',
+        quantity: 0,
+        price: 0,
+        vat: 0,
+        netprice: 0,
+        totalNet: 0,
+        totalGross: 0,
+      },
+    ])
+    setTitlesVisibility(true)
+  }
+
   useEffect(() => {
     loadSettings()
   }, [])
@@ -221,6 +262,11 @@ const InvoicePage = () => {
   useEffect(() => {
     updatePaymantDate()
   }, [invoiceDate])
+
+  useEffect(() => {
+    const updatedNetPrices = netPrices()
+    setNetPrice(updatedNetPrices)
+  }, [prices, vat])
 
   return (
     <StyledMain>
@@ -405,12 +451,13 @@ const InvoicePage = () => {
                     id={key}
                     type="checkbox"
                     checked={checkedItems[key] || false}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setCheckedItems({
                         ...checkedItems,
                         [key]: e.target.checked,
                       })
-                    }
+                      setTitlesVisibility(true)
+                    }}
                   />
                 </div>
               ))
@@ -420,31 +467,26 @@ const InvoicePage = () => {
           </div>
         </div>
         <div className="selling-form">
+          {titlesVisibility && (
+            <div className="titles">
+              <div className="number">Lp.</div>
+              <div className="product-name">
+                Towar/Usługa
+              </div>
+              <div className="product-code">PKWIU</div>
+              <div className="product-unit">J.m.</div>
+              <div className="product-quantity">Ilość</div>
+              <div className="net-price">Cena netto</div>
+              <div className="vat">VAT</div>
+              <div className="gross-price">Cena brutto</div>
+              <div className="total-net">Wartość netto</div>
+              <div className="total-gross">
+                Wartość brutto
+              </div>
+            </div>
+          )}
           {Object.keys(checkedItems).length > 0 && (
             <>
-              <div className="titles">
-                <div className="number">Lp.</div>
-                <div className="product-name">
-                  Towar/Usługa
-                </div>
-                <div className="product-code">PKWIU</div>
-                <div className="product-unit">J.m.</div>
-                <div className="product-quantity">
-                  Ilość
-                </div>
-                <div className="net-price">Cena netto</div>
-                <div className="vat">VAT</div>
-                <div className="gross-price">
-                  Cena brutto
-                </div>
-                <div className="total-net">
-                  Wartość netto
-                </div>
-                <div className="total-gross">
-                  Wartość brutto
-                </div>
-              </div>
-
               {Object.keys(checkedItems).map((key) => {
                 if (checkedItems[key]) {
                   const details = productDetails[key]
@@ -498,10 +540,7 @@ const InvoicePage = () => {
                         </label>
                       </div>
                       <div className="net-price">
-                        {Number(
-                          prices[key] /
-                            (1 + vat[key] / 100),
-                        ).toFixed(2)}
+                        {netPrice[key]}
                       </div>
                       <div className="vat">
                         <label>
@@ -536,8 +575,16 @@ const InvoicePage = () => {
                           />
                         </label>
                       </div>
-                      <div className="total-net">2</div>
-                      <div className="total-gross">1</div>
+                      <div className="total-net">
+                        {Number(
+                          netPrice[key] * totalsOfSale[key],
+                        ).toFixed(2)}
+                      </div>
+                      <div className="total-gross">
+                        {Number(
+                          prices[key] * totalsOfSale[key],
+                        ).toFixed(2)}
+                      </div>
                     </div>
                   )
                 }
@@ -545,6 +592,137 @@ const InvoicePage = () => {
               })}
             </>
           )}
+          {extraProduct.map((line, index) => (
+            <div key={index} className="product-details">
+              <div className="number">
+                <label>
+                  <input
+                    type="text"
+                    defaultValue="1"
+                    onChange={(e) => e.target.value}
+                  />
+                </label>
+              </div>
+              <div className="product-name">
+                <label>
+                  <input
+                    type="text"
+                    value={line.product}
+                    onChange={(e) => {
+                      const updatedProducts = [
+                        ...extraProduct,
+                      ]
+                      updatedProducts[index].product =
+                        e.target.value
+                      setExtraProduct(updatedProducts)
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="product-code">
+                <label>
+                  <input
+                    type="text"
+                    value={line.code}
+                    onChange={(e) => {
+                      const updatedProducts = [
+                        ...extraProduct,
+                      ]
+                      updatedProducts[index].code =
+                        e.target.value
+                      setExtraProduct(updatedProducts)
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="product-unit">
+                <label>
+                  <input
+                    type="text"
+                    value={line.units}
+                    onChange={(e) => {
+                      const updatedProducts = [
+                        ...extraProduct,
+                      ]
+                      updatedProducts[index].units =
+                        e.target.value
+                      setExtraProduct(updatedProducts)
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="product-quantity">
+                <label>
+                  <input
+                    type="number"
+                    value={line.quantity}
+                    onChange={(e) => {
+                      const updatedProducts = [
+                        ...extraProduct,
+                      ]
+                      updatedProducts[index].quantity =
+                        Number(e.target.value)
+                      setExtraProduct(updatedProducts)
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="net-price">
+                {calculateNet(line.price, line.vat)}
+              </div>
+              <div className="vat">
+                <label>
+                  <input
+                    type="number"
+                    value={line.vat}
+                    onChange={(e) => {
+                      const updatedProducts = [
+                        ...extraProduct,
+                      ]
+                      updatedProducts[index].vat = Number(
+                        e.target.value,
+                      )
+                      setExtraProduct(updatedProducts)
+                    }}
+                  />
+                  %
+                </label>
+              </div>
+              <div className="gross-price">
+                <label>
+                  <input
+                    type="number"
+                    value={line.price}
+                    onChange={(e) => {
+                      const updatedProducts = [
+                        ...extraProduct,
+                      ]
+                      updatedProducts[index].price = Number(
+                        e.target.value,
+                      )
+                      setExtraProduct(updatedProducts)
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="total-net">
+                {Number(line.price * line.quantity).toFixed(
+                  2,
+                )}
+              </div>
+              <div className="total-gross">
+                {Number(
+                  line.price *
+                    line.quantity *
+                    (1 + line.vat / 100),
+                ).toFixed(2)}
+              </div>
+            </div>
+          ))}
+
+          <button onClick={addExtraProduct}>
+            Dodaj nowy produkt
+          </button>
         </div>
         {loading && <Spinner />}
       </Container>
