@@ -27,15 +27,6 @@ const SummaryShopProductDetails = ({
   const [editValue, setEditValue] = useState('')
   const [editType, setEditType] = useState(null)
   const [messageText, setMessageText] = useState(false)
-  // const [localSaleData, setLocalSaleData] =
-  //   useState(saleData)
-  // const [localReturnData, setLocalReturnData] =
-  //   useState(returnsData)
-
-  // useEffect(() => {
-  //   setLocalSaleData(saleData)
-  //   setLocalReturnData(returnsData)
-  // }, [saleData, returnsData])
 
   useEffect(() => {
     if (contentRef.current) {

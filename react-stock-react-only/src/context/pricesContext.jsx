@@ -44,6 +44,7 @@ export const PricesProvider = ({ children }) => {
       const updatedData = {
         shops: settingsData.shops,
         prices: updatedPrices,
+        address: settingsData.address,
       }
       const response = await updateDataOnApi(
         updatedData,

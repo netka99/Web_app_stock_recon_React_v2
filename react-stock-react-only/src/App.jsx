@@ -15,6 +15,7 @@ import {
   SettingsPricesPage,
   SettingsShopsPage,
   InvoicePage,
+  SettingsAddressPage,
 } from './pages/index'
 import './App.css'
 
@@ -43,6 +44,10 @@ function App() {
         <Route
           path="ceny"
           element={<SettingsPricesPage />}
+        />
+        <Route
+          path="adresy"
+          element={<SettingsAddressPage />}
         />
         <Route path="*" element={<ErrorPage />} />
       </Routes>

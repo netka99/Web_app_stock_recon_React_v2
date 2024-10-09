@@ -5,6 +5,7 @@ import summary from '../assets/summary.svg'
 import cog from '../assets/cog-solid.svg'
 import priceTag from '../assets/price-tag.svg'
 import store from '../assets/store-img.svg'
+import address from '../assets/address.svg'
 
 export const homeLabels = [
   {
@@ -76,6 +77,16 @@ export const settingsLabels = [
     bcgprimary: '#0e06e8',
     bcgsecondary: '#e5fbf9',
     hoverprimary: '#0b05a3',
+    hoversecondary: '#c3d5d3',
+  },
+  {
+    id: 3,
+    url: '/adresy',
+    icon: address,
+    title: 'Adresy sklepów',
+    bcgprimary: '#2ce806',
+    bcgsecondary: '#e5fbf9',
+    hoverprimary: '#05a30d',
     hoversecondary: '#c3d5d3',
   },
 ]

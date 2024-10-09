@@ -133,6 +133,7 @@ const SettingsShopsPage = () => {
       const updatedData = {
         shops: updatedShops,
         prices: dataAll.prices,
+        address: dataAll.address,
       }
       const response = await updateDataOnApi(
         updatedData,
