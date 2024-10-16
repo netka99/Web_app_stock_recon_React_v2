@@ -6,6 +6,7 @@ import {
   Sidebar,
   Footer,
   Spinner,
+  InvoiceLayout,
 } from '../components/index'
 import { size } from '../styles/devices'
 import { fetchData } from '../api/fetchAPI'
@@ -39,6 +40,9 @@ const InvoicePage = () => {
   const [summaryReturns, setSummaryReturns] = useState({})
   const [totalsOfSale, setTotalsOfSale] = useState({})
   const [checkedItems, setCheckedItems] = useState([])
+  const [seller, setSeller] = useState(
+    'SMACZNY KĄSEK -catering-Ewelina Radoń\nul. Sejneńska 21/1\n16-400 Suwałki\nNIP 8442120248',
+  )
   const [city, setCity] = useState('Suwałki')
   const [invoiceDate, setInvoiceDate] = useState(today)
   const [endSaleDate, setEndSaleDate] = useState(today)
@@ -274,11 +278,23 @@ const InvoicePage = () => {
       <Sidebar />
       <Container>
         <div className="title">Podaj dane do faktury</div>
+        <div className="seller">
+          <label htmlFor="seller">
+            Sprzedawca:
+            <textarea
+              id="seller"
+              type="text"
+              rows={5}
+              value={seller}
+              onChange={(e) => setSeller(e.target.value)}
+            />
+          </label>
+        </div>
         <div className="details">
           <div className="invoiceNumber">
             <label>Numer Faktury: </label>
             <textarea
-              name="inoiceNumber"
+              name="invoiceNumber"
               value={invoiceNumber}
               rows={1}
               onChange={(e) =>
@@ -726,6 +742,8 @@ const InvoicePage = () => {
         </div>
         {loading && <Spinner />}
       </Container>
+
+      <InvoiceLayout />
       <Footer />
     </StyledMain>
   )
@@ -763,6 +781,14 @@ const Container = styled.div`
     font-size: 1.3rem;
   }
 
+  .seller {
+    textarea {
+      display: flex;
+      flex-direction: column;
+      padding: 0.5rem;
+      width: 100%;
+    }
+  }
   .dates {
     display: flex;
     flex-direction: row;

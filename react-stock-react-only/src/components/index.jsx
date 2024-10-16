@@ -16,6 +16,7 @@ import SummaryPerProduct from './SummaryPerProduct'
 import SummaryShopProductDetails from './SummaryShopProductDetails'
 import SummaryTotal from './SummaryTotal'
 import DropdownMenu from './DropDown'
+import InvoiceLayout from './InvoiceLayout'
 
 export {
   Navbar,
@@ -36,4 +37,5 @@ export {
   SummaryShopProductDetails,
   SummaryTotal,
   DropdownMenu,
+  InvoiceLayout,
 }
