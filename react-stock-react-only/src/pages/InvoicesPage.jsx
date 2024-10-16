@@ -318,12 +318,12 @@ const InvoicePage = () => {
             </label>
           </div>
           <div className="shopAddress">
-            <p>Adres sklepu:</p>
+            <div>Adres sklepu:</div>
             <div className="addressDetails">
               {address && (
                 <div className="address">
-                  {Object.keys(address).map((key) => (
-                    <p key={key}>{address[key]}</p>
+                  {address.split('\n').map((line, idx) => (
+                    <div key={idx}>{line}</div>
                   ))}
                 </div>
               )}

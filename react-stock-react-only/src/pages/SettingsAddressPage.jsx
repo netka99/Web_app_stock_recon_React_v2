@@ -21,24 +21,20 @@ const SettingsAddressPage = () => {
   const [settings, setSettings] = useState(null)
   const [addresses, setAddresses] = useState({})
   const [loading, setLoading] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const [editingShop, setEditingShop] = useState(null)
 
   const handleMessage = (messageType) => {
     getMessageText(messageType)
-    setmessageText(messageType)
+    setMessageText(messageType)
     setTimeout(() => {
-      setmessageText(false)
+      setMessageText(false)
     }, 10000)
   }
 
   const getMessageText = (messageType) => {
     switch (messageType) {
       case 'added':
-        return 'Sklep został dodany!'
-      case 'deleted':
-        return 'Sklep został skasowany!'
-      case 'saved':
-        return 'Nowa nazwa sklepu została zapisana!'
+        return 'Adres został zapisany!'
       case 'error':
         return 'Dane nie zostały pobrane lub zapisane, skontaktuj się z administratorem!'
       default:
@@ -49,7 +45,7 @@ const SettingsAddressPage = () => {
   const handleError = (error) => {
     console.error('Error fetching data:', error),
       setTimeout(() => {
-        setMessageText(getMessageText('errorFetching'))
+        setMessageText(getMessageText('error'))
       }, 4000)
   }
 
@@ -66,9 +62,53 @@ const SettingsAddressPage = () => {
     }
   }
 
+  const toggleEdit = (shop) => {
+    editingShop === shop
+      ? setEditingShop(null)
+      : setEditingShop(shop)
+  }
+
+  const changeAddress = (shop, value) => {
+    setAddresses({
+      ...addresses,
+      [shop]: value,
+    })
+  }
+
+  const saveAddressesonApi = async () => {
+    try {
+      const updatedData = {
+        shops: settings.shops,
+        prices: settings.prices,
+        address: addresses,
+      }
+      const response = await updateDataOnApi(
+        updatedData,
+        VITE_APP_SETTINGS_API,
+        'PUT',
+      )
+      console.log('Response status:', response.status)
+      console.log('Response data:', response.data)
+      if (response.status === 200) {
+        handleMessage('added')
+        console.log('data sent')
+      } else {
+        console.log('data not sent')
+        handleMessage('error')
+      }
+    } catch (error) {
+      console.error('Error saving shops:', error)
+      handleError('error')
+    }
+  }
+
   useEffect(() => {
     loadSettings()
   }, [])
+
+  useEffect(() => {
+    console.log(editingShop)
+  }, [editingShop])
 
   return (
     <main>
@@ -81,35 +121,68 @@ const SettingsAddressPage = () => {
         )}
         <div className="shopsListSettings">
           {settings ? (
-            settings.shops.map((shop, index) => (
-              <div key={`${shop}_${index}`}>
-                <div className="shop-header">
-                  <img
-                    className="store-picture"
-                    src={shopImg}
-                    alt="shop image"
-                  />
-                  <span>{shop}</span>
-                </div>
-                {addresses[shop] ? (
-                  <div className="shop-address">
-                    {isEditing ? (
-                      <textarea
-                        type="text"
-                        defaultValue={addresses[shop]}
-                        onChange={(e) => e.target.value}
+            settings.shops.map((shop, index) => {
+              const shopAddress = addresses[shop]
+              return (
+                <div
+                  key={`${shop}_${index}`}
+                  className="address-container"
+                >
+                  <div className="shop-header">
+                    <img
+                      className="store-picture"
+                      src={shopImg}
+                      alt="shop image"
+                    />
+                    <span>{shop}</span>
+                    {editingShop === shop ? (
+                      <SaveButton
+                        onClick={() => {
+                          toggleEdit(shop)
+                          saveAddressesonApi()
+                        }}
                       />
                     ) : (
-                      <div>
-                        <div>{addresses[shop]}</div>
-                      </div>
+                      <EditButton
+                        onClick={() => {
+                          toggleEdit(shop)
+                        }}
+                      />
                     )}
                   </div>
-                ) : (
-                  <div>brak adresu</div>
-                )}
-              </div>
-            ))
+                  <div className="shop-address">
+                    {editingShop === shop ? (
+                      <textarea
+                        value={shopAddress || ''}
+                        onChange={(e) =>
+                          changeAddress(
+                            shop,
+                            e.target.value,
+                          )
+                        }
+                        rows={5}
+                        placeholder="Wprowadź adres"
+                      />
+                    ) : shopAddress ? (
+                      <div>
+                        {shopAddress
+                          .split('\n')
+                          .map((line, idx) => (
+                            <div
+                              key={idx}
+                              className="address"
+                            >
+                              {line}
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <div>Brak adresu</div>
+                    )}
+                  </div>
+                </div>
+              )
+            })
           ) : (
             <Spinner />
           )}
@@ -120,6 +193,26 @@ const SettingsAddressPage = () => {
     </main>
   )
 }
+
+const EditButton = ({ onClick }) => (
+  <Button className="edit-button" onClick={onClick}>
+    <img
+      src={editImg}
+      className="item-picture"
+      alt="edit"
+    />
+  </Button>
+)
+
+const SaveButton = ({ onClick }) => (
+  <Button className="edit-button" onClick={onClick}>
+    <img
+      src={saveImg}
+      className="item-picture"
+      alt="save"
+    />
+  </Button>
+)
 
 const Container = styled.div`
   display: flex;
@@ -156,6 +249,34 @@ const Container = styled.div`
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
   }
+
+  .shopsListSettings {
+    width: 65%;
+  }
+
+  .address-container {
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 15px;
+    margin: 1rem 0rem;
+    padding-bottom: 0.7rem;
+    box-shadow:
+      0 4px 8px 0 rgba(0, 0, 0, 0.2),
+      0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+
+  .shop-header {
+    display: flex;
+    align-content: space-between;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+
+    span {
+      font-weight: bold;
+    }
+  }
+
   .store-picture {
     width: 24px;
     margin: 8px;
@@ -168,6 +289,7 @@ const Container = styled.div`
     background-color: transparent;
     border: none;
     cursor: pointer;
+    padding-right: 2rem;
 
     @media screen and (max-width: $mobileL) {
       padding-right: 0rem;
@@ -180,17 +302,15 @@ const Container = styled.div`
   }
 
   .edit-button {
-    padding-left: 2rem;
+    padding-left: 0rem;
     img {
-      filter: brightness(0) saturate(100%) invert(65%)
-        sepia(45%) saturate(5826%) hue-rotate(176deg)
-        brightness(97%) contrast(92%);
+      filter: invert(20%) sepia(82%) saturate(2113%)
+        hue-rotate(246deg) brightness(92%) contrast(95%);
     }
     &:focus,
     &:hover {
-      filter: brightness(0) saturate(100%) invert(13%)
-        sepia(92%) saturate(4907%) hue-rotate(228deg)
-        brightness(88%) contrast(105%);
+      filter: invert(44%) sepia(63%) saturate(472%)
+        hue-rotate(219deg) brightness(87%) contrast(97%);
     }
   }
 
@@ -208,6 +328,41 @@ const Container = styled.div`
         brightness(72%) contrast(96%);
     }
   }
+
+  .shop-address {
+    display: flex;
+    flex-direction: row;
+    width: 85%;
+    background-color: #f6f6f6;
+    margin: 0.1rem auto 0.5rem auto;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    box-shadow:
+      0 4px 8px 0 rgba(0, 0, 0, 0.2),
+      0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    textarea {
+      width: 90%;
+      background-color: #f6f6f6;
+      border: none;
+    }
+
+    textarea:focus {
+      border: none;
+      outline: none;
+    }
+  }
+
+  .address {
+    display: flex;
+    flex-direction: column;
+  }
+`
+
+const Button = styled.button`
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
 `
 
 export default SettingsAddressPage
