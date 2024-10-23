@@ -230,7 +230,3 @@ const Container = styled.div`
 `
 
 export default SettingsShopsPage
-
-// shopName,address,startDate,endDate,checkedItems,city,
-//invoiceDate,endSaleDate,paymentDate,paymentType
-//prices, productCode, vat, netPrice,extraProduct

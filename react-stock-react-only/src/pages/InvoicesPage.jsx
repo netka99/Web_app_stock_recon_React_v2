@@ -63,6 +63,8 @@ const InvoicePage = () => {
   const [extraProduct, setExtraProduct] = useState([])
   const [titlesVisibility, setTitlesVisibility] =
     useState(false)
+  const [invoiceVisibility, setInvoiceVisibility] =
+    useState(false)
 
   const formatDate = (date) => {
     return date.toISOString().split('T')[0] // Format as YYYY-MM-DD
@@ -277,469 +279,522 @@ const InvoicePage = () => {
       <Navbar pageTitle={pageTitle} />
       <Sidebar />
       <Container>
-        <div className="title">Podaj dane do faktury</div>
-        <div className="seller">
-          <label htmlFor="seller">
-            Sprzedawca:
-            <textarea
-              id="seller"
-              type="text"
-              rows={5}
-              value={seller}
-              onChange={(e) => setSeller(e.target.value)}
-            />
-          </label>
-        </div>
-        <div className="details">
-          <div className="invoiceNumber">
-            <label>Numer Faktury: </label>
-            <textarea
-              name="invoiceNumber"
-              value={invoiceNumber}
-              rows={1}
-              onChange={(e) =>
-                setInvoiceNumber(e.target.value)
-              }
-            ></textarea>
-          </div>
-          <div className={shopName}>
-            <label>
-              Nazwa sklepu :
-              {settings ? (
-                <select
-                  value={shopName}
-                  onChange={(e) => {
-                    const selectedShop = e.target.value
-                    setShopName(selectedShop)
-                    setAddress(
-                      settings.address[selectedShop],
-                    )
-                  }}
-                >
-                  <option value="">
-                    {'Wybierz sklep'}
-                  </option>
-                  {settings.shops.map((shop, index) => (
-                    <option
-                      key={`${shop}${index}`}
-                      value={shop}
+        {!invoiceVisibility && (
+          <div className="invoices-details">
+            <div className="title">
+              Podaj dane do faktury
+            </div>
+            <div className="seller">
+              <label htmlFor="seller">
+                Sprzedawca:
+                <textarea
+                  id="seller"
+                  type="text"
+                  rows={5}
+                  value={seller}
+                  onChange={(e) =>
+                    setSeller(e.target.value)
+                  }
+                />
+              </label>
+            </div>
+            <div className="details">
+              <div className="invoiceNumber">
+                <label>Numer Faktury: </label>
+                <textarea
+                  name="invoiceNumber"
+                  value={invoiceNumber}
+                  rows={1}
+                  onChange={(e) =>
+                    setInvoiceNumber(e.target.value)
+                  }
+                ></textarea>
+              </div>
+              <div className={shopName}>
+                <label>
+                  Nazwa sklepu :
+                  {settings ? (
+                    <select
+                      value={shopName}
+                      onChange={(e) => {
+                        const selectedShop = e.target.value
+                        setShopName(selectedShop)
+                        setAddress(
+                          settings.address[selectedShop],
+                        )
+                      }}
                     >
-                      {shop}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                getMessagesText('errorFetching')
-              )}
-            </label>
-          </div>
-          <div className="shopAddress">
-            <div>Adres sklepu:</div>
-            <div className="addressDetails">
-              {address && (
-                <div className="address">
-                  {address.split('\n').map((line, idx) => (
-                    <div key={idx}>{line}</div>
-                  ))}
+                      <option value="">
+                        {'Wybierz sklep'}
+                      </option>
+                      {settings.shops.map((shop, index) => (
+                        <option
+                          key={`${shop}${index}`}
+                          value={shop}
+                        >
+                          {shop}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    getMessagesText('errorFetching')
+                  )}
+                </label>
+              </div>
+              <div className="shopAddress">
+                <div>Adres sklepu:</div>
+                <div className="addressDetails">
+                  {address && (
+                    <div className="address">
+                      {address
+                        .split('\n')
+                        .map((line, idx) => (
+                          <div key={idx}>{line}</div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="city">
+                <label htmlFor="city">
+                  Miejsce wystawienia:
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) =>
+                      setCity(e.target.value)
+                    }
+                  />
+                </label>
+              </div>
+              <div className="invoice-date">
+                <label>
+                  Data wystawienia:
+                  <input
+                    type="date"
+                    value={invoiceDate}
+                    onChange={(e) => {
+                      setInvoiceDate(e.target.value)
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="sale-end-date">
+                <label>
+                  Data zakończenia dostawy/usługi:
+                  <input
+                    type="date"
+                    value={endSaleDate}
+                    onChange={(e) => {
+                      setEndSaleDate(e.target.value)
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="payment-date">
+                <label>
+                  Termin płatności:
+                  <input
+                    type="date"
+                    value={paymentDate}
+                    onChange={(e) => {
+                      setPaymentDate(e.target.value)
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="payment-type">
+                <label>
+                  <input
+                    type="text"
+                    value={paymentType}
+                    onChange={(e) => {
+                      setPaymentType(e.target.value)
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="dateRange">
+                <p>Okres sprzedaży</p>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => {
+                    setStartDate(e.target.value)
+                  }}
+                  required
+                ></input>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => {
+                    setEndDate(e.target.value)
+                  }}
+                  required
+                ></input>
+                <div className="search">
+                  <button
+                    className="searchButton"
+                    onClick={dataSearchedByDates}
+                  >
+                    Szukaj
+                  </button>
+                </div>
+              </div>
+              <div className="summary-details">
+                <p>Sprzedaż</p>
+                {summarySale &&
+                Object.keys(summarySale).length > 0 ? (
+                  Object.keys(summarySale).map((key) => (
+                    <p key={key}>
+                      {key}: {summarySale[key]}
+                    </p>
+                  ))
+                ) : (
+                  <p>0</p>
+                )}
+
+                <p>Zwrot</p>
+                {summaryReturns &&
+                Object.keys(summaryReturns).length ? (
+                  Object.keys(summaryReturns).map((key) => (
+                    <p key={key}>
+                      {key}: {summaryReturns[key]}
+                    </p>
+                  ))
+                ) : (
+                  <p>0</p>
+                )}
+              </div>
+              <div className="total-sale">
+                Łączna sprzedaż za okres:
+                {totalsOfSale &&
+                Object.keys(totalsOfSale).length > 0 ? (
+                  Object.keys(totalsOfSale).map((key) => (
+                    <div key={key}>
+                      <label htmlFor={key}>
+                        {` ${key}: ${totalsOfSale[key]} ${units[key]}`}
+                      </label>
+                      <input
+                        id={key}
+                        type="checkbox"
+                        checked={checkedItems[key] || false}
+                        onChange={(e) => {
+                          setCheckedItems({
+                            ...checkedItems,
+                            [key]: e.target.checked,
+                          })
+                          setTitlesVisibility(true)
+                        }}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <p>0</p>
+                )}
+              </div>
+            </div>
+            <div className="selling-form">
+              {titlesVisibility && (
+                <div className="titles">
+                  <div className="number">Lp.</div>
+                  <div className="product-name">
+                    Towar/Usługa
+                  </div>
+                  <div className="product-code">PKWIU</div>
+                  <div className="product-unit">J.m.</div>
+                  <div className="product-quantity">
+                    Ilość
+                  </div>
+                  <div className="net-price">
+                    Cena netto
+                  </div>
+                  <div className="vat">VAT</div>
+                  <div className="gross-price">
+                    Cena brutto
+                  </div>
+                  <div className="total-net">
+                    Wartość netto
+                  </div>
+                  <div className="total-gross">
+                    Wartość brutto
+                  </div>
                 </div>
               )}
+              {Object.keys(checkedItems).length > 0 && (
+                <>
+                  {Object.keys(checkedItems).map((key) => {
+                    if (checkedItems[key]) {
+                      const details = productDetails[key]
+                      return (
+                        <div
+                          className="product-details"
+                          key={key}
+                        >
+                          <div className="number">
+                            <label>
+                              <input
+                                type="text"
+                                defaultValue="1"
+                                onChange={(e) =>
+                                  e.target.value
+                                }
+                              />
+                            </label>
+                          </div>
+                          <div className="product-name">
+                            {details.name}
+                          </div>
+                          <div className="product-code">
+                            <label>
+                              <input
+                                type="text"
+                                value={productCode[key]}
+                                onChange={(e) =>
+                                  setProductCode({
+                                    ...productCode,
+                                    [key]: e.target.value,
+                                  })
+                                }
+                              />
+                            </label>
+                          </div>
+                          <div className="product-unit">
+                            {units[key]}
+                          </div>
+                          <div className="product-quantity">
+                            <label>
+                              <input
+                                value={totalsOfSale[key]}
+                                onChange={(e) =>
+                                  setTotalsOfSale({
+                                    ...totalsOfSale,
+                                    [key]: Number(
+                                      e.target.value,
+                                    ),
+                                  })
+                                }
+                              />
+                            </label>
+                          </div>
+                          <div className="net-price">
+                            {netPrice[key]}
+                          </div>
+                          <div className="vat">
+                            <label>
+                              <input
+                                type="number"
+                                value={vat[key]}
+                                onChange={(e) =>
+                                  setVat({
+                                    ...vat,
+                                    [key]: Number(
+                                      e.target.value,
+                                    ),
+                                  })
+                                }
+                              />{' '}
+                              %
+                            </label>
+                          </div>
+                          <div className="gross-price">
+                            <label>
+                              <input
+                                type="number"
+                                value={prices[key]}
+                                onChange={(e) =>
+                                  setPrices({
+                                    ...prices,
+                                    [key]: Number(
+                                      e.target.value,
+                                    ),
+                                  })
+                                }
+                              />
+                            </label>
+                          </div>
+                          <div className="total-net">
+                            {Number(
+                              netPrice[key] *
+                                totalsOfSale[key],
+                            ).toFixed(2)}
+                          </div>
+                          <div className="total-gross">
+                            {Number(
+                              prices[key] *
+                                totalsOfSale[key],
+                            ).toFixed(2)}
+                          </div>
+                        </div>
+                      )
+                    }
+                    return null // This is added in case the condition is false
+                  })}
+                </>
+              )}
+              {extraProduct.map((line, index) => (
+                <div
+                  key={index}
+                  className="product-details"
+                >
+                  <div className="number">
+                    <label>
+                      <input
+                        type="text"
+                        defaultValue="1"
+                        onChange={(e) => e.target.value}
+                      />
+                    </label>
+                  </div>
+                  <div className="product-name">
+                    <label>
+                      <input
+                        type="text"
+                        value={line.product}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[index].product =
+                            e.target.value
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div className="product-code">
+                    <label>
+                      <input
+                        type="text"
+                        value={line.code}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[index].code =
+                            e.target.value
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div className="product-unit">
+                    <label>
+                      <input
+                        type="text"
+                        value={line.units}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[index].units =
+                            e.target.value
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div className="product-quantity">
+                    <label>
+                      <input
+                        type="number"
+                        value={line.quantity}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[index].quantity =
+                            Number(e.target.value)
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div className="net-price">
+                    {calculateNet(line.price, line.vat)}
+                  </div>
+                  <div className="vat">
+                    <label>
+                      <input
+                        type="number"
+                        value={line.vat}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[index].vat =
+                            Number(e.target.value)
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                      %
+                    </label>
+                  </div>
+                  <div className="gross-price">
+                    <label>
+                      <input
+                        type="number"
+                        value={line.price}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[index].price =
+                            Number(e.target.value)
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div className="total-net">
+                    {Number(
+                      line.price * line.quantity,
+                    ).toFixed(2)}
+                  </div>
+                  <div className="total-gross">
+                    {Number(
+                      line.price *
+                        line.quantity *
+                        (1 + line.vat / 100),
+                    ).toFixed(2)}
+                  </div>
+                </div>
+              ))}
+
+              <button onClick={addExtraProduct}>
+                Dodaj nowy produkt
+              </button>
             </div>
-          </div>
-          <div className="city">
-            <label htmlFor="city">
-              Miejsce wystawienia:
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-            </label>
-          </div>
-          <div className="invoice-date">
-            <label>
-              Data wystawienia:
-              <input
-                type="date"
-                value={invoiceDate}
-                onChange={(e) => {
-                  setInvoiceDate(e.target.value)
-                }}
-              />
-            </label>
-          </div>
-          <div className="sale-end-date">
-            <label>
-              Data zakończenia dostawy/usługi:
-              <input
-                type="date"
-                value={endSaleDate}
-                onChange={(e) => {
-                  setEndSaleDate(e.target.value)
-                }}
-              />
-            </label>
-          </div>
-          <div className="payment-date">
-            <label>
-              Termin płatności:
-              <input
-                type="date"
-                value={paymentDate}
-                onChange={(e) => {
-                  setPaymentDate(e.target.value)
-                }}
-              />
-            </label>
-          </div>
-          <div className="payment-type">
-            <label>
-              <input
-                type="text"
-                value={paymentType}
-                onChange={(e) => {
-                  setPaymentType(e.target.value)
-                }}
-              />
-            </label>
-          </div>
-          <div className="dateRange">
-            <p>Okres sprzedaży</p>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value)
-              }}
-              required
-            ></input>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value)
-              }}
-              required
-            ></input>
-            <div className="search">
+            <div className="generate">
               <button
-                className="searchButton"
-                onClick={dataSearchedByDates}
+                className="generateButton"
+                onClick={() => setInvoiceVisibility(true)}
               >
-                Szukaj
+                Wygeneruj fakturę
               </button>
             </div>
           </div>
-          <div className="summary-details">
-            <p>Sprzedaż</p>
-            {summarySale &&
-            Object.keys(summarySale).length > 0 ? (
-              Object.keys(summarySale).map((key) => (
-                <p key={key}>
-                  {key}: {summarySale[key]}
-                </p>
-              ))
-            ) : (
-              <p>0</p>
-            )}
-
-            <p>Zwrot</p>
-            {summaryReturns &&
-            Object.keys(summaryReturns).length ? (
-              Object.keys(summaryReturns).map((key) => (
-                <p key={key}>
-                  {key}: {summaryReturns[key]}
-                </p>
-              ))
-            ) : (
-              <p>0</p>
-            )}
-          </div>
-          <div className="total-sale">
-            Łączna sprzedaż za okres:
-            {totalsOfSale &&
-            Object.keys(totalsOfSale).length > 0 ? (
-              Object.keys(totalsOfSale).map((key) => (
-                <div key={key}>
-                  <label htmlFor={key}>
-                    {` ${key}: ${totalsOfSale[key]} ${units[key]}`}
-                  </label>
-                  <input
-                    id={key}
-                    type="checkbox"
-                    checked={checkedItems[key] || false}
-                    onChange={(e) => {
-                      setCheckedItems({
-                        ...checkedItems,
-                        [key]: e.target.checked,
-                      })
-                      setTitlesVisibility(true)
-                    }}
-                  />
-                </div>
-              ))
-            ) : (
-              <p>0</p>
-            )}
-          </div>
-        </div>
-        <div className="selling-form">
-          {titlesVisibility && (
-            <div className="titles">
-              <div className="number">Lp.</div>
-              <div className="product-name">
-                Towar/Usługa
-              </div>
-              <div className="product-code">PKWIU</div>
-              <div className="product-unit">J.m.</div>
-              <div className="product-quantity">Ilość</div>
-              <div className="net-price">Cena netto</div>
-              <div className="vat">VAT</div>
-              <div className="gross-price">Cena brutto</div>
-              <div className="total-net">Wartość netto</div>
-              <div className="total-gross">
-                Wartość brutto
-              </div>
-            </div>
-          )}
-          {Object.keys(checkedItems).length > 0 && (
-            <>
-              {Object.keys(checkedItems).map((key) => {
-                if (checkedItems[key]) {
-                  const details = productDetails[key]
-                  return (
-                    <div
-                      className="product-details"
-                      key={key}
-                    >
-                      <div className="number">
-                        <label>
-                          <input
-                            type="text"
-                            defaultValue="1"
-                            onChange={(e) => e.target.value}
-                          />
-                        </label>
-                      </div>
-                      <div className="product-name">
-                        {details.name}
-                      </div>
-                      <div className="product-code">
-                        <label>
-                          <input
-                            type="text"
-                            value={productCode[key]}
-                            onChange={(e) =>
-                              setProductCode({
-                                ...productCode,
-                                [key]: e.target.value,
-                              })
-                            }
-                          />
-                        </label>
-                      </div>
-                      <div className="product-unit">
-                        {units[key]}
-                      </div>
-                      <div className="product-quantity">
-                        <label>
-                          <input
-                            value={totalsOfSale[key]}
-                            onChange={(e) =>
-                              setTotalsOfSale({
-                                ...totalsOfSale,
-                                [key]: Number(
-                                  e.target.value,
-                                ),
-                              })
-                            }
-                          />
-                        </label>
-                      </div>
-                      <div className="net-price">
-                        {netPrice[key]}
-                      </div>
-                      <div className="vat">
-                        <label>
-                          <input
-                            type="number"
-                            value={vat[key]}
-                            onChange={(e) =>
-                              setVat({
-                                ...vat,
-                                [key]: Number(
-                                  e.target.value,
-                                ),
-                              })
-                            }
-                          />{' '}
-                          %
-                        </label>
-                      </div>
-                      <div className="gross-price">
-                        <label>
-                          <input
-                            type="number"
-                            value={prices[key]}
-                            onChange={(e) =>
-                              setPrices({
-                                ...prices,
-                                [key]: Number(
-                                  e.target.value,
-                                ),
-                              })
-                            }
-                          />
-                        </label>
-                      </div>
-                      <div className="total-net">
-                        {Number(
-                          netPrice[key] * totalsOfSale[key],
-                        ).toFixed(2)}
-                      </div>
-                      <div className="total-gross">
-                        {Number(
-                          prices[key] * totalsOfSale[key],
-                        ).toFixed(2)}
-                      </div>
-                    </div>
-                  )
-                }
-                return null // This is added in case the condition is false
-              })}
-            </>
-          )}
-          {extraProduct.map((line, index) => (
-            <div key={index} className="product-details">
-              <div className="number">
-                <label>
-                  <input
-                    type="text"
-                    defaultValue="1"
-                    onChange={(e) => e.target.value}
-                  />
-                </label>
-              </div>
-              <div className="product-name">
-                <label>
-                  <input
-                    type="text"
-                    value={line.product}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].product =
-                        e.target.value
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                </label>
-              </div>
-              <div className="product-code">
-                <label>
-                  <input
-                    type="text"
-                    value={line.code}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].code =
-                        e.target.value
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                </label>
-              </div>
-              <div className="product-unit">
-                <label>
-                  <input
-                    type="text"
-                    value={line.units}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].units =
-                        e.target.value
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                </label>
-              </div>
-              <div className="product-quantity">
-                <label>
-                  <input
-                    type="number"
-                    value={line.quantity}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].quantity =
-                        Number(e.target.value)
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                </label>
-              </div>
-              <div className="net-price">
-                {calculateNet(line.price, line.vat)}
-              </div>
-              <div className="vat">
-                <label>
-                  <input
-                    type="number"
-                    value={line.vat}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].vat = Number(
-                        e.target.value,
-                      )
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                  %
-                </label>
-              </div>
-              <div className="gross-price">
-                <label>
-                  <input
-                    type="number"
-                    value={line.price}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].price = Number(
-                        e.target.value,
-                      )
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                </label>
-              </div>
-              <div className="total-net">
-                {Number(line.price * line.quantity).toFixed(
-                  2,
-                )}
-              </div>
-              <div className="total-gross">
-                {Number(
-                  line.price *
-                    line.quantity *
-                    (1 + line.vat / 100),
-                ).toFixed(2)}
-              </div>
-            </div>
-          ))}
-
-          <button onClick={addExtraProduct}>
-            Dodaj nowy produkt
-          </button>
-        </div>
+        )}
+        {invoiceVisibility && (
+          <InvoiceLayout
+            shopName={shopName}
+            address={address}
+            startDate={startDate}
+            endDate={endDate}
+            checkedItems={checkedItems}
+            city={city}
+            invoiceDate={invoiceDate}
+            endSaleDate={endSaleDate}
+            paymentDate={paymentDate}
+            paymentType={paymentType}
+            prices={prices}
+            productCode={productCode}
+            vat={vat}
+            netPrice={netPrice}
+            extraProduct={extraProduct}
+            seller={seller}
+          />
+        )}
         {loading && <Spinner />}
       </Container>
 
@@ -807,7 +862,6 @@ const Container = styled.div`
     line-height: 24px;
     overflow: hidden;
     text-align: center;
-    z-index: 1;
     display: inline-block;
     border-radius: 15px;
     background-color: #fdfdfd;
