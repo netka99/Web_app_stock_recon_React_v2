@@ -793,12 +793,12 @@ const InvoicePage = () => {
             netPrice={netPrice}
             extraProduct={extraProduct}
             seller={seller}
+            invoiceNumber={invoiceNumber}
           />
         )}
         {loading && <Spinner />}
       </Container>
 
-      <InvoiceLayout />
       <Footer />
     </StyledMain>
   )
