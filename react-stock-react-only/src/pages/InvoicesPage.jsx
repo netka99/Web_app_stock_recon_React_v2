@@ -794,6 +794,9 @@ const InvoicePage = () => {
             extraProduct={extraProduct}
             seller={seller}
             invoiceNumber={invoiceNumber}
+            productDetails={productDetails}
+            totalsOfSale={totalsOfSale}
+            calculateNet={calculateNet}
           />
         )}
         {loading && <Spinner />}

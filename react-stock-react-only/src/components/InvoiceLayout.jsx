@@ -1,12 +1,12 @@
 import * as React from 'react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
-import { Spinner } from './index'
-import { size } from '../styles/devices'
+// import { Spinner } from './index'
+// import { size } from '../styles/devices'
 import { units } from '../utils/productDetails'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
-import autoTable from 'jspdf-autotable'
+// import autoTable from 'jspdf-autotable'
 
 const InvoiceLayout = ({
   seller,
@@ -26,20 +26,74 @@ const InvoiceLayout = ({
   netPrice,
   extraProduct,
   invoiceNumber,
+  productDetails,
+  totalsOfSale,
+  calculateNet,
 }) => {
+  const [totals, setTotals] = useState([])
   const invoiceRef = useRef()
-  const items = [
-    { name: 'Product A', quantity: 2, price: 50.0 },
-    { name: 'Product B', quantity: 1, price: 100.0 },
-    { name: 'Service C', quantity: 3, price: 75.0 },
-    { name: 'Subscription D', quantity: 2, price: 150.0 },
-    { name: 'Consultation E', quantity: 5, price: 200.0 },
-  ]
 
   const formatDate = (date) => {
     const reverseDate = date.split('-').reverse().join('-')
     return reverseDate
   }
+
+  const gatherTotals = () => {
+    let newTotals = []
+
+    Object.keys(checkedItems).forEach((key) => {
+      if (checkedItems[key]) {
+        const details = productDetails[key]
+        const netTotal = Number(
+          netPrice[key] * totalsOfSale[key],
+        ).toFixed(2)
+        const grossTotal = Number(
+          prices[key] * totalsOfSale[key],
+        ).toFixed(2)
+
+        newTotals.push({
+          productName: details.name,
+          code: productCode[key],
+          unit: units[key],
+          quantity: totalsOfSale[key],
+          net: netPrice[key],
+          vat: vat[key],
+          gross: prices[key],
+          totalNet: Number(netTotal),
+          totalGross: Number(grossTotal),
+        })
+      }
+    })
+
+    extraProduct.forEach((line) => {
+      const netPrice = calculateNet(line.price, line.vat)
+      const netTotal = Number(
+        line.price * line.quantity,
+      ).toFixed(2)
+      const grossTotal = Number(
+        line.price * line.quantity * (1 + line.vat / 100),
+      ).toFixed(2)
+
+      newTotals.push({
+        productName: line.product,
+        code: line.code,
+        unit: line.units,
+        quantity: line.quantity,
+        net: Number(netPrice),
+        vat: line.vat,
+        gross: line.price,
+        totalNet: Number(netTotal),
+        totalGross: Number(grossTotal),
+      })
+    })
+
+    setTotals(newTotals)
+  }
+
+  useEffect(() => {
+    gatherTotals()
+  }, [])
+
   const generatePdf = async () => {
     const canvas = await html2canvas(invoiceRef.current, {
       scale: 4, // Increase the scale (default is 1)
@@ -140,43 +194,85 @@ const InvoiceLayout = ({
         </div>
 
         <div className="titles">
-          <div className="number">Lp.</div>
-          <div className="product-name">Towar/Usługa</div>
-          <div className="product-code">PKWIU</div>
-          <div className="product-unit">J.m.</div>
-          <div className="product-quantity">Ilość</div>
-          <div className="net-price">Cena netto</div>
-          <div className="vat">VAT</div>
-          <div className="gross-price">Cena brutto</div>
-          <div className="total-net">Wartość netto</div>
-          <div className="total-gross">Wartość brutto</div>
+          <div className="title-table number">Lp.</div>
+          <div className="title-table product-name">
+            Towar/Usługa
+          </div>
+          <div className="title-table product-code">
+            PKWIU
+          </div>
+          <div className="title-table product-unit">
+            J.m.
+          </div>
+          <div className="title-table product-quantity">
+            Ilość
+          </div>
+          <div className="title-table net-price">
+            Cena netto
+          </div>
+          <div className="title-table vat">VAT</div>
+          <div className="title-table gross-price">
+            Cena brutto
+          </div>
+          <div className="title-table total-net">
+            Wartość netto
+          </div>
+          <div className="title-table total-gross">
+            Wartość brutto
+          </div>
         </div>
-        {/* Invoice table preview */}
-        <div className="invoice-body">
-          <Table>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.name}</td>
-                  <td>{item.quantity}</td>
-                  <td>{item.price}</td>
-                  <td>
-                    {(item.quantity * item.price).toFixed(
-                      2,
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+
+        {totals.map((line, index) => (
+          <div className="product-details" key={index}>
+            <div className="details number-details">
+              {index + 1}
+            </div>
+            <div className="details product-name-details">
+              {line.productName}
+            </div>
+            <div className="details product-code-details">
+              {line.code}
+            </div>
+            <div className="details product-unit-details">
+              {line.unit}
+            </div>
+            <div className="details product-quantity-details">
+              {line.quantity}
+            </div>
+            <div className="details net-price-details">
+              {line.net.toFixed(2)}
+            </div>
+            <div className="details product-vat-details">
+              {line.vat}%
+            </div>
+            <div className="details gross-price-details">
+              {line.gross.toFixed(2)}
+            </div>
+            <div className="details total-net-details">
+              {line.totalNet.toFixed(2)}
+            </div>
+            <div className="details total-gross-details">
+              {line.totalGross.toFixed(2)}
+            </div>
+          </div>
+        ))}
+        <div className="summary">
+          <div className="summary-text">Razem w PLN</div>
+          <div className="summary-net">
+            {totals.length > 0 &&
+              totals
+                .reduce((acc, cur) => acc + cur.totalNet, 0)
+                .toFixed(2)}
+          </div>
+          <div className="summary-gross">
+            {totals.length > 0 &&
+              totals
+                .reduce(
+                  (acc, cur) => acc + cur.totalGross,
+                  0,
+                )
+                .toFixed(2)}
+          </div>
         </div>
       </div>
 
@@ -192,7 +288,7 @@ const Container = styled.div`
     /* border: 1px solid #ddd; */
     margin-bottom: 20px;
     width: 800px;
-    background-color: #f6f6f6;
+    background-color: white;
   }
 
   .invoice-header {
@@ -249,7 +345,7 @@ const Container = styled.div`
   .buyer-title {
     font-size: 1.2rem;
     font-weight: bold;
-    padding-top: 1rem;
+    padding-top: 2rem;
     border-bottom: 3px solid #818181;
   }
 
@@ -294,7 +390,53 @@ const Container = styled.div`
         8,
         1fr
       );
+    font-size: 0.9rem;
+
+    .title-table {
+      border: 1px solid #818181;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
   }
+  .titles {
+    background-color: #bdd9e4;
+  }
+
+  .product-details {
+    text-align: left;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+
+  .details {
+    border: 1px solid #818181;
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: [first] 3rem [line2] 30% repeat(
+        8,
+        1fr
+      );
+  }
+
+  .summary-text {
+    grid-column-start: 7;
+    grid-column-end: 9;
+  }
+
+  .summary-net {
+    grid-column-start: 9;
+    grid-column-end: 10;
+  }
+
+  .summary-gross {
+    grid-column-start: 10;
+    grid-column-end: 11;
+  }
+
   button {
     margin-top: 20px;
     padding: 10px 15px;
