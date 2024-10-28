@@ -14,4 +14,6 @@
 - **Data Management:** Context API and/or Reducer for seamless state management.
 - **Utilities:** jspdf, date handling, and other utility libraries.
 
+- ![Alt text describing the image](./src/App_images)
+
   author: Aneta Di Scala
