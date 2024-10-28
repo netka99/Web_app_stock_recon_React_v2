@@ -31,6 +31,7 @@ const InvoiceLayout = ({
   calculateNet,
 }) => {
   const [totals, setTotals] = useState([])
+  const [vatTotals, setVatTotals] = useState({})
   const invoiceRef = useRef()
 
   const formatDate = (date) => {
@@ -68,10 +69,10 @@ const InvoiceLayout = ({
     extraProduct.forEach((line) => {
       const netPrice = calculateNet(line.price, line.vat)
       const netTotal = Number(
-        line.price * line.quantity,
+        netPrice * line.quantity,
       ).toFixed(2)
       const grossTotal = Number(
-        line.price * line.quantity * (1 + line.vat / 100),
+        line.price * line.quantity,
       ).toFixed(2)
 
       newTotals.push({
@@ -93,6 +94,25 @@ const InvoiceLayout = ({
   useEffect(() => {
     gatherTotals()
   }, [])
+
+  const calculateVatTotals = () => {
+    const vatGroups = {}
+
+    totals.forEach((item) => {
+      const vatRate = item.vat
+      if (!vatGroups[vatRate]) {
+        vatGroups[vatRate] = { totalNet: 0, totalGross: 0 }
+      }
+      vatGroups[vatRate].totalNet += item.totalNet
+      vatGroups[vatRate].totalGross += item.totalGross
+    })
+
+    setVatTotals(vatGroups)
+  }
+
+  useEffect(() => {
+    calculateVatTotals()
+  }, [totals])
 
   const generatePdf = async () => {
     const canvas = await html2canvas(invoiceRef.current, {
@@ -237,7 +257,7 @@ const InvoiceLayout = ({
               {line.unit}
             </div>
             <div className="details product-quantity-details">
-              {line.quantity}
+              {line.quantity.toFixed(2)}
             </div>
             <div className="details net-price-details">
               {line.net.toFixed(2)}
@@ -274,6 +294,36 @@ const InvoiceLayout = ({
                 .toFixed(2)}
           </div>
         </div>
+      </div>
+      <div className="totalsVat">
+        <div className="totalsVat-title">
+          SUMA WEDŁUG STAWEK VAT W PLN
+        </div>
+        <div className="totalsVat-header">
+          <div>Netto</div>
+          <div>VAT</div>
+          <div>Kwota VAT</div>
+          <div>Brutto</div>
+        </div>
+        {vatTotals &&
+          Object.keys(vatTotals).length > 0 &&
+          Object.keys(vatTotals).map((key) => (
+            <div key={key} className="totalsVat-values">
+              <div>
+                {vatTotals[key].totalNet.toFixed(2)}
+              </div>
+              <div>{key}%</div>
+              <div>
+                {(
+                  vatTotals[key].totalGross -
+                  vatTotals[key].totalNet
+                ).toFixed(2)}
+              </div>
+              <div>
+                {vatTotals[key].totalGross.toFixed(2)}
+              </div>
+            </div>
+          ))}
       </div>
 
       <button onClick={generatePdf}>Generate PDF</button>
@@ -393,15 +443,16 @@ const Container = styled.div`
     font-size: 0.9rem;
 
     .title-table {
-      border: 1px solid #818181;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
+      border: 1px solid #818181;
     }
   }
   .titles {
     background-color: #bdd9e4;
+    border: 1px solid #818181;
   }
 
   .product-details {
@@ -411,7 +462,28 @@ const Container = styled.div`
   }
 
   .details {
-    border: 1px solid #818181;
+    border-left: 1px solid #818181;
+    border-bottom: 1px solid #818181;
+    padding: 3px 3px;
+  }
+
+  .total-gross-details {
+    border-right: 1px solid #818181;
+  }
+
+  .number-details,
+  .product-unit-details {
+    text-align: center;
+  }
+
+  .product-code-details,
+  .product-quantity-details,
+  .net-price-details,
+  .product-vat-details,
+  .gross-price-details,
+  .total-net-details,
+  .total-gross-details {
+    text-align: right;
   }
 
   .summary {
@@ -420,21 +492,34 @@ const Container = styled.div`
         8,
         1fr
       );
+    font-size: 13.5px;
+    font-weight: bold;
+    text-align: right;
+    align-items: center;
   }
 
   .summary-text {
     grid-column-start: 7;
     grid-column-end: 9;
+    padding: 3px;
   }
 
   .summary-net {
     grid-column-start: 9;
     grid-column-end: 10;
+    padding-right: 1px;
+    border-bottom: 1px solid #818181;
+    border-left: 1px solid #818181;
+    padding: 3px;
   }
 
   .summary-gross {
     grid-column-start: 10;
     grid-column-end: 11;
+    padding: 3px;
+    border-bottom: 1px solid #818181;
+    border-right: 1px solid #818181;
+    border-left: 1px solid #818181;
   }
 
   button {
@@ -444,6 +529,17 @@ const Container = styled.div`
     color: white;
     border: none;
     cursor: pointer;
+  }
+
+  .totalsVat {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: center;
+  }
+
+  .totalsVat-title {
+    grid-column-start: 1;
+    grid-column-end: 5;
   }
 `
 

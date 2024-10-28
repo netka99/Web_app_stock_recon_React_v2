@@ -234,7 +234,6 @@ const InvoicePage = () => {
         quantity: 0,
         price: 0,
         vat: 0,
-        netprice: 0,
         totalNet: 0,
         totalGross: 0,
       },
@@ -601,7 +600,9 @@ const InvoicePage = () => {
                             <label>
                               <input
                                 type="number"
-                                value={prices[key]}
+                                value={prices[key].toFixed(
+                                  2,
+                                )}
                                 onChange={(e) =>
                                   setPrices({
                                     ...prices,
@@ -734,7 +735,7 @@ const InvoicePage = () => {
                     <label>
                       <input
                         type="number"
-                        value={line.price}
+                        value={line.price.toFixed(2)}
                         onChange={(e) => {
                           const updatedProducts = [
                             ...extraProduct,
@@ -748,14 +749,13 @@ const InvoicePage = () => {
                   </div>
                   <div className="total-net">
                     {Number(
-                      line.price * line.quantity,
+                      calculateNet(line.price, line.vat) *
+                        line.quantity,
                     ).toFixed(2)}
                   </div>
                   <div className="total-gross">
                     {Number(
-                      line.price *
-                        line.quantity *
-                        (1 + line.vat / 100),
+                      line.price * line.quantity,
                     ).toFixed(2)}
                   </div>
                 </div>
