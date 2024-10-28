@@ -13,3 +13,5 @@
 - **Frontend:** React, Styled Components for custom, responsive UI.
 - **Data Management:** Context API and/or Reducer for seamless state management.
 - **Utilities:** jspdf, date handling, and other utility libraries.
+
+  author: Aneta Di Scala
