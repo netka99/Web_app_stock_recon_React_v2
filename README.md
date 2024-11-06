@@ -14,4 +14,6 @@
 - **Data Management:** Context API and/or Reducer for seamless state management.
 - **Utilities:** jspdf, date handling, and other utility libraries.
 
+- ![Folder with images of web app](https://github.com/netka99/Web_app_stock_recon_React_v2/tree/main/react-stock-react-only/src/App_images)
+
   author: Aneta Di Scala
