@@ -1,16 +1,15 @@
 import * as React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
-// import { Spinner } from './index'
 // import { size } from '../styles/devices'
 import { units } from '../utils/productDetails'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
-// import autoTable from 'jspdf-autotable'
+import PropTypes from 'prop-types'
+import n2words from 'n2words'
 
 const InvoiceLayout = ({
   seller,
-  shopName,
   address,
   startDate,
   endDate,
@@ -29,14 +28,26 @@ const InvoiceLayout = ({
   productDetails,
   totalsOfSale,
   calculateNet,
+  comment,
 }) => {
   const [totals, setTotals] = useState([])
   const [vatTotals, setVatTotals] = useState({})
+  const [vatSum, setVatSum] = useState({
+    totalNet: 0,
+    totalGross: 0,
+  })
   const invoiceRef = useRef()
 
   const formatDate = (date) => {
     const reverseDate = date.split('-').reverse().join('-')
     return reverseDate
+  }
+
+  const paymentSpelling = () => {
+    let sum = n2words(vatSum.totalGross.toFixed(0), {
+      lang: 'pl',
+    })
+    return sum
   }
 
   const gatherTotals = () => {
@@ -97,6 +108,8 @@ const InvoiceLayout = ({
 
   const calculateVatTotals = () => {
     const vatGroups = {}
+    let overallNetTotals = 0
+    let overallGrossTotals = 0
 
     totals.forEach((item) => {
       const vatRate = item.vat
@@ -105,9 +118,16 @@ const InvoiceLayout = ({
       }
       vatGroups[vatRate].totalNet += item.totalNet
       vatGroups[vatRate].totalGross += item.totalGross
+
+      overallNetTotals += item.totalNet
+      overallGrossTotals += item.totalGross
     })
 
     setVatTotals(vatGroups)
+    setVatSum({
+      totalNet: Number(overallNetTotals) || 0,
+      totalGross: Number(overallGrossTotals) || 0,
+    })
   }
 
   useEffect(() => {
@@ -153,7 +173,7 @@ const InvoiceLayout = ({
       )
       heightLeft -= pdf.internal.pageSize.height
     }
-    pdf.save('invoice.pdf')
+    pdf.save(`${invoiceNumber}.pdf`)
   }
 
   return (
@@ -294,41 +314,137 @@ const InvoiceLayout = ({
                 .toFixed(2)}
           </div>
         </div>
-      </div>
-      <div className="totalsVat">
-        <div className="totalsVat-title">
-          SUMA WEDŁUG STAWEK VAT W PLN
-        </div>
-        <div className="totalsVat-header">
-          <div>Netto</div>
-          <div>VAT</div>
-          <div>Kwota VAT</div>
-          <div>Brutto</div>
-        </div>
-        {vatTotals &&
-          Object.keys(vatTotals).length > 0 &&
-          Object.keys(vatTotals).map((key) => (
-            <div key={key} className="totalsVat-values">
-              <div>
-                {vatTotals[key].totalNet.toFixed(2)}
+        <div className="totals-vat">
+          <div className="totalsVat">
+            <div className="totalsVat-title">
+              SUMA WEDŁUG STAWEK VAT W PLN
+            </div>
+            <div className="totalsVat-header">
+              <div className="totalsVat-vat">VAT</div>
+              <div className="totalsVat-net">Netto</div>
+              <div className="totalsVat-totalVat">
+                Kwota VAT
               </div>
-              <div>{key}%</div>
-              <div>
-                {(
-                  vatTotals[key].totalGross -
-                  vatTotals[key].totalNet
-                ).toFixed(2)}
-              </div>
-              <div>
-                {vatTotals[key].totalGross.toFixed(2)}
+              <div className="totalsVat-totalGross">
+                Brutto
               </div>
             </div>
-          ))}
+            {vatTotals &&
+              Object.keys(vatTotals).length > 0 &&
+              Object.keys(vatTotals).map((key) => (
+                <div key={key} className="totalsVat-values">
+                  <div className="valueTotals-vat">
+                    {key}%
+                  </div>
+                  <div className="valueTotals-net">
+                    {vatTotals[key].totalNet.toFixed(2)}
+                  </div>
+                  <div className="valueTotals-totalVat">
+                    {(
+                      vatTotals[key].totalGross -
+                      vatTotals[key].totalNet
+                    ).toFixed(2)}
+                  </div>
+                  <div className="valueTotals-totalGross">
+                    {vatTotals[key].totalGross.toFixed(2)}
+                  </div>
+                </div>
+              ))}
+            {vatSum && (
+              <div className="totals-sum">
+                <div className="totals-sum-text">Razem</div>
+                <div className="totals-sum-net">
+                  {vatSum.totalNet.toFixed(2)}
+                </div>
+                <div className="totals-sum-vat">
+                  {isNaN(
+                    vatSum.totalGross - vatSum.totalNet,
+                  )
+                    ? '0.00'
+                    : (
+                        vatSum.totalGross - vatSum.totalNet
+                      ).toFixed(2)}
+                </div>
+                <div className="totals-sum-gross">
+                  {vatSum.totalGross.toFixed(2)}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="payment-method">
+            {`Forma płatności:  `}
+            <span className="bold-text">{paymentType}</span>
+          </div>
+          <div className="payment-date">
+            {`Termin płatności:  `}
+            <span className="bold-text">
+              {formatDate(paymentDate)}
+            </span>
+          </div>
+          <div className="payment-total">
+            {`Razem do zapłaty: ${vatSum.totalGross.toFixed(2)} PLN`}
+          </div>
+          <div className="payment-spelling">
+            {`Razem słownie: ${paymentSpelling()} i ${vatSum.totalGross.toString().split('.')[1] || '0'}/100 PLN`}
+          </div>
+        </div>
+        <div className="signatures">
+          <div className="signature-seller">
+            Fakturę wystawił
+          </div>
+          <div className="signature-receiver">
+            Fakturę odebrał
+          </div>
+        </div>
+        <div className="comment">{comment}</div>
       </div>
-
       <button onClick={generatePdf}>Generate PDF</button>
     </Container>
   )
+}
+
+InvoiceLayout.propTypes = {
+  seller: PropTypes.string,
+  address: PropTypes.string,
+  startDate: PropTypes.string,
+  endDate: PropTypes.string,
+  checkedItems: PropTypes.oneOfType([
+    PropTypes.objectOf(PropTypes.bool),
+    PropTypes.array,
+  ]),
+  city: PropTypes.string,
+  invoiceDate: PropTypes.string,
+  endSaleDate: PropTypes.string,
+  paymentDate: PropTypes.string,
+  paymentType: PropTypes.string,
+  prices: PropTypes.objectOf(PropTypes.number),
+  productCode: PropTypes.objectOf(PropTypes.string),
+  vat: PropTypes.objectOf(PropTypes.number),
+  netPrice: PropTypes.objectOf(PropTypes.number),
+  extraProduct: PropTypes.arrayOf(
+    PropTypes.shape({
+      product: PropTypes.string,
+      code: PropTypes.string,
+      units: PropTypes.string,
+      quantity: PropTypes.number,
+      price: PropTypes.number,
+      vat: PropTypes.number,
+      totalNet: PropTypes.number,
+      totalGross: PropTypes.number,
+    }),
+  ),
+  invoiceNumber: PropTypes.string,
+  productDetails: PropTypes.shape({
+    Kartacze: PropTypes.shape({
+      name: PropTypes.string,
+    }),
+    Babka: PropTypes.shape({
+      name: PropTypes.string,
+    }),
+  }),
+  totalsOfSale: PropTypes.objectOf(PropTypes.number),
+  calculateNet: PropTypes.func,
+  comment: PropTypes.string,
 }
 
 const Container = styled.div`
@@ -338,7 +454,9 @@ const Container = styled.div`
     /* border: 1px solid #ddd; */
     margin-bottom: 20px;
     width: 800px;
+    height: 297mm;
     background-color: white;
+    position: relative;
   }
 
   .invoice-header {
@@ -371,7 +489,7 @@ const Container = styled.div`
   .invoice-number {
     border-bottom: 2px solid #818181;
     border-top: 2px solid #818181;
-    background-color: #bdd9e4;
+    background-color: #c6e0eb;
     padding: 10px;
     font-size: 1.5rem;
     font-weight: bold;
@@ -451,14 +569,14 @@ const Container = styled.div`
     }
   }
   .titles {
-    background-color: #bdd9e4;
+    background-color: #c6e0eb;
     border: 1px solid #818181;
   }
 
   .product-details {
     text-align: left;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
 
   .details {
@@ -492,7 +610,7 @@ const Container = styled.div`
         8,
         1fr
       );
-    font-size: 13.5px;
+    font-size: 0.9rem;
     font-weight: bold;
     text-align: right;
     align-items: center;
@@ -530,35 +648,118 @@ const Container = styled.div`
     border: none;
     cursor: pointer;
   }
+  .totals-vat {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    margin-left: auto;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+  }
 
   .totalsVat {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    align-items: center;
+    grid-template-rows: auto auto auto auto; /* 4 rows, height adjusts automatically */
+    align-items: center; /* Center items in each grid cell */
+  }
+
+  .totalsVat-header {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    background-color: #c6e0eb;
   }
 
   .totalsVat-title {
-    grid-column-start: 1;
-    grid-column-end: 5;
-  }
-`
-
-// Styling for the table
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-
-  th,
-  td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    grid-column: 1 / -1;
     text-align: center;
+    padding: 3px;
+    border: 1px solid #818181;
   }
 
-  th {
-    background-color: #f2f2f2;
+  .totalsVat-values {
+    grid-column: 1 / -1; /* Span all columns */
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr; /* Match the main grid columns */
+  }
+
+  .totals-sum {
+    grid-column: 1 / -1; /* Span all columns */
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr; /* Match the main grid columns */
+    border: 1px solid #666666;
+    background-color: #c6e0eb;
     font-weight: bold;
+  }
+
+  .totalsVat-net,
+  .totalsVat-vat,
+  .totalsVat-totalVat,
+  .totalsVat-totalGross,
+  .valueTotals-net,
+  .valueTotals-vat,
+  .valueTotals-totalVat,
+  .valueTotals-totalGross,
+  .totals-sum-text,
+  .totals-sum-net,
+  .totals-sum-vat,
+  .totals-sum-gross {
+    border-left: 1px solid #818181;
+    border-bottom: 1px solid #818181;
+    padding: 3px;
+  }
+
+  .totalsVat-totalGross,
+  .valueTotals-totalGross,
+  .totals-sum-gross {
+    border-right: 1px solid #818181;
+  }
+
+  .bold-text {
+    font-weight: bold;
+  }
+
+  .payment-method,
+  .payment-date {
+    margin-top: 0.5rem;
+  }
+
+  .payment-total {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-decoration: underline;
+    background-color: #c6e0eb;
+    padding: 5px 0 5px 5px;
+  }
+
+  .payment-spelling {
+    margin-top: 0.8rem;
+  }
+
+  .signature-seller,
+  .signature-receiver {
+    border-top: 1px dashed #333333;
+    width: 35%;
+    text-align: center;
+    padding-top: 10px;
+  }
+
+  .signatures {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin-bottom: 2rem;
+    margin-top: auto;
+    position: absolute;
+    bottom: 0;
+    width: 90%;
+  }
+
+  .comment {
+    padding-top: 1rem;
+    font-size: 0.9rem;
   }
 `
 

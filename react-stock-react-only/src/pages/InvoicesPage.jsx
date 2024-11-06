@@ -65,6 +65,7 @@ const InvoicePage = () => {
     useState(false)
   const [invoiceVisibility, setInvoiceVisibility] =
     useState(false)
+  const [comment, setComment] = useState('')
 
   const formatDate = (date) => {
     return date.toISOString().split('T')[0] // Format as YYYY-MM-DD
@@ -765,6 +766,18 @@ const InvoicePage = () => {
                 Dodaj nowy produkt
               </button>
             </div>
+            <div className="comment">
+              <label>
+                Dodatkowy komentarz:
+                <input
+                  type="text"
+                  value={comment}
+                  onChange={(e) => {
+                    setComment(e.target.value)
+                  }}
+                />
+              </label>
+            </div>
             <div className="generate">
               <button
                 className="generateButton"
@@ -797,6 +810,7 @@ const InvoicePage = () => {
             productDetails={productDetails}
             totalsOfSale={totalsOfSale}
             calculateNet={calculateNet}
+            comment={comment}
           />
         )}
         {loading && <Spinner />}
