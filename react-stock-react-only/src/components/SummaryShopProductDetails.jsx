@@ -75,6 +75,16 @@ const SummaryShopProductDetails = ({
     setEditType(type)
   }
 
+  const formatcentsToEuros = (cents) => {
+    const euros = cents / 100
+    const convertedValue = euros.toLocaleString('pl-PL', {
+      useGrouping: true,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+    return convertedValue
+  }
+
   //message displayed on the screen after updated data are saved
   const getMessageText = (messageType) => {
     switch (messageType) {
@@ -188,7 +198,7 @@ const SummaryShopProductDetails = ({
           )}
 
           <div className="detailed-price">
-            {`${minus}${item.quantity * settingsData.prices[productSelected]} zł`}
+            {`${minus}${((item.quantity * settingsData.prices[productSelected]) / 100).toFixed(2)} zł`}
           </div>
           {editIndex === idx && editType === typeOfSale ? (
             <SaveButton

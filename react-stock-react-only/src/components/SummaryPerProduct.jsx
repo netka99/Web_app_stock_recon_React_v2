@@ -96,7 +96,7 @@ const SummaryPerProduct = ({
               <div className="summary-total-quantity">
                 {`${totals(shop)} ${units[productSelected]}`}
               </div>
-              <div className="summary-total-prize">{`${totals(shop) * settingsData.prices[productSelected]} zł`}</div>
+              <div className="summary-total-prize">{`${((totals(shop) * settingsData.prices[productSelected]) / 100).toFixed(2)} zł`}</div>
               <div
                 onClick={() => toggleAccordion(index)}
                 className="accordion-open"

@@ -212,7 +212,7 @@ const InvoicePage = () => {
     } catch (error) {
       handleError(error)
     } finally {
-      setLoading(false) // Hide spinner
+      setLoading(false)
     }
   }
 
@@ -578,7 +578,9 @@ const InvoicePage = () => {
                             </label>
                           </div>
                           <div className="net-price">
-                            {netPrice[key]}
+                            {(netPrice[key] / 100).toFixed(
+                              2,
+                            )}
                           </div>
                           <div className="vat">
                             <label>
@@ -598,33 +600,34 @@ const InvoicePage = () => {
                             </label>
                           </div>
                           <div className="gross-price">
-                            <label>
-                              <input
-                                type="number"
-                                value={prices[key].toFixed(
-                                  2,
-                                )}
-                                onChange={(e) =>
-                                  setPrices({
-                                    ...prices,
-                                    [key]: Number(
-                                      e.target.value,
-                                    ),
-                                  })
-                                }
-                              />
-                            </label>
+                            <input
+                              type="number"
+                              placeholder="0.00"
+                              value={(
+                                prices[key] / 100
+                              ).toFixed(2)}
+                              onChange={(e) => {
+                                setPrices({
+                                  ...prices,
+                                  [key]: Math.round(
+                                    e.target.value * 100,
+                                  ),
+                                })
+                              }}
+                            />
                           </div>
                           <div className="total-net">
                             {Number(
-                              netPrice[key] *
-                                totalsOfSale[key],
+                              (netPrice[key] *
+                                totalsOfSale[key]) /
+                                100,
                             ).toFixed(2)}
                           </div>
                           <div className="total-gross">
                             {Number(
-                              prices[key] *
-                                totalsOfSale[key],
+                              (prices[key] *
+                                totalsOfSale[key]) /
+                                100,
                             ).toFixed(2)}
                           </div>
                         </div>

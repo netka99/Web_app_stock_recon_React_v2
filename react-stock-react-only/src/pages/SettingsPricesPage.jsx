@@ -71,7 +71,7 @@ const SettingsPricesPage = () => {
                       <input
                         type="number"
                         id={productName}
-                        value={price}
+                        value={(price / 100).toFixed(2)}
                         disabled={isDisabled}
                         onChange={handleUpdate}
                       />

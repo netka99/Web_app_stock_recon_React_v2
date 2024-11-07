@@ -27,7 +27,7 @@ export const PricesProvider = ({ children }) => {
       ...settingsData,
       prices: {
         ...settingsData.prices,
-        [id]: Number(value),
+        [id]: Math.round(value * 100),
       },
     })
   }
