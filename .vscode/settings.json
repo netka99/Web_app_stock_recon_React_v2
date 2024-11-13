@@ -1,4 +1,8 @@
 {
     "terminal.integrated.autoReplies": {},
-    "editor.defaultFormatter": null
+    "editor.defaultFormatter": null,
+    "github.copilot.editor.enableAutoCompletions": false,
+    "github.copilot.advanced": {
+        
+    }
 }

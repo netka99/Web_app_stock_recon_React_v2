@@ -11,6 +11,7 @@ import {
 import { size } from '../styles/devices'
 import { fetchData } from '../api/fetchAPI'
 import { units } from '../utils/productDetails'
+import n2words from 'n2words'
 
 const {
   VITE_APP_SETTINGS_API,
@@ -25,14 +26,10 @@ const InvoicePage = () => {
 
   const [invoiceNumber, setInvoiceNumber] = useState(
     'FV .../01/2024',
-  )
-  const [shopName, setShopName] = useState('')
+  ) //*
   const [messageText, setMessageText] = useState('')
   const [settings, setSettings] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [address, setAddress] = useState('')
-  const [startDate, setStartDate] = useState(today)
-  const [endDate, setEndDate] = useState(today)
   const [dates, setDates] = useState([])
   const [sale, setSale] = useState(null)
   const [returns, setReturns] = useState(null)
@@ -40,20 +37,13 @@ const InvoicePage = () => {
   const [summaryReturns, setSummaryReturns] = useState({})
   const [totalsOfSale, setTotalsOfSale] = useState({})
   const [checkedItems, setCheckedItems] = useState([])
-  const [seller, setSeller] = useState(
-    'SMACZNY KĄSEK -catering-Ewelina Radoń\nul. Sejneńska 21/1\n16-400 Suwałki\nNIP 8442120248',
-  )
-  const [city, setCity] = useState('Suwałki')
-  const [invoiceDate, setInvoiceDate] = useState(today)
-  const [endSaleDate, setEndSaleDate] = useState(today)
-  const [paymentDate, setPaymentDate] = useState(today)
-  const [paymentType, setPaymentType] = useState('Przelew')
+  const [endSaleDate, setEndSaleDate] = useState(today) //*
   const [prices, setPrices] = useState({})
   const [productCode, setProductCode] = useState({
     Kartacze: '10.85.Z',
     Babka: '10.85.Z',
     Kiszka: '10.85.Z',
-  })
+  }) //*
   const [vat, setVat] = useState({
     Kartacze: 8,
     Babka: 8,
@@ -64,17 +54,86 @@ const InvoicePage = () => {
   const [titlesVisibility, setTitlesVisibility] =
     useState(false)
   const [invoiceVisibility, setInvoiceVisibility] =
-    useState(false)
-  const [comment, setComment] = useState('')
+    useState(true)
+  //states required for summaries
+  const [totals, setTotals] = useState([])
+  const [vatTotals, setVatTotals] = useState({})
+  const [vatSum, setVatSum] = useState({
+    totalNet: 0,
+    totalGross: 0,
+  })
+  const [invoiceData, setInvoiceData] = useState({
+    shopName: '',
+    address: '',
+    startDate: today,
+    endDate: today,
+    city: 'Suwałki',
+    invoiceDate: today,
+    endSaleDate: today,
+    paymentDate: today,
+    paymentType: 'Przelew',
+    seller:
+      'SMACZNY KĄSEK -catering-Ewelina Radoń\nul. Sejneńska 21/1\n16-400 Suwałki\nNIP 8442120248',
+    invoiceNumber: 'FV .../01/2024',
+    comment: '',
+  })
+  const [productsData, setProductsData] = useState([
+    {
+      checked: false,
+      product: 'Kartacze',
+      code: '10.85.Z',
+      units: 'szt.',
+      quantity: 0,
+      netPrice: 0,
+      vat: 8,
+      grossPrice: 0,
+      totalNet: 0,
+      totalGross: 0,
+    },
+    {
+      checked: false,
+      product: 'Babka',
+      code: '10.85.Z',
+      units: 'kg',
+      quantity: 0,
+      netPrice: 0,
+      vat: 8,
+      grossPrice: 0,
+      totalNet: 0,
+      totalGross: 0,
+    },
+    {
+      checked: false,
+      product: 'Kiszka',
+      code: '10.85.Z',
+      units: 'kg',
+      quantity: 0,
+      netPrice: 0,
+      vat: 8,
+      grossPrice: 0,
+      totalNet: 0,
+      totalGross: 0,
+    },
+  ])
+
+  const paymentSpelling = () => {
+    let sum = n2words(Math.trunc(vatSum.totalGross), {
+      lang: 'pl',
+    })
+    return sum
+  }
 
   const formatDate = (date) => {
     return date.toISOString().split('T')[0] // Format as YYYY-MM-DD
   }
 
-  const updatePaymantDate = () => {
-    const date = new Date()
-    date.setDate(date.getDate() + 7)
-    setPaymentDate(formatDate(date))
+  const updatePaymantDate = (date) => {
+    const newDate = new Date(date)
+    newDate.setDate(newDate.getDate() + 7)
+    setInvoiceData((prevState) => ({
+      ...prevState,
+      paymentDate: formatDate(newDate),
+    }))
   }
 
   const getDatesBetween = (startDate, endDate) => {
@@ -92,9 +151,9 @@ const InvoicePage = () => {
   }
 
   const calculateNet = (price, vat) => {
-    const net = Number(price / (1 + vat / 100)).toFixed(2)
-
-    return net
+    const priceInCents = Math.round(price * 100)
+    const netInCents = priceInCents / (1 + vat / 100)
+    return Number((netInCents / 100).toFixed(2))
   }
 
   const netPrices = () => {
@@ -195,10 +254,13 @@ const InvoicePage = () => {
 
   const dataSearchedByDates = async () => {
     setLoading(true)
-    getDatesBetween(startDate, endDate)
+    getDatesBetween(
+      invoiceData.startDate,
+      invoiceData.endDate,
+    )
 
-    const urlSales = `${VITE_APP_SALES_API}?start=${startDate}&end=${endDate}`
-    const urlReturns = `${VITE_APP_RETURNS_API}?start=${startDate}&end=${endDate}`
+    const urlSales = `${VITE_APP_SALES_API}?start=${invoiceData.startDate}&end=${invoiceData.endDate}`
+    const urlReturns = `${VITE_APP_RETURNS_API}?start=${invoiceData.startDate}&end=${invoiceData.endDate}`
 
     try {
       await fetchDataByAPI(urlSales, (dataSale) => {
@@ -242,22 +304,116 @@ const InvoicePage = () => {
     setTitlesVisibility(true)
   }
 
+  //calculations required for summaries
+  const gatherTotals = () => {
+    let newTotals = []
+
+    Object.keys(checkedItems).forEach((key) => {
+      if (checkedItems[key]) {
+        const details = productDetails[key]
+        const netTotal = Number(
+          netPrice[key] * totalsOfSale[key],
+        ).toFixed(2)
+        const grossTotal = Number(
+          prices[key] * totalsOfSale[key],
+        ).toFixed(2)
+
+        newTotals.push({
+          productName: details.name,
+          code: productCode[key],
+          unit: units[key],
+          quantity: totalsOfSale[key],
+          net: netPrice[key],
+          vat: vat[key],
+          gross: prices[key],
+          totalNet: Number(netTotal),
+          totalGross: Number(grossTotal),
+        })
+      }
+    })
+
+    extraProduct.forEach((line) => {
+      const netPrice = calculateNet(line.price, line.vat)
+      const netTotal = Number(
+        netPrice * line.quantity,
+      ).toFixed(2)
+      const grossTotal = Number(
+        line.price * line.quantity,
+      ).toFixed(2)
+
+      newTotals.push({
+        productName: line.product,
+        code: line.code,
+        unit: line.units,
+        quantity: line.quantity,
+        net: Number(netPrice),
+        vat: line.vat,
+        gross: line.price,
+        totalNet: Number(netTotal),
+        totalGross: Number(grossTotal),
+      })
+    })
+
+    setTotals(newTotals)
+  }
+
+  useEffect(() => {
+    gatherTotals()
+  }, [checkedItems, extraProduct, productCode])
+
+  const calculateVatTotals = () => {
+    const vatGroups = {}
+    let overallNetTotals = 0
+    let overallGrossTotals = 0
+
+    totals.forEach((item) => {
+      const vatRate = item.vat
+      if (!vatGroups[vatRate]) {
+        vatGroups[vatRate] = { totalNet: 0, totalGross: 0 }
+      }
+      vatGroups[vatRate].totalNet += item.totalNet
+      vatGroups[vatRate].totalGross += item.totalGross
+
+      overallNetTotals += item.totalNet
+      overallGrossTotals += item.totalGross
+    })
+
+    setVatTotals(vatGroups)
+    setVatSum({
+      totalNet: Number(overallNetTotals) || 0,
+      totalGross: Number(overallGrossTotals) || 0,
+    })
+  }
+
+  useEffect(() => {
+    calculateVatTotals()
+  }, [totals])
+
   useEffect(() => {
     loadSettings()
-  }, [])
+  }, [extraProduct, checkedItems, totals])
 
   useEffect(() => {
-    if (settings || shopName || sale || returns) {
-      summary(sale, shopName, setSummarySale)
-      summary(returns, shopName, setSummaryReturns)
+    if (
+      settings ||
+      invoiceData.shopName ||
+      sale ||
+      returns
+    ) {
+      summary(sale, invoiceData.shopName, setSummarySale)
+      summary(
+        returns,
+        invoiceData.shopName,
+        setSummaryReturns,
+      )
 
       console.log('settings data:', settings)
-      console.log('shop Name:', shopName)
-      console.log('adress:', address)
+      console.log('shop Name:', invoiceData.shopName)
+      console.log('adress:', invoiceData.address)
       console.log('sum Sale:', summarySale)
       console.log('sum Returns:', summaryReturns)
     }
-  }, [settings, shopName, sale, returns])
+  }, [settings, invoiceData.shopName, sale, returns])
 
   useEffect(() => {
     if (summarySale || summaryReturns) {
@@ -266,8 +422,8 @@ const InvoicePage = () => {
   }, [summarySale, summaryReturns])
 
   useEffect(() => {
-    updatePaymantDate()
-  }, [invoiceDate])
+    updatePaymantDate(invoiceData.invoiceDate)
+  }, [invoiceData.invoiceDate])
 
   useEffect(() => {
     const updatedNetPrices = netPrices()
@@ -279,7 +435,8 @@ const InvoicePage = () => {
       <Navbar pageTitle={pageTitle} />
       <Sidebar />
       <Container>
-        {!invoiceVisibility && (
+        {/* {!invoiceVisibility && ( */}
+        {invoiceVisibility && (
           <div className="invoices-details">
             <div className="title">
               Podaj dane do faktury
@@ -291,10 +448,13 @@ const InvoicePage = () => {
                   id="seller"
                   type="text"
                   rows={5}
-                  value={seller}
-                  onChange={(e) =>
-                    setSeller(e.target.value)
-                  }
+                  value={invoiceData.seller}
+                  onChange={(e) => {
+                    setInvoiceData((prevState) => ({
+                      ...prevState,
+                      seller: e.target.value,
+                    }))
+                  }}
                 />
               </label>
             </div>
@@ -310,18 +470,20 @@ const InvoicePage = () => {
                   }
                 ></textarea>
               </div>
-              <div className={shopName}>
+              <div className="shopName">
                 <label>
                   Nazwa sklepu :
                   {settings ? (
                     <select
-                      value={shopName}
+                      value={invoiceData.shopName}
                       onChange={(e) => {
                         const selectedShop = e.target.value
-                        setShopName(selectedShop)
-                        setAddress(
-                          settings.address[selectedShop],
-                        )
+                        setInvoiceData((prev) => ({
+                          ...prev,
+                          shopName: selectedShop,
+                          address:
+                            settings.address[selectedShop],
+                        }))
                       }}
                     >
                       <option value="">
@@ -344,9 +506,9 @@ const InvoicePage = () => {
               <div className="shopAddress">
                 <div>Adres sklepu:</div>
                 <div className="addressDetails">
-                  {address && (
+                  {invoiceData.address && (
                     <div className="address">
-                      {address
+                      {invoiceData.address
                         .split('\n')
                         .map((line, idx) => (
                           <div key={idx}>{line}</div>
@@ -360,10 +522,13 @@ const InvoicePage = () => {
                   Miejsce wystawienia:
                   <input
                     type="text"
-                    value={city}
-                    onChange={(e) =>
-                      setCity(e.target.value)
-                    }
+                    value={invoiceData.city}
+                    onChange={(e) => {
+                      setInvoiceData((prevState) => ({
+                        ...prevState,
+                        city: e.target.value,
+                      }))
+                    }}
                   />
                 </label>
               </div>
@@ -372,9 +537,12 @@ const InvoicePage = () => {
                   Data wystawienia:
                   <input
                     type="date"
-                    value={invoiceDate}
+                    value={invoiceData.invoiceDate}
                     onChange={(e) => {
-                      setInvoiceDate(e.target.value)
+                      setInvoiceData((prevState) => ({
+                        ...prevState,
+                        invoiceDate: e.target.value,
+                      }))
                     }}
                   />
                 </label>
@@ -396,9 +564,12 @@ const InvoicePage = () => {
                   Termin płatności:
                   <input
                     type="date"
-                    value={paymentDate}
+                    value={invoiceData.paymentDate}
                     onChange={(e) => {
-                      setPaymentDate(e.target.value)
+                      setInvoiceData((prevState) => ({
+                        ...prevState,
+                        paymentDate: e.target.value,
+                      }))
                     }}
                   />
                 </label>
@@ -407,9 +578,12 @@ const InvoicePage = () => {
                 <label>
                   <input
                     type="text"
-                    value={paymentType}
+                    value={invoiceData.paymentType}
                     onChange={(e) => {
-                      setPaymentType(e.target.value)
+                      setInvoiceData((prevState) => ({
+                        ...prevState,
+                        paymentType: e.target.value,
+                      }))
                     }}
                   />
                 </label>
@@ -418,17 +592,24 @@ const InvoicePage = () => {
                 <p>Okres sprzedaży</p>
                 <input
                   type="date"
-                  value={startDate}
+                  value={invoiceData.startDate}
                   onChange={(e) => {
-                    setStartDate(e.target.value)
+                    setInvoiceData((prev) => ({
+                      ...prev,
+                      startDate: e.target.value,
+                    }))
+                    // setStartDate(e.target.value)
                   }}
                   required
                 ></input>
                 <input
                   type="date"
-                  value={endDate}
+                  value={invoiceData.endDate}
                   onChange={(e) => {
-                    setEndDate(e.target.value)
+                    setInvoiceData((prev) => ({
+                      ...prev,
+                      endDate: e.target.value,
+                    }))
                   }}
                   required
                 ></input>
@@ -550,12 +731,12 @@ const InvoicePage = () => {
                               <input
                                 type="text"
                                 value={productCode[key]}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   setProductCode({
                                     ...productCode,
                                     [key]: e.target.value,
                                   })
-                                }
+                                }}
                               />
                             </label>
                           </div>
@@ -566,14 +747,14 @@ const InvoicePage = () => {
                             <label>
                               <input
                                 value={totalsOfSale[key]}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   setTotalsOfSale({
                                     ...totalsOfSale,
                                     [key]: Number(
                                       e.target.value,
                                     ),
                                   })
-                                }
+                                }}
                               />
                             </label>
                           </div>
@@ -602,7 +783,7 @@ const InvoicePage = () => {
                           <div className="gross-price">
                             <input
                               type="number"
-                              placeholder="0.00"
+                              placeholder="0"
                               value={(
                                 prices[key] / 100
                               ).toFixed(2)}
@@ -739,7 +920,8 @@ const InvoicePage = () => {
                     <label>
                       <input
                         type="number"
-                        value={line.price.toFixed(2)}
+                        step=".01"
+                        value={line.price}
                         onChange={(e) => {
                           const updatedProducts = [
                             ...extraProduct,
@@ -759,7 +941,9 @@ const InvoicePage = () => {
                   </div>
                   <div className="total-gross">
                     {Number(
-                      line.price * line.quantity,
+                      (Math.round(line.price * 100) *
+                        line.quantity) /
+                        100,
                     ).toFixed(2)}
                   </div>
                 </div>
@@ -774,9 +958,12 @@ const InvoicePage = () => {
                 Dodatkowy komentarz:
                 <input
                   type="text"
-                  value={comment}
+                  value={invoiceData.comment}
                   onChange={(e) => {
-                    setComment(e.target.value)
+                    setInvoiceData((prevState) => ({
+                      ...prevState,
+                      comment: e.target.value,
+                    }))
                   }}
                 />
               </label>
@@ -793,27 +980,24 @@ const InvoicePage = () => {
         )}
         {invoiceVisibility && (
           <InvoiceLayout
-            shopName={shopName}
-            address={address}
-            startDate={startDate}
-            endDate={endDate}
             checkedItems={checkedItems}
-            city={city}
-            invoiceDate={invoiceDate}
+            // invoiceDate={invoiceDate}
             endSaleDate={endSaleDate}
-            paymentDate={paymentDate}
-            paymentType={paymentType}
             prices={prices}
             productCode={productCode}
             vat={vat}
             netPrice={netPrice}
             extraProduct={extraProduct}
-            seller={seller}
             invoiceNumber={invoiceNumber}
             productDetails={productDetails}
             totalsOfSale={totalsOfSale}
             calculateNet={calculateNet}
-            comment={comment}
+            setInvoiceVisibility={setInvoiceVisibility}
+            paymentSpelling={paymentSpelling}
+            totals={totals}
+            vatTotals={vatTotals}
+            vatSum={vatSum}
+            invoiceData={invoiceData}
           />
         )}
         {loading && <Spinner />}

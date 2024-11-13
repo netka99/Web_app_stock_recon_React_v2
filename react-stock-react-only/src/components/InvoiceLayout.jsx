@@ -6,19 +6,11 @@ import { units } from '../utils/productDetails'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 import PropTypes from 'prop-types'
-import n2words from 'n2words'
+// import n2words from 'n2words' //*
 
 const InvoiceLayout = ({
-  seller,
-  address,
-  startDate,
-  endDate,
   checkedItems,
-  city,
-  invoiceDate,
   endSaleDate,
-  paymentDate,
-  paymentType,
   prices,
   productCode,
   vat,
@@ -28,111 +20,119 @@ const InvoiceLayout = ({
   productDetails,
   totalsOfSale,
   calculateNet,
-  comment,
+  setInvoiceVisibility,
+  paymentSpelling,
+  vatSum,
+  vatTotals,
+  totals,
+  invoiceData,
 }) => {
-  const [totals, setTotals] = useState([])
-  const [vatTotals, setVatTotals] = useState({})
-  const [vatSum, setVatSum] = useState({
-    totalNet: 0,
-    totalGross: 0,
-  })
+  // const [totals, setTotals] = useState([]) //*
+  // const [vatTotals, setVatTotals] = useState({}) //*
+  // const [vatSum, setVatSum] = useState({
+  //   totalNet: 0,
+  //   totalGross: 0,
+  // }) //*
   const invoiceRef = useRef()
 
   const formatDate = (date) => {
+    if (!date) {
+      return ''
+    }
     const reverseDate = date.split('-').reverse().join('-')
     return reverseDate
   }
 
-  const paymentSpelling = () => {
-    let sum = n2words(vatSum.totalGross.toFixed(0), {
-      lang: 'pl',
-    })
-    return sum
-  }
+  // const paymentSpelling = () => {
+  //   let sum = n2words(Math.trunc(vatSum.totalGross), {
+  //     lang: 'pl',
+  //   })
+  //   return sum
+  // }
 
-  const gatherTotals = () => {
-    let newTotals = []
+  // const gatherTotals = () => {
+  //   let newTotals = []
 
-    Object.keys(checkedItems).forEach((key) => {
-      if (checkedItems[key]) {
-        const details = productDetails[key]
-        const netTotal = Number(
-          netPrice[key] * totalsOfSale[key],
-        ).toFixed(2)
-        const grossTotal = Number(
-          prices[key] * totalsOfSale[key],
-        ).toFixed(2)
+  //   Object.keys(checkedItems).forEach((key) => {
+  //     if (checkedItems[key]) {
+  //       const details = productDetails[key]
+  //       const netTotal = Number(
+  //         netPrice[key] * totalsOfSale[key],
+  //       ).toFixed(2)
+  //       const grossTotal = Number(
+  //         prices[key] * totalsOfSale[key],
+  //       ).toFixed(2)
 
-        newTotals.push({
-          productName: details.name,
-          code: productCode[key],
-          unit: units[key],
-          quantity: totalsOfSale[key],
-          net: netPrice[key],
-          vat: vat[key],
-          gross: prices[key],
-          totalNet: Number(netTotal),
-          totalGross: Number(grossTotal),
-        })
-      }
-    })
+  //       newTotals.push({
+  //         productName: details.name,
+  //         code: productCode[key],
+  //         unit: units[key],
+  //         quantity: totalsOfSale[key],
+  //         net: netPrice[key],
+  //         vat: vat[key],
+  //         gross: prices[key],
+  //         totalNet: Number(netTotal),
+  //         totalGross: Number(grossTotal),
+  //       })
+  //     }
+  //   })
 
-    extraProduct.forEach((line) => {
-      const netPrice = calculateNet(line.price, line.vat)
-      const netTotal = Number(
-        netPrice * line.quantity,
-      ).toFixed(2)
-      const grossTotal = Number(
-        line.price * line.quantity,
-      ).toFixed(2)
+  //   extraProduct.forEach((line) => {
+  //     const netPrice = calculateNet(line.price, line.vat)
+  //     const netTotal = Number(
+  //       netPrice * line.quantity,
+  //     ).toFixed(2)
+  //     const grossTotal = Number(
+  //       line.price * line.quantity,
+  //     ).toFixed(2)
 
-      newTotals.push({
-        productName: line.product,
-        code: line.code,
-        unit: line.units,
-        quantity: line.quantity,
-        net: Number(netPrice),
-        vat: line.vat,
-        gross: line.price,
-        totalNet: Number(netTotal),
-        totalGross: Number(grossTotal),
-      })
-    })
+  //     newTotals.push({
+  //       productName: line.product,
+  //       code: line.code,
+  //       unit: line.units,
+  //       quantity: line.quantity,
+  //       net: Number(netPrice),
+  //       vat: line.vat,
+  //       gross: line.price,
+  //       totalNet: Number(netTotal),
+  //       totalGross: Number(grossTotal),
+  //     })
+  //   })
 
-    setTotals(newTotals)
-  }
+  //   setTotals(newTotals)
+  // }
 
-  useEffect(() => {
-    gatherTotals()
-  }, [])
+  // useEffect(() => {
+  //   gatherTotals()
+  // }, [])
 
-  const calculateVatTotals = () => {
-    const vatGroups = {}
-    let overallNetTotals = 0
-    let overallGrossTotals = 0
+  // const calculateVatTotals = () => {
+  //   const vatGroups = {}
+  //   let overallNetTotals = 0
+  //   let overallGrossTotals = 0
 
-    totals.forEach((item) => {
-      const vatRate = item.vat
-      if (!vatGroups[vatRate]) {
-        vatGroups[vatRate] = { totalNet: 0, totalGross: 0 }
-      }
-      vatGroups[vatRate].totalNet += item.totalNet
-      vatGroups[vatRate].totalGross += item.totalGross
+  //   totals.forEach((item) => {
+  //     const vatRate = item.vat
+  //     if (!vatGroups[vatRate]) {
+  //       vatGroups[vatRate] = { totalNet: 0, totalGross: 0 }
+  //     }
+  //     vatGroups[vatRate].totalNet += item.totalNet
+  //     vatGroups[vatRate].totalGross += item.totalGross
 
-      overallNetTotals += item.totalNet
-      overallGrossTotals += item.totalGross
-    })
+  //     overallNetTotals += item.totalNet
+  //     overallGrossTotals += item.totalGross
+  //   })
 
-    setVatTotals(vatGroups)
-    setVatSum({
-      totalNet: Number(overallNetTotals) || 0,
-      totalGross: Number(overallGrossTotals) || 0,
-    })
-  }
+  //   setVatTotals(vatGroups)
+  //   setVatSum({
+  //     totalNet: Number(overallNetTotals) || 0,
+  //     totalGross: Number(overallGrossTotals) || 0,
+  //   })
+  // }
 
-  useEffect(() => {
-    calculateVatTotals()
-  }, [totals])
+  // useEffect(() => {
+  //   calculateVatTotals()
+  // }, [totals])
 
   const generatePdf = async () => {
     const canvas = await html2canvas(invoiceRef.current, {
@@ -184,12 +184,14 @@ const InvoiceLayout = ({
           <div className="invoice-info">
             <div className="info">
               <div>Miejsce wystawienia:</div>
-              <div className="info-main">{city}</div>
+              <div className="info-main">
+                {invoiceData.city}
+              </div>
             </div>
             <div className="info">
               <div>Data wystawienia:</div>
               <div className="info-main">
-                {formatDate(invoiceDate)}
+                {formatDate(invoiceData.invoiceDate)}
               </div>
             </div>
             <div className="info">
@@ -201,8 +203,8 @@ const InvoiceLayout = ({
             <div className="info">
               <div>Okres dostawy:</div>
               <div className="info-main">
-                {formatDate(startDate)} -{' '}
-                {formatDate(endDate)}
+                {formatDate(invoiceData.startDate)} -{' '}
+                {formatDate(invoiceData.endDate)}
               </div>
             </div>
           </div>
@@ -213,11 +215,15 @@ const InvoiceLayout = ({
         <div className="seller-buyer">
           <div className="seller">
             <div className="seller-title">Sprzedawca</div>
-            <div className="seller-address">{seller}</div>
+            <div className="seller-address">
+              {invoiceData.seller}
+            </div>
           </div>
           <div className="buyer">
             <div className="buyer-title">Nabywca</div>
-            <div className="buyer-address">{address}</div>
+            <div className="buyer-address">
+              {invoiceData.address}
+            </div>
           </div>
         </div>
         <div className="bank-account">
@@ -373,12 +379,14 @@ const InvoiceLayout = ({
           </div>
           <div className="payment-method">
             {`Forma płatności:  `}
-            <span className="bold-text">{paymentType}</span>
+            <span className="bold-text">
+              {invoiceData.paymentType}
+            </span>
           </div>
           <div className="payment-date">
             {`Termin płatności:  `}
             <span className="bold-text">
-              {formatDate(paymentDate)}
+              {formatDate(invoiceData.paymentDate)}
             </span>
           </div>
           <div className="payment-total">
@@ -396,9 +404,12 @@ const InvoiceLayout = ({
             Fakturę odebrał
           </div>
         </div>
-        <div className="comment">{comment}</div>
+        <div className="comment">{invoiceData.comment}</div>
       </div>
       <button onClick={generatePdf}>Generate PDF</button>
+      <button onClick={() => setInvoiceVisibility(false)}>
+        Popraw
+      </button>
     </Container>
   )
 }
@@ -445,6 +456,8 @@ InvoiceLayout.propTypes = {
   totalsOfSale: PropTypes.objectOf(PropTypes.number),
   calculateNet: PropTypes.func,
   comment: PropTypes.string,
+  setInvoiceVisibility: PropTypes.func,
+  paymentSpelling: PropTypes.func,
 }
 
 const Container = styled.div`
