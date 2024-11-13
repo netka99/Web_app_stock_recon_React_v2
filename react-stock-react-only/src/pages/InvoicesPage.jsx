@@ -156,6 +156,26 @@ const InvoicePage = () => {
     return Number((netInCents / 100).toFixed(2))
   }
 
+  const calculations = () => {
+    const updatedProductsData = productsData.map((prod) => {
+      const netPrice = calculateNet(
+        prod.grossPrice,
+        prod.vat,
+      )
+      const totalNet = prod.quantity * netPrice
+      const totalGross = totalNet * (1 + prod.vat / 100)
+      console.log('calculations run')
+      return {
+        ...prod,
+        netPrice: netPrice,
+        totalNet: totalNet,
+        totalGross: totalGross,
+      }
+    })
+
+    setProductsData(updatedProductsData)
+  }
+
   const netPrices = () => {
     if (prices) {
       const updatedNetPrices = {}
@@ -202,6 +222,19 @@ const InvoicePage = () => {
         (data) => {
           setSettings(data)
           setPrices(data.prices)
+          const updatedProductData = productsData.map(
+            (product) => {
+              const price = data.prices[product.product]
+              return {
+                ...product,
+                grossPrice:
+                  price !== undefined
+                    ? price
+                    : product.grossPrice,
+              }
+            },
+          )
+          setProductsData(updatedProductData)
         },
       )
     } catch (error) {
@@ -250,6 +283,18 @@ const InvoicePage = () => {
 
     console.log(totals)
     setTotalsOfSale(totals)
+
+    const updateProductData = productsData.map(
+      (product) => {
+        const quantity = totals[product.product] || 0
+        return {
+          ...product,
+          quantity: quantity,
+        }
+      },
+    )
+
+    setProductsData(updateProductData)
   }
 
   const dataSearchedByDates = async () => {
@@ -406,6 +451,7 @@ const InvoicePage = () => {
         invoiceData.shopName,
         setSummaryReturns,
       )
+      calculations()
 
       console.log('settings data:', settings)
       console.log('shop Name:', invoiceData.shopName)
@@ -598,7 +644,6 @@ const InvoicePage = () => {
                       ...prev,
                       startDate: e.target.value,
                     }))
-                    // setStartDate(e.target.value)
                   }}
                   required
                 ></input>
