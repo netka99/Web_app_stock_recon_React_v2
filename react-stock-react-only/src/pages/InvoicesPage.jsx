@@ -77,10 +77,12 @@ const InvoicePage = () => {
     invoiceNumber: 'FV .../01/2024',
     comment: '',
   })
+
   const [productsData, setProductsData] = useState([
     {
       checked: false,
       product: 'Kartacze',
+      productName: 'Ciepłe gotowane kartacze',
       code: '10.85.Z',
       units: 'szt.',
       quantity: 0,
@@ -93,6 +95,7 @@ const InvoicePage = () => {
     {
       checked: false,
       product: 'Babka',
+      productName: 'Ciepła babka ziemniaczana',
       code: '10.85.Z',
       units: 'kg',
       quantity: 0,
@@ -105,6 +108,7 @@ const InvoicePage = () => {
     {
       checked: false,
       product: 'Kiszka',
+      productName: 'Ciepła kiszka',
       code: '10.85.Z',
       units: 'kg',
       quantity: 0,
@@ -158,12 +162,15 @@ const InvoicePage = () => {
 
   const calculations = () => {
     const updatedProductsData = productsData.map((prod) => {
-      const netPrice = calculateNet(
-        prod.grossPrice,
-        prod.vat,
+      const netPrice = Number(
+        (prod.grossPrice / (1 + prod.vat / 100)).toFixed(2),
       )
-      const totalNet = prod.quantity * netPrice
-      const totalGross = totalNet * (1 + prod.vat / 100)
+      const totalNet = Number(
+        (prod.quantity * netPrice).toFixed(2),
+      )
+      const totalGross = Number(
+        (prod.quantity * prod.grossPrice).toFixed(2),
+      )
       console.log('calculations run')
       return {
         ...prod,
@@ -174,6 +181,16 @@ const InvoicePage = () => {
     })
 
     setProductsData(updatedProductsData)
+  }
+
+  const updateProductData = (product, title, value) => {
+    setProductsData((prev) =>
+      prev.map((p) =>
+        p.product === product.product
+          ? { ...p, [title]: value }
+          : p,
+      ),
+    )
   }
 
   const netPrices = () => {
@@ -229,7 +246,7 @@ const InvoicePage = () => {
                 ...product,
                 grossPrice:
                   price !== undefined
-                    ? price
+                    ? Number((price / 100).toFixed(2))
                     : product.grossPrice,
               }
             },
@@ -320,6 +337,7 @@ const InvoicePage = () => {
       handleError(error)
     } finally {
       setLoading(false)
+      setTitlesVisibility(true)
     }
   }
 
@@ -698,9 +716,9 @@ const InvoicePage = () => {
                 Object.keys(totalsOfSale).length > 0 ? (
                   Object.keys(totalsOfSale).map((key) => (
                     <div key={key}>
-                      <label htmlFor={key}>
-                        {` ${key}: ${totalsOfSale[key]} ${units[key]}`}
-                      </label>
+                      <label
+                        htmlFor={key}
+                      >{` ${key}: ${totalsOfSale[key]} ${units[key]}`}</label>
                       <input
                         id={key}
                         type="checkbox"
@@ -747,7 +765,112 @@ const InvoicePage = () => {
                   </div>
                 </div>
               )}
-              {Object.keys(checkedItems).length > 0 && (
+              {(summarySale || summaryReturns) &&
+                productsData.map(
+                  (product) =>
+                    product.quantity !== 0 && (
+                      <div
+                        className="product-details"
+                        key={product.product}
+                      >
+                        <div className="number">
+                          <label htmlFor={product.product}>
+                            <input
+                              type="checkbox"
+                              name={product.product}
+                              checked={product.checked}
+                              onChange={(e) =>
+                                updateProductData(
+                                  product,
+                                  'checked',
+                                  e.target.checked,
+                                )
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div className="product-name">
+                          {product.product}
+                        </div>
+                        <div className="product-code">
+                          <label>
+                            <input
+                              type="text"
+                              value={product.code}
+                              onChange={(e) =>
+                                updateProductData(
+                                  product,
+                                  'code',
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div className="product-unit">
+                          {product.units}
+                        </div>
+                        <div className="product-quantity">
+                          <label>
+                            <input
+                              value={product.quantity}
+                              onChange={(e) =>
+                                updateProductData(
+                                  product,
+                                  'quantity',
+                                  Number(e.target.value),
+                                )
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div className="net-price">
+                          {product.netPrice.toFixed(2)}
+                        </div>
+                        <div className="vat">
+                          <label>
+                            <input
+                              type="number"
+                              value={product.vat}
+                              onChange={(e) =>
+                                updateProductData(
+                                  product,
+                                  'vat',
+                                  Number(e.target.value),
+                                )
+                              }
+                            />
+                            %
+                          </label>
+                        </div>
+                        <div className="gross-price">
+                          <input
+                            type="number"
+                            placeholder="0"
+                            value={product.grossPrice}
+                            onChange={(e) =>
+                              updateProductData(
+                                product,
+                                'grossPrice',
+                                Number(e.target.value),
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="total-net">
+                          {Number(product.totalNet).toFixed(
+                            2,
+                          )}
+                        </div>
+                        <div className="total-gross">
+                          {Number(
+                            product.totalGross,
+                          ).toFixed(2)}
+                        </div>
+                      </div>
+                    ),
+                )}
+              {/* {Object.keys(checkedItems).length > 0 && (
                 <>
                   {Object.keys(checkedItems).map((key) => {
                     if (checkedItems[key]) {
@@ -862,7 +985,7 @@ const InvoicePage = () => {
                     return null // This is added in case the condition is false
                   })}
                 </>
-              )}
+              )} */}
               {extraProduct.map((line, index) => (
                 <div
                   key={index}
