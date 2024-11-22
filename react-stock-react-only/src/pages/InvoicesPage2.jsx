@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import {
   Navbar,
@@ -21,7 +21,7 @@ const {
 
 const pageTitle = 'Faktury'
 
-const InvoicePage = () => {
+const InvoicePage2 = () => {
   const today = new Date().toISOString().split('T')[0]
 
   const [invoiceNumber, setInvoiceNumber] = useState(
@@ -78,6 +78,21 @@ const InvoicePage = () => {
     comment: '',
   })
 
+  const [summariesUpdated, setSummariesUpdated] =
+    useState(false)
+
+  const calculateNetPrice = (grossPrice, vat) => {
+    return Number((grossPrice / (1 + vat / 100)).toFixed(2))
+  }
+
+  const calculateTotalNet = (quantity, netPrice) => {
+    return Number((quantity * netPrice).toFixed(2))
+  }
+
+  const calculateTotalGross = (quantity, grossPrice) => {
+    return Number((quantity * grossPrice).toFixed(2))
+  }
+
   const [productsData, setProductsData] = useState([
     {
       checked: false,
@@ -120,6 +135,10 @@ const InvoicePage = () => {
     },
   ])
 
+  const filteredCheckedProducts = productsData.filter(
+    (product) => product.checked,
+  )
+
   const paymentSpelling = () => {
     let sum = n2words(Math.trunc(vatSum.totalGross), {
       lang: 'pl',
@@ -160,37 +179,34 @@ const InvoicePage = () => {
     return Number((netInCents / 100).toFixed(2))
   }
 
-  const calculations = () => {
-    const updatedProductsData = productsData.map((prod) => {
-      const netPrice = Number(
-        (prod.grossPrice / (1 + prod.vat / 100)).toFixed(2),
-      )
-      const totalNet = Number(
-        (prod.quantity * netPrice).toFixed(2),
-      )
-      const totalGross = Number(
-        (prod.quantity * prod.grossPrice).toFixed(2),
-      )
-      console.log('calculations run')
-      return {
-        ...prod,
-        netPrice: netPrice,
-        totalNet: totalNet,
-        totalGross: totalGross,
-      }
-    })
-
-    setProductsData(updatedProductsData)
-  }
-
   const updateProductData = (product, title, value) => {
     setProductsData((prev) =>
-      prev.map((p) =>
-        p.product === product.product
-          ? { ...p, [title]: value }
-          : p,
-      ),
+      prev.map((p) => {
+        if (p.product === product.product) {
+          const updatedProduct = { ...p, [title]: value }
+          const netPrice = calculateNetPrice(
+            updatedProduct.grossPrice,
+            updatedProduct.vat,
+          )
+          const totalNet = calculateTotalNet(
+            updatedProduct.quantity,
+            netPrice,
+          )
+          const totalGross = calculateTotalGross(
+            updatedProduct.quantity,
+            updatedProduct.grossPrice,
+          )
+          return {
+            ...updatedProduct,
+            netPrice: netPrice,
+            totalNet: totalNet,
+            totalGross: totalGross,
+          }
+        }
+        return p
+      }),
     )
+    setSummariesUpdated(true)
   }
 
   const netPrices = () => {
@@ -350,9 +366,9 @@ const InvoicePage = () => {
     },
   }
 
-  const addExtraProduct = () => {
-    setExtraProduct([
-      ...extraProduct,
+  const addExtraProduct = useCallback(() => {
+    setExtraProduct((prev) => [
+      ...prev,
       {
         product: '',
         code: '',
@@ -365,10 +381,10 @@ const InvoicePage = () => {
       },
     ])
     setTitlesVisibility(true)
-  }
+  }, [])
 
   //calculations required for summaries
-  const gatherTotals = () => {
+  const gatherTotals = useCallback(() => {
     let newTotals = []
 
     Object.keys(checkedItems).forEach((key) => {
@@ -418,11 +434,19 @@ const InvoicePage = () => {
     })
 
     setTotals(newTotals)
-  }
+  }, [
+    checkedItems,
+    extraProduct,
+    productCode,
+    netPrice,
+    prices,
+    totalsOfSale,
+    vat,
+  ])
 
   useEffect(() => {
     gatherTotals()
-  }, [checkedItems, extraProduct, productCode])
+  }, [gatherTotals])
 
   const calculateVatTotals = () => {
     const vatGroups = {}
@@ -448,36 +472,36 @@ const InvoicePage = () => {
     })
   }
 
-  useEffect(() => {
-    calculateVatTotals()
-  }, [totals])
-
-  useEffect(() => {
-    loadSettings()
-  }, [extraProduct, checkedItems, totals])
-
-  useEffect(() => {
-    if (
-      settings ||
-      invoiceData.shopName ||
-      sale ||
-      returns
-    ) {
-      summary(sale, invoiceData.shopName, setSummarySale)
-      summary(
-        returns,
-        invoiceData.shopName,
-        setSummaryReturns,
+  const calculations = () => {
+    const updatedProductsData = productsData.map((prod) => {
+      const netPrice = calculateNetPrice(
+        prod.grossPrice,
+        prod.vat,
       )
+      const totalNet = calculateTotalNet(
+        prod.quantity,
+        netPrice,
+      )
+      const totalGross = calculateTotalGross(
+        prod.quantity,
+        prod.grossPrice,
+      )
+      return {
+        ...prod,
+        netPrice: netPrice,
+        totalNet: totalNet,
+        totalGross: totalGross,
+      }
+    })
+    console.log('calculations run')
+    setProductsData(updatedProductsData)
+  }
+  useEffect(() => {
+    if (summariesUpdated) {
       calculations()
-
-      console.log('settings data:', settings)
-      console.log('shop Name:', invoiceData.shopName)
-      console.log('adress:', invoiceData.address)
-      console.log('sum Sale:', summarySale)
-      console.log('sum Returns:', summaryReturns)
+      setSummariesUpdated(false) // Reset the state
     }
-  }, [settings, invoiceData.shopName, sale, returns])
+  }, [summariesUpdated])
 
   useEffect(() => {
     if (summarySale || summaryReturns) {
@@ -494,6 +518,36 @@ const InvoicePage = () => {
     setNetPrice(updatedNetPrices)
   }, [prices, vat])
 
+  useEffect(() => {
+    calculateVatTotals()
+  }, [totals])
+
+  useEffect(() => {
+    loadSettings()
+  }, [])
+
+  useEffect(() => {
+    if (
+      settings ||
+      invoiceData.shopName ||
+      sale ||
+      returns
+    ) {
+      summary(sale, invoiceData.shopName, setSummarySale)
+      summary(
+        returns,
+        invoiceData.shopName,
+        setSummaryReturns,
+      )
+      // calculations()
+      setSummariesUpdated(true)
+      console.log('settings data:', settings)
+      console.log('shop Name:', invoiceData.shopName)
+      console.log('adress:', invoiceData.address)
+      console.log('sum Sale:', summarySale)
+      console.log('sum Returns:', summaryReturns)
+    }
+  }, [invoiceData.shopName, sale, returns])
   return (
     <StyledMain>
       <Navbar pageTitle={pageTitle} />
@@ -1146,7 +1200,7 @@ const InvoicePage = () => {
             </div>
           </div>
         )}
-        {invoiceVisibility && (
+        {/* {invoiceVisibility && (
           <InvoiceLayout
             checkedItems={checkedItems}
             // invoiceDate={invoiceDate}
@@ -1166,8 +1220,9 @@ const InvoicePage = () => {
             vatTotals={vatTotals}
             vatSum={vatSum}
             invoiceData={invoiceData}
+            productsData={productsData}
           />
-        )}
+        )} */}
         {loading && <Spinner />}
       </Container>
 
@@ -1279,4 +1334,4 @@ const Container = styled.div`
     }
   }
 `
-export default InvoicePage
+export default InvoicePage2
