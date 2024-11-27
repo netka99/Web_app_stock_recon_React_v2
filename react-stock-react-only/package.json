@@ -12,6 +12,7 @@
     "server": "json-server --watch settings.json --port 3001"
   },
   "dependencies": {
+    "big.js": "^6.2.2",
     "jspdf": "^2.5.1",
     "n2words": "^1.21.0",
     "react": "^18.2.0",

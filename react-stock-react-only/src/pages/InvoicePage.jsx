@@ -1,5 +1,10 @@
 import * as React from 'react'
-import { useState, useEffect } from 'react'
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from 'react'
 import styled from 'styled-components'
 import {
   Navbar,
@@ -11,6 +16,7 @@ import {
 import { size } from '../styles/devices'
 import { fetchData } from '../api/fetchAPI'
 // import n2words from 'n2words'
+import Big from 'big.js'
 
 const {
   VITE_APP_SETTINGS_API,
@@ -33,10 +39,14 @@ const InvoicePage = () => {
   const [summaryReturns, setSummaryReturns] = useState({})
   const [summariesUpdated, setSummariesUpdated] =
     useState(false)
+  const [extraProduct, setExtraProduct] = useState([])
   const [titlesVisibility, setTitlesVisibility] =
     useState(false)
-
-  const [invoiceData, setInvoiceData] = useState({
+  const [quntitiesUpdated, setQuantitiesUpdated] =
+    useState(false)
+  const [shouldCalculate, setShouldCalculate] =
+    useState(false)
+  const initialInvoiceData = {
     shopName: '',
     address: '',
     startDate: today,
@@ -50,7 +60,11 @@ const InvoicePage = () => {
       'SMACZNY KĄSEK -catering-Ewelina Radoń\nul. Sejneńska 21/1\n16-400 Suwałki\nNIP 8442120248',
     invoiceNumber: 'FV .../01/2024',
     comment: '',
-  })
+  }
+
+  const [invoiceData, setInvoiceData] = useState(
+    initialInvoiceData,
+  )
 
   const [productsData, setProductsData] = useState([
     {
@@ -98,28 +112,31 @@ const InvoicePage = () => {
     return date.toISOString().split('T')[0] // Format as YYYY-MM-DD
   }
 
-  const updatePaymantDate = (date) => {
+  const updatePaymantDate = useCallback((date) => {
     const newDate = new Date(date)
     newDate.setDate(newDate.getDate() + 7)
     setInvoiceData((prevState) => ({
       ...prevState,
       paymentDate: formatDate(newDate),
     }))
-  }
+  }, [])
 
-  const getDatesBetween = (startDate, endDate) => {
-    let dates = []
-    let currentDate = new Date(startDate)
+  const getDatesBetween = useCallback(
+    (startDate, endDate) => {
+      let dates = []
+      let currentDate = new Date(startDate)
 
-    while (currentDate <= new Date(endDate)) {
-      dates.push({
-        name: formatDate(new Date(currentDate)),
-      })
-      currentDate.setDate(currentDate.getDate() + 1)
-    }
-    setDates(dates)
-    return dates
-  }
+      while (currentDate <= new Date(endDate)) {
+        dates.push({
+          name: formatDate(new Date(currentDate)),
+        })
+        currentDate.setDate(currentDate.getDate() + 1)
+      }
+      setDates(dates)
+      return dates
+    },
+    [],
+  )
 
   const getMessagesText = (messageType) => {
     switch (messageType) {
@@ -130,23 +147,26 @@ const InvoicePage = () => {
     }
   }
 
-  const handleError = (error) => {
+  const handleError = useCallback((error) => {
     console.error('Error fetching data:', error),
       setTimeout(() => {
         setMessageText(getMessagesText('errorFetching'))
       }, 4000)
-  }
+  }, [])
 
-  const fetchDataByAPI = (url, setDatafromAPI) => {
-    fetchData(url)
-      .then((data) => {
-        setDatafromAPI(data)
-        setMessageText('')
-      })
-      .catch(handleError)
-  }
+  const fetchDataByAPI = useCallback(
+    (url, setDatafromAPI) => {
+      fetchData(url)
+        .then((data) => {
+          setDatafromAPI(data)
+          setMessageText('')
+        })
+        .catch(handleError)
+    },
+    [handleError],
+  )
 
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     setLoading(true)
     try {
       await fetchDataByAPI(
@@ -173,9 +193,9 @@ const InvoicePage = () => {
     } finally {
       setLoading(false) // Hide spinner
     }
-  }
+  }, [fetchDataByAPI, handleError, productsData])
 
-  const dataSearchedByDates = async () => {
+  const dataSearchedByDates = useCallback(async () => {
     setLoading(true)
     getDatesBetween(
       invoiceData.startDate,
@@ -200,9 +220,15 @@ const InvoicePage = () => {
       setLoading(false)
       setTitlesVisibility(true)
     }
-  }
+  }, [
+    fetchDataByAPI,
+    getDatesBetween,
+    handleError,
+    invoiceData.startDate,
+    invoiceData.endDate,
+  ])
 
-  const summary = (data, shop, stateVar) => {
+  const summary = useCallback((data, shop, stateVar) => {
     const filteredByShop = data?.filter(
       (d) => d.shop === shop,
     )
@@ -220,17 +246,47 @@ const InvoicePage = () => {
       {},
     )
     return stateVar(productSum)
+  }, [])
+
+  const calculateNetPrice = (grossPrice, vat) => {
+    const netPrice = Big(grossPrice).div(
+      Big(1).plus(Big(vat).div(100)),
+    )
+    console.log(
+      `calculateNetPrice - grossPrice: ${grossPrice}, vat: ${vat}, netPrice: ${netPrice.toFixed(2)}`,
+    )
+    return Number(netPrice.toFixed(2))
   }
 
-  const totalsPerProduct = () => {
+  const calculateTotalNet = (vat, quantity, grossPrice) => {
+    const grossDecimal = Big(quantity).times(grossPrice) // Convert gross to Big.js instance
+    const vatMultiplier = Big(1).plus(Big(vat).div(100)) // Calculate VAT multiplier
+    const net = grossDecimal.div(vatMultiplier) // Divide gross by VAT multiplier
+    console.log(
+      `calculateTotalNet: grossPrice: ${grossPrice}, vat: ${vat}, quantity: ${quantity}, net: ${net.toFixed(2)}`,
+    )
+    return Number(net.toFixed(2)) // Round to 2 decimal places
+  }
+
+  const calculateTotalGross = (quantity, grossPrice) => {
+    const totalGross = Big(quantity).times(grossPrice)
+    console.log(
+      `calculateTotalGross - quantity: ${quantity}, grossPrice: ${grossPrice}, totalGross: ${totalGross.toFixed(2)}`,
+    )
+    return Number(totalGross.toFixed(2))
+  }
+
+  const totalsPerProduct = useCallback(() => {
     const safeSummarySale = summarySale || {}
     const safeSummaryReturns = summaryReturns || {}
 
+    // Combine keys from both objects
     const allKeys = new Set([
       ...Object.keys(safeSummarySale),
       ...Object.keys(safeSummaryReturns),
     ])
 
+    // Calculate totals per product
     const totals = Object.fromEntries(
       [...allKeys].map((k) => [
         k,
@@ -239,20 +295,90 @@ const InvoicePage = () => {
       ]),
     )
 
-    console.log(totals)
-
-    const updateProductData = productsData.map(
+    // Update quantities first
+    const updateProductQuantityTotals = productsData.map(
       (product) => {
         const quantity = totals[product.product] || 0
+
+        const netPrice = calculateNetPrice(
+          product.grossPrice,
+          product.vat,
+        )
+        const totalNet = calculateTotalNet(
+          product.vat,
+          quantity,
+          product.grossPrice,
+        )
+        const totalGross = calculateTotalGross(
+          quantity,
+          product.grossPrice,
+        )
+        console.log('only quantities run')
         return {
           ...product,
           quantity: quantity,
+          netPrice: netPrice,
+          totalNet: totalNet,
+          totalGross: totalGross,
         }
       },
     )
 
-    setProductsData(updateProductData)
-  }
+    setProductsData(updateProductQuantityTotals)
+  }, [summarySale, summaryReturns])
+
+  const updateProductTotals = useCallback(
+    (productName, title, value, setState) => {
+      setState((prev) =>
+        prev.map((p) => {
+          if (p.product === productName.product) {
+            const updatedProduct = { ...p, [title]: value }
+            const netPrice = calculateNetPrice(
+              updatedProduct.grossPrice,
+              updatedProduct.vat,
+            )
+            const totalNet = calculateTotalNet(
+              updatedProduct.vat,
+              updatedProduct.quantity,
+              updatedProduct.grossPrice,
+            )
+            const totalGross = calculateTotalGross(
+              updatedProduct.quantity,
+              updatedProduct.grossPrice,
+            )
+            console.log('updateProductTotals run')
+            return {
+              ...updatedProduct,
+              netPrice: netPrice,
+              totalNet: totalNet,
+              totalGross: totalGross,
+            }
+          }
+          return p
+        }),
+      )
+      // setSummariesUpdated(true)
+    },
+  )
+
+  const addExtraProduct = useCallback(() => {
+    setExtraProduct((prev) => [
+      ...prev,
+      {
+        checked: false,
+        productName: '',
+        code: '',
+        units: '',
+        quantity: 0,
+        netPrice: 0,
+        vat: 0,
+        grossPrice: 0,
+        totalNet: 0,
+        totalGross: 0,
+      },
+    ])
+    setTitlesVisibility(true)
+  }, [])
 
   useEffect(() => {
     loadSettings()
@@ -281,8 +407,12 @@ const InvoicePage = () => {
   }, [invoiceData.shopName, sale, returns])
 
   useEffect(() => {
-    if (summarySale || summaryReturns) {
+    if (
+      (sale && Object.keys(summarySale).length > 0) ||
+      (returns && Object.keys(summaryReturns).length > 0)
+    ) {
       totalsPerProduct()
+      console.log('useEffect for totalsPerProduct run')
     }
   }, [summarySale, summaryReturns])
 
@@ -496,7 +626,8 @@ const InvoicePage = () => {
           {((summarySale &&
             Object.keys(summarySale).length > 0) ||
             (summaryReturns &&
-              Object.keys(summaryReturns).length > 0)) && (
+              Object.keys(summaryReturns).length > 0) ||
+            titlesVisibility) && (
             <div className="titles">
               <div className="number">Lp.</div>
               <div className="product-name">
@@ -553,14 +684,19 @@ const InvoicePage = () => {
                         <input
                           type="text"
                           value={product.code}
-                          readOnly
-                          //   onChange={(e) =>
-                          //     updateProductData(
-                          //       product,
-                          //       'code',
-                          //       e.target.value,
-                          //     )
-                          //   }
+                          onChange={(e) =>
+                            setProductsData((prod) =>
+                              prod.map((p) =>
+                                p.product ===
+                                product.product
+                                  ? {
+                                      ...p,
+                                      code: e.target.value,
+                                    }
+                                  : p,
+                              ),
+                            )
+                          }
                         />
                       </label>
                     </div>
@@ -571,14 +707,14 @@ const InvoicePage = () => {
                       <label>
                         <input
                           value={product.quantity}
-                          readOnly
-                          //   onChange={(e) =>
-                          //     updateProductData(
-                          //       product,
-                          //       'quantity',
-                          //       Number(e.target.value),
-                          //     )
-                          //   }
+                          onChange={(e) =>
+                            updateProductTotals(
+                              product,
+                              'quantity',
+                              Number(e.target.value),
+                              setProductsData,
+                            )
+                          }
                         />
                       </label>
                     </div>
@@ -590,14 +726,16 @@ const InvoicePage = () => {
                         <input
                           type="number"
                           value={product.vat}
-                          readOnly
-                          //   onChange={(e) =>
-                          //     updateProductData(
-                          //       product,
-                          //       'vat',
-                          //       Number(e.target.value),
-                          //     )
-                          //   }
+                          onChange={(e) =>
+                            updateProductTotals(
+                              product,
+                              'vat',
+                              Number(
+                                e.target.value,
+                              ).toFixed(2),
+                              setProductsData,
+                            )
+                          }
                         />
                         %
                       </label>
@@ -607,14 +745,16 @@ const InvoicePage = () => {
                         type="number"
                         placeholder="0"
                         value={product.grossPrice}
-                        readOnly
-                        // onChange={(e) =>
-                        //   updateProductData(
-                        //     product,
-                        //     'grossPrice',
-                        //     Number(e.target.value),
-                        //   )
-                        // }
+                        onChange={(e) =>
+                          updateProductTotals(
+                            product,
+                            'grossPrice',
+                            Number(e.target.value).toFixed(
+                              2,
+                            ),
+                            setProductsData,
+                          )
+                        }
                       />
                     </div>
                     <div className="total-net">
@@ -628,14 +768,22 @@ const InvoicePage = () => {
                   </div>
                 ),
             )}
-          {/* {extraProduct.map((line, index) => (
+          {extraProduct.map((line, index) => (
             <div key={index} className="product-details">
               <div className="number">
                 <label>
                   <input
-                    type="text"
-                    defaultValue="1"
-                    onChange={(e) => e.target.value}
+                    type="checkbox"
+                    name={line.product}
+                    checked={line.checked}
+                    onChange={(e) => {
+                      const updatedProducts = [
+                        ...extraProduct,
+                      ]
+                      updatedProducts[index].checked =
+                        e.target.checked
+                      setExtraProduct(updatedProducts)
+                    }}
                   />
                 </label>
               </div>
@@ -643,12 +791,12 @@ const InvoicePage = () => {
                 <label>
                   <input
                     type="text"
-                    value={line.product}
+                    value={line.productName}
                     onChange={(e) => {
                       const updatedProducts = [
                         ...extraProduct,
                       ]
-                      updatedProducts[index].product =
+                      updatedProducts[index].productName =
                         e.target.value
                       setExtraProduct(updatedProducts)
                     }}
@@ -704,22 +852,31 @@ const InvoicePage = () => {
                 </label>
               </div>
               <div className="net-price">
-                {calculateNet(line.price, line.vat)}
+                {/* {calculateNet(line.price, line.vat)} */}
+                {line.netPrice.toFixed(2)}
               </div>
               <div className="vat">
                 <label>
                   <input
                     type="number"
                     value={line.vat}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].vat = Number(
-                        e.target.value,
+                    // onChange={(e) => {
+                    //   const updatedProducts = [
+                    //     ...extraProduct,
+                    //   ]
+                    //   updatedProducts[index].vat = Number(
+                    //     e.target.value,
+                    //   )
+                    //   setExtraProduct(updatedProducts)
+                    // }}
+                    onChange={(e) =>
+                      updateProductTotals(
+                        line.productName,
+                        'vat',
+                        Number(e.target.value),
+                        setExtraProduct,
                       )
-                      setExtraProduct(updatedProducts)
-                    }}
+                    }
                   />
                   %
                 </label>
@@ -729,38 +886,43 @@ const InvoicePage = () => {
                   <input
                     type="number"
                     step=".01"
-                    value={line.price}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].price = Number(
-                        e.target.value,
+                    value={line.grossPrice}
+                    // onChange={(e) => {
+                    //   const updatedProducts = [
+                    //     ...extraProduct,
+                    //   ]
+                    //   updatedProducts[index].grossPrice =
+                    //     Number(e.target.value)
+                    //   setExtraProduct(updatedProducts)
+                    // }}
+                    onChange={(e) =>
+                      updateProductTotals(
+                        line.productName,
+                        'grossPrice',
+                        Number(e.target.value),
+                        setExtraProduct,
                       )
-                      setExtraProduct(updatedProducts)
-                    }}
+                    }
                   />
                 </label>
               </div>
               <div className="total-net">
-                {Number(
-                  calculateNet(line.price, line.vat) *
-                    line.quantity,
-                ).toFixed(2)}
+                {Number(line.totalNet).toFixed(2)}
               </div>
               <div className="total-gross">
-                {Number(
+                {Number(line.totalGross).toFixed(2)}
+                {/* {Number(
                   (Math.round(line.price * 100) *
                     line.quantity) /
                     100,
-                ).toFixed(2)}
+                ).toFixed(2)} */}
               </div>
             </div>
           ))}
 
           <button onClick={addExtraProduct}>
             Dodaj nowy produkt
-          </button> */}
+          </button>
         </div>
       </Container>
       <Footer />
