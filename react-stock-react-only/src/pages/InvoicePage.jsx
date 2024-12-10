@@ -1,10 +1,5 @@
 import * as React from 'react'
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-} from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import {
   Navbar,
@@ -37,14 +32,8 @@ const InvoicePage = () => {
   const [returns, setReturns] = useState(null)
   const [summarySale, setSummarySale] = useState({})
   const [summaryReturns, setSummaryReturns] = useState({})
-  const [summariesUpdated, setSummariesUpdated] =
-    useState(false)
   const [extraProduct, setExtraProduct] = useState([])
   const [titlesVisibility, setTitlesVisibility] =
-    useState(false)
-  const [quntitiesUpdated, setQuantitiesUpdated] =
-    useState(false)
-  const [shouldCalculate, setShouldCalculate] =
     useState(false)
   const initialInvoiceData = {
     shopName: '',
@@ -357,7 +346,6 @@ const InvoicePage = () => {
           return p
         }),
       )
-      // setSummariesUpdated(true)
     },
   )
 
@@ -397,7 +385,6 @@ const InvoicePage = () => {
         invoiceData.shopName,
         setSummaryReturns,
       )
-      setSummariesUpdated(true)
       console.log('settings data:', settings)
       console.log('shop Name:', invoiceData.shopName)
       console.log('adress:', invoiceData.address)
@@ -415,12 +402,6 @@ const InvoicePage = () => {
       console.log('useEffect for totalsPerProduct run')
     }
   }, [summarySale, summaryReturns])
-
-  useEffect(() => {
-    if (summariesUpdated) {
-      setSummariesUpdated(false) // Reset the state
-    }
-  }, [summariesUpdated])
 
   useEffect(() => {
     updatePaymantDate(invoiceData.invoiceDate)
@@ -852,7 +833,6 @@ const InvoicePage = () => {
                 </label>
               </div>
               <div className="net-price">
-                {/* {calculateNet(line.price, line.vat)} */}
                 {line.netPrice.toFixed(2)}
               </div>
               <div className="vat">
@@ -860,15 +840,6 @@ const InvoicePage = () => {
                   <input
                     type="number"
                     value={line.vat}
-                    // onChange={(e) => {
-                    //   const updatedProducts = [
-                    //     ...extraProduct,
-                    //   ]
-                    //   updatedProducts[index].vat = Number(
-                    //     e.target.value,
-                    //   )
-                    //   setExtraProduct(updatedProducts)
-                    // }}
                     onChange={(e) =>
                       updateProductTotals(
                         line.productName,
@@ -887,14 +858,6 @@ const InvoicePage = () => {
                     type="number"
                     step=".01"
                     value={line.grossPrice}
-                    // onChange={(e) => {
-                    //   const updatedProducts = [
-                    //     ...extraProduct,
-                    //   ]
-                    //   updatedProducts[index].grossPrice =
-                    //     Number(e.target.value)
-                    //   setExtraProduct(updatedProducts)
-                    // }}
                     onChange={(e) =>
                       updateProductTotals(
                         line.productName,
@@ -911,11 +874,6 @@ const InvoicePage = () => {
               </div>
               <div className="total-gross">
                 {Number(line.totalGross).toFixed(2)}
-                {/* {Number(
-                  (Math.round(line.price * 100) *
-                    line.quantity) /
-                    100,
-                ).toFixed(2)} */}
               </div>
             </div>
           ))}
@@ -1031,6 +989,17 @@ const Container = styled.div`
     input {
       width: 60%;
     }
+  }
+
+  /* Chrome, Safari, Edge, and Opera */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+
+  /* Firefox */
+  input[type='number'] {
+    -moz-appearance: textfield;
   }
 `
 export default InvoicePage
