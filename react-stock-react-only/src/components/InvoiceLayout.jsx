@@ -6,33 +6,19 @@ import { units } from '../utils/productDetails'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 import PropTypes from 'prop-types'
-// import n2words from 'n2words' //*
+import n2words from 'n2words' //*
 
 const InvoiceLayout = ({
-  checkedItems,
-  endSaleDate,
-  prices,
-  productCode,
-  vat,
-  netPrice,
-  extraProduct,
-  invoiceNumber,
-  productDetails,
-  totalsOfSale,
-  calculateNet,
-  setInvoiceVisibility,
-  paymentSpelling,
-  vatSum,
-  vatTotals,
-  totals,
   invoiceData,
+  productsData,
+  extraProduct,
 }) => {
   // const [totals, setTotals] = useState([]) //*
-  // const [vatTotals, setVatTotals] = useState({}) //*
-  // const [vatSum, setVatSum] = useState({
-  //   totalNet: 0,
-  //   totalGross: 0,
-  // }) //*
+  const [vatTotals, setVatTotals] = useState({}) //*
+  const [vatSum, setVatSum] = useState({
+    totalNet: 0,
+    totalGross: 0,
+  }) //*
   const invoiceRef = useRef()
 
   const formatDate = (date) => {
@@ -43,12 +29,21 @@ const InvoiceLayout = ({
     return reverseDate
   }
 
-  // const paymentSpelling = () => {
-  //   let sum = n2words(Math.trunc(vatSum.totalGross), {
-  //     lang: 'pl',
-  //   })
-  //   return sum
-  // }
+  const allProducts = [...productsData, ...extraProduct]
+
+  //productsData data filtered by checked
+  const filteredProducts = allProducts.filter(
+    (product) => product.checked,
+  )
+
+  console.log('Filtered all Products:', filteredProducts)
+
+  const paymentSpelling = () => {
+    let sum = n2words(Math.trunc(vatSum.totalGross), {
+      lang: 'pl',
+    })
+    return sum
+  }
 
   // const gatherTotals = () => {
   //   let newTotals = []
@@ -106,33 +101,33 @@ const InvoiceLayout = ({
   //   gatherTotals()
   // }, [])
 
-  // const calculateVatTotals = () => {
-  //   const vatGroups = {}
-  //   let overallNetTotals = 0
-  //   let overallGrossTotals = 0
+  const calculateVatTotals = () => {
+    const vatGroups = {}
+    let overallNetTotals = 0
+    let overallGrossTotals = 0
 
-  //   totals.forEach((item) => {
-  //     const vatRate = item.vat
-  //     if (!vatGroups[vatRate]) {
-  //       vatGroups[vatRate] = { totalNet: 0, totalGross: 0 }
-  //     }
-  //     vatGroups[vatRate].totalNet += item.totalNet
-  //     vatGroups[vatRate].totalGross += item.totalGross
+    filteredProducts.forEach((item) => {
+      const vatRate = item.vat
+      if (!vatGroups[vatRate]) {
+        vatGroups[vatRate] = { totalNet: 0, totalGross: 0 }
+      }
+      vatGroups[vatRate].totalNet += item.totalNet
+      vatGroups[vatRate].totalGross += item.totalGross
 
-  //     overallNetTotals += item.totalNet
-  //     overallGrossTotals += item.totalGross
-  //   })
+      overallNetTotals += item.totalNet
+      overallGrossTotals += item.totalGross
+    })
 
-  //   setVatTotals(vatGroups)
-  //   setVatSum({
-  //     totalNet: Number(overallNetTotals) || 0,
-  //     totalGross: Number(overallGrossTotals) || 0,
-  //   })
-  // }
+    setVatTotals(vatGroups)
+    setVatSum({
+      totalNet: Number(overallNetTotals) || 0,
+      totalGross: Number(overallGrossTotals) || 0,
+    })
+  }
 
-  // useEffect(() => {
-  //   calculateVatTotals()
-  // }, [totals])
+  useEffect(() => {
+    calculateVatTotals()
+  }, [productsData, extraProduct])
 
   const generatePdf = async () => {
     const canvas = await html2canvas(invoiceRef.current, {
@@ -173,7 +168,7 @@ const InvoiceLayout = ({
       )
       heightLeft -= pdf.internal.pageSize.height
     }
-    pdf.save(`${invoiceNumber}.pdf`)
+    pdf.save(`${invoiceData.invoiceNumber}.pdf`)
   }
 
   return (
@@ -197,7 +192,7 @@ const InvoiceLayout = ({
             <div className="info">
               <div>Data zakoczenia dostawy/usługi:</div>
               <div className="info-main">
-                {formatDate(endSaleDate)}
+                {formatDate(invoiceData.endSaleDate)}
               </div>
             </div>
             <div className="info">
@@ -210,7 +205,7 @@ const InvoiceLayout = ({
           </div>
         </div>
         <div className="invoice-number">
-          Faktura nr: {invoiceNumber}
+          Faktura nr: {invoiceData.invoiceNumber}
         </div>
         <div className="seller-buyer">
           <div className="seller">
@@ -268,7 +263,7 @@ const InvoiceLayout = ({
           </div>
         </div>
 
-        {totals.map((line, index) => (
+        {filteredProducts.map((line, index) => (
           <div className="product-details" key={index}>
             <div className="details number-details">
               {index + 1}
@@ -280,19 +275,19 @@ const InvoiceLayout = ({
               {line.code}
             </div>
             <div className="details product-unit-details">
-              {line.unit}
+              {line.units}
             </div>
             <div className="details product-quantity-details">
               {line.quantity.toFixed(2)}
             </div>
             <div className="details net-price-details">
-              {line.net.toFixed(2)}
+              {line.netPrice.toFixed(2)}
             </div>
             <div className="details product-vat-details">
               {line.vat}%
             </div>
             <div className="details gross-price-details">
-              {line.gross.toFixed(2)}
+              {line.grossPrice.toFixed(2)}
             </div>
             <div className="details total-net-details">
               {line.totalNet.toFixed(2)}
@@ -305,14 +300,14 @@ const InvoiceLayout = ({
         <div className="summary">
           <div className="summary-text">Razem w PLN</div>
           <div className="summary-net">
-            {totals.length > 0 &&
-              totals
+            {allProducts.length > 0 &&
+              filteredProducts
                 .reduce((acc, cur) => acc + cur.totalNet, 0)
                 .toFixed(2)}
           </div>
           <div className="summary-gross">
-            {totals.length > 0 &&
-              totals
+            {allProducts.length > 0 &&
+              filteredProducts
                 .reduce(
                   (acc, cur) => acc + cur.totalGross,
                   0,
@@ -407,9 +402,9 @@ const InvoiceLayout = ({
         <div className="comment">{invoiceData.comment}</div>
       </div>
       <button onClick={generatePdf}>Generate PDF</button>
-      <button onClick={() => setInvoiceVisibility(false)}>
+      {/* <button onClick={() => setInvoiceVisibility(false)}> 
         Popraw
-      </button>
+      </button> */}
     </Container>
   )
 }
@@ -766,7 +761,7 @@ const Container = styled.div`
     margin-bottom: 2rem;
     margin-top: auto;
     position: absolute;
-    bottom: 0;
+    bottom: 5rem;
     width: 90%;
   }
 

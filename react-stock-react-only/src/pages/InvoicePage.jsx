@@ -6,7 +6,7 @@ import {
   Sidebar,
   Footer,
   //   Spinner,
-  //   InvoiceLayout,
+  InvoiceLayout,
 } from '../components/index'
 import { size } from '../styles/devices'
 import { fetchData } from '../api/fetchAPI'
@@ -32,6 +32,8 @@ const InvoicePage = () => {
   const [returns, setReturns] = useState(null)
   const [summarySale, setSummarySale] = useState({})
   const [summaryReturns, setSummaryReturns] = useState({})
+  const [isInvoiceVisible, setIsInvoiceVisible] =
+    useState(false)
   const [extraProduct, setExtraProduct] = useState([])
   const [titlesVisibility, setTitlesVisibility] =
     useState(false)
@@ -601,6 +603,19 @@ const InvoicePage = () => {
                 )}
               </div>
             </div>
+            <div className="comment">
+              <div>Dodatkowy komentarz: </div>
+              <input
+                type="text"
+                value={invoiceData.comment}
+                onChange={(e) => {
+                  setInvoiceData((prev) => ({
+                    ...prev,
+                    comment: e.target.value,
+                  }))
+                }}
+              />
+            </div>
           </div>
         </div>
         <div className="selling-form">
@@ -881,6 +896,22 @@ const InvoicePage = () => {
           <button onClick={addExtraProduct}>
             Dodaj nowy produkt
           </button>
+        </div>
+        <div className="generateButton">
+          <button
+            onClick={() =>
+              !isInvoiceVisible && setIsInvoiceVisible(true)
+            }
+          >
+            Wygeneruj fakturę
+          </button>
+          {isInvoiceVisible && (
+            <InvoiceLayout
+              extraProduct={extraProduct}
+              invoiceData={invoiceData}
+              productsData={productsData}
+            />
+          )}
         </div>
       </Container>
       <Footer />
