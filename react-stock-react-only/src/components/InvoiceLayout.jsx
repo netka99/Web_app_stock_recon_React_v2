@@ -19,7 +19,7 @@ const InvoiceLayout = ({
     totalNet: 0,
     totalGross: 0,
   }) //*
-  const invoiceRef = useRef()
+  const invoiceRef = useRef(null)
 
   const formatDate = (date) => {
     if (!date) {
@@ -44,62 +44,6 @@ const InvoiceLayout = ({
     })
     return sum
   }
-
-  // const gatherTotals = () => {
-  //   let newTotals = []
-
-  //   Object.keys(checkedItems).forEach((key) => {
-  //     if (checkedItems[key]) {
-  //       const details = productDetails[key]
-  //       const netTotal = Number(
-  //         netPrice[key] * totalsOfSale[key],
-  //       ).toFixed(2)
-  //       const grossTotal = Number(
-  //         prices[key] * totalsOfSale[key],
-  //       ).toFixed(2)
-
-  //       newTotals.push({
-  //         productName: details.name,
-  //         code: productCode[key],
-  //         unit: units[key],
-  //         quantity: totalsOfSale[key],
-  //         net: netPrice[key],
-  //         vat: vat[key],
-  //         gross: prices[key],
-  //         totalNet: Number(netTotal),
-  //         totalGross: Number(grossTotal),
-  //       })
-  //     }
-  //   })
-
-  //   extraProduct.forEach((line) => {
-  //     const netPrice = calculateNet(line.price, line.vat)
-  //     const netTotal = Number(
-  //       netPrice * line.quantity,
-  //     ).toFixed(2)
-  //     const grossTotal = Number(
-  //       line.price * line.quantity,
-  //     ).toFixed(2)
-
-  //     newTotals.push({
-  //       productName: line.product,
-  //       code: line.code,
-  //       unit: line.units,
-  //       quantity: line.quantity,
-  //       net: Number(netPrice),
-  //       vat: line.vat,
-  //       gross: line.price,
-  //       totalNet: Number(netTotal),
-  //       totalGross: Number(grossTotal),
-  //     })
-  //   })
-
-  //   setTotals(newTotals)
-  // }
-
-  // useEffect(() => {
-  //   gatherTotals()
-  // }, [])
 
   const calculateVatTotals = () => {
     const vatGroups = {}
@@ -130,10 +74,18 @@ const InvoiceLayout = ({
   }, [productsData, extraProduct])
 
   const generatePdf = async () => {
+    // Temporarily remove scaling styles for PDF generation
+    const originalTransform =
+      invoiceRef.current.style.transform
+    invoiceRef.current.style.transform = 'none'
+
     const canvas = await html2canvas(invoiceRef.current, {
       scale: 4, // Increase the scale (default is 1)
       useCORS: true, // Allow external resources like fonts and images
     })
+
+    // Restore the original styles after capturing
+    invoiceRef.current.style.transform = originalTransform
 
     const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF('portrait', 'pt', 'a4') // A4 size PDF
@@ -171,8 +123,58 @@ const InvoiceLayout = ({
     pdf.save(`${invoiceData.invoiceNumber}.pdf`)
   }
 
+  useEffect(() => {
+    const handleResize = () => {
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
+
+      // Invoice original dimensions
+      const invoiceWidth = 880 // Original width of the invoice
+      const invoiceHeight = 297 * 3.77953 // Convert mm to px (1 mm = 3.77953 px)
+
+      // Set scaling behavior based on viewport width
+      let scaleFactor = 1
+
+      if (viewportWidth < 500) {
+        // Scale to 0.5 when the viewport is less than 500px
+        scaleFactor = 0.4
+      } else if (
+        viewportWidth >= 600 &&
+        viewportWidth < 800
+      ) {
+        // Scale to 0.8 when the viewport is between 500px and 800px
+        scaleFactor = 0.7
+      } else if (viewportWidth >= 800) {
+        // No scaling for screens wider than 800px
+        scaleFactor = 1
+      } else if (
+        viewportWidth >= 500 &&
+        viewportWidth < 600
+      ) {
+        // Scale to 0.8 when the viewport is between 500px and 800px
+        scaleFactor = 0.6
+      }
+
+      // Apply the scaling if the invoiceRef is available
+      if (invoiceRef.current) {
+        invoiceRef.current.style.transform = `scale(${scaleFactor})`
+        invoiceRef.current.style.transformOrigin =
+          'top center' // Anchor scaling at top-center
+      }
+    }
+
+    handleResize() // Initial scaling
+    window.addEventListener('resize', handleResize) // Adjust on resize
+
+    return () => {
+      window.removeEventListener('resize', handleResize) // Cleanup
+    }
+  }, [])
   return (
     <Container>
+      <div className="generate_pdf">
+        <button onClick={generatePdf}>Wygeneruj PDF</button>
+      </div>
       <div ref={invoiceRef} className="invoice-preview">
         <div className="invoice-header">
           <div className="invoice-logo">Logo</div>
@@ -401,10 +403,6 @@ const InvoiceLayout = ({
         </div>
         <div className="comment">{invoiceData.comment}</div>
       </div>
-      <button onClick={generatePdf}>Generate PDF</button>
-      {/* <button onClick={() => setInvoiceVisibility(false)}> 
-        Popraw
-      </button> */}
     </Container>
   )
 }
@@ -456,15 +454,28 @@ InvoiceLayout.propTypes = {
 }
 
 const Container = styled.div`
+  /* display: 'flex';
+  justify-content: 'center';
+  align-items: 'flex-start'; // Align invoice to the top
+  width: '100vw';
+  height: '100vh'; */
+  flex-direction: column;
+  /* overflow: 'hidden'; // Prevent unwanted scrolling */
+  margin: 1rem;
+
   .invoice-preview {
-    width: 100%;
+    /* width: 100%; */
     padding: 35px;
     /* border: 1px solid #ddd; */
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
     width: 800px;
     height: 297mm;
     background-color: white;
     position: relative;
+    overflow: auto;
+    margin: 0 auto 20px auto;
+    /* transform-origin: top center; */
+    transition: transform 0.3s ease; /* Smooth scaling */
   }
 
   .invoice-header {
@@ -768,6 +779,13 @@ const Container = styled.div`
   .comment {
     padding-top: 1rem;
     font-size: 0.9rem;
+  }
+
+  .generate_pdf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem;
   }
 `
 
