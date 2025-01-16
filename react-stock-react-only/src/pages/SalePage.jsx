@@ -23,8 +23,6 @@ const {
 } = import.meta.env
 import { size } from '../styles/devices'
 
-//http://localhost:8000/sales?start=2024-04-19&end=2024-04-19
-
 const pageTitle = 'Sprzedaż'
 
 const SalePage = () => {

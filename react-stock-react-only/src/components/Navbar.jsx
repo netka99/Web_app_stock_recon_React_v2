@@ -5,6 +5,7 @@ import { FaBars } from 'react-icons/fa'
 import logo from '../assets/Logo_SK.png'
 import backgroundImgBig from '../assets/backgroundBig.png'
 import backgroundImgS from '../assets/background.png'
+import { size } from '../styles/devices'
 import { useProductsContext } from '../context/products_context'
 import PropTypes from 'prop-types'
 
@@ -146,7 +147,7 @@ const NavContainer = styled.nav`
     display: block;
     z-index: -1;
 
-    @media screen and (max-width: 321px) {
+    @media screen and (max-width: ${size.mobileS}) {
       height: 90px;
     }
 
@@ -186,7 +187,7 @@ const NavContainer = styled.nav`
     font-size: 1.6rem;
     font-weight: bolder;
 
-    @media screen and (max-width: $tablet) {
+    @media screen and (max-width: ${size.tabletS}) {
       font-size: 1.3rem;
       padding: 0.6em 1rem;
     }

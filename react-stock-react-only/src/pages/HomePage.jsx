@@ -40,7 +40,7 @@ const HomePage = () => {
 
 const Wrapper = styled.section`
   position: fixed;
-  top: 50%;
+  top: 60%;
   left: 50%;
   transform: translate(-50%, -50%);
   .labelsContainer {
@@ -48,6 +48,13 @@ const Wrapper = styled.section`
     grid-template-columns: repeat(2, 1fr);
     gap: 20px; /* Adjust the gap between grid items as needed */
     padding: 20px;
+    width: fit-content; /* Shrinks the container to fit its content */
+    margin: 0 auto; /* Centers the grid */
+  }
+
+  .label:nth-child(5) {
+    grid-column: 1 / 3; /* Span across both columns */
+    justify-self: center; /* Center horizontally */
   }
 
   .label {
@@ -55,7 +62,7 @@ const Wrapper = styled.section`
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    padding: 0.4rem 1rem;
+    padding: 0.3rem 0.8rem;
     cursor: pointer;
     font-weight: bold;
     transition: background ease 0.3s;
@@ -63,9 +70,12 @@ const Wrapper = styled.section`
     border-radius: 15px;
     box-shadow: 2px 3px 4px 1px rgba(0, 0, 0, 0.3);
     padding-top: 1.5rem;
+    width: fit-content; /* Shrinks the label */
+    max-width: 100px; /* Optional: Set a max width if needed */
+    transition: background ease 0.3s;
 
     @media screen and (max-width: 350px) {
-      padding: 0.8rem 0.8rem;
+      padding: 0.5rem;
     }
   }
 
@@ -83,6 +93,10 @@ const Wrapper = styled.section`
     border-radius: 4rem;
     height: auto;
     width: auto;
+
+    @media screen and (max-width: 768px) {
+      padding: 0.1rem;
+    }
   }
 
   .labelTitle {
@@ -91,8 +105,10 @@ const Wrapper = styled.section`
     padding-bottom: 1rem;
     font-size: 1.1rem;
 
-    @media screen and (min-width: 768px) {
-      padding-bottom: 1.5rem;
+    @media screen and (max-width: 768px) {
+      padding-bottom: 0.1rem;
+      padding-top: 0.1rem;
+      font-size: 0.9rem;
     }
   }
 `

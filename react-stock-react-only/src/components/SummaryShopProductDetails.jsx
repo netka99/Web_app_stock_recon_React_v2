@@ -5,6 +5,7 @@ import { units } from '../utils/productDetails'
 import editImg from '../assets/edit.png'
 import saveImg from '../assets/save-icon.png'
 import { updateDataOnApi } from '../api/fetchAPI'
+import { size } from '../styles/devices'
 const { VITE_APP_SALES_API, VITE_APP_RETURNS_API } =
   import.meta.env
 
@@ -332,6 +333,10 @@ const Container = styled.div`
     grid-template-columns: 2fr 1fr 1fr 1fr;
     border-bottom: 1px solid #e1e0e0;
     padding: 10px 0px 3px 2px;
+
+    @media screen and (max-width: ${size.mobileL}) {
+      grid-template-columns: 40% 23% 25% 12%;
+    }
   }
 
   .sale-filered {
@@ -381,8 +386,8 @@ const Container = styled.div`
     border: none;
     cursor: pointer;
 
-    @media screen and (max-width: $mobileL) {
-      padding-right: 0rem;
+    @media screen and (max-width: ${size.mobileL}) {
+      padding-right: 5px;
     }
     img {
       display: block;
@@ -392,6 +397,10 @@ const Container = styled.div`
 
   .edit-button {
     padding-left: 2rem;
+
+    @media screen and (max-width: ${size.mobileL}) {
+      padding-left: 0rem;
+    }
     img {
       filter: brightness(0) saturate(100%) invert(24%)
         sepia(0%) saturate(484%) hue-rotate(174deg)

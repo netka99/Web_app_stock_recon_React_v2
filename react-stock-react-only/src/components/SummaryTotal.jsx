@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { units } from '../utils/productDetails'
+import { size } from '../styles/devices'
 
 const SummaryTotal = ({
   settingsData,
@@ -21,17 +22,17 @@ const SummaryTotal = ({
       <div className="sum-container">
         <div className="sum-header">Suma</div>
         <div className="sum-total">{`${summary(saleData) - summary(returnsData)} ${units[productSelected]}`}</div>
-        <div className="sum-total-prize">{`${(summary(saleData) - summary(returnsData)) * settingsData.prices[productSelected]} zł`}</div>
+        <div className="sum-total-prize">{`${(((summary(saleData) - summary(returnsData)) * settingsData.prices[productSelected]) / 100).toFixed(2)} zł`}</div>
       </div>
       <div className="sum-sale">
         <div className="sum-header-sale">Sprzedaż</div>
         <div className="sum-total">{`  ${summary(saleData)} ${units[productSelected]}`}</div>
-        <div className="sum-total-prize">{`  ${summary(saleData) * settingsData.prices[productSelected]} zł`}</div>
+        <div className="sum-total-prize">{`  ${((summary(saleData) * settingsData.prices[productSelected]) / 100).toFixed(2)} zł`}</div>
       </div>
       <div className="sum-return">
         <div className="sum-header-sale">Zwrot</div>
         <div className="sum-total">{`-${summary(returnsData)} ${units[productSelected]}`}</div>
-        <div className="sum-total-prize">{`-${summary(returnsData) * settingsData.prices[productSelected]} zł`}</div>
+        <div className="sum-total-prize">{`-${((summary(returnsData) * settingsData.prices[productSelected]) / 100).toFixed(2)} zł`}</div>
       </div>
     </Container>
   )
@@ -85,36 +86,76 @@ const Container = styled.div`
   font-weight: bold;
   color: #5d5d5d;
 
+  @media screen and (max-width: ${size.tabletS}) {
+    width: 95%;
+  }
+
+  @media screen and (min-width: ${size.tabletS}) and (max-width: ${size.tablet}) {
+    width: 80%;
+  }
+
+  @media screen and (min-width: ${size.tablet}) and (max-width: ${size.desktop}) {
+    width: 70%;
+  }
+
+  @media screen and (min-width: ${size.desktop}) and (max-width: ${size.desktopXS}) {
+    width: 60%;
+  }
+
   .sum-sale,
   .sum-container,
   .sum-return {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
     width: 95%;
+
+    @media screen and (max-width: ${size.mobileL}) {
+      grid-template-columns: 40% 30% 30%;
+    }
+
+    @media screen and (max-width: ${size.tabletS}) {
+      width: 100%;
+    }
   }
 
   .sum-header {
     padding-right: 0rem;
     margin: 0em 0em;
     padding-left: 35px;
+
+    @media screen and (max-width: ${size.mobileL}) {
+      padding-left: 15px;
+    }
   }
 
   .sum-header-sale {
     padding-right: 0rem;
     margin: 0em 0em;
     padding-left: 35px;
+
+    @media screen and (max-width: ${size.mobileL}) {
+      padding-left: 15px;
+    }
   }
 
   .sum-container {
     font-weight: bold;
     font-size: 1.1rem;
     padding: 0.5rem 0 1rem 0;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      font-size: 0.9rem;
+    }
   }
 
   .sum-sale {
     font-weight: 400;
     font-size: 1rem;
     padding: 0.5rem 0 0.5rem 0;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      font-size: 0.9rem;
+    }
   }
 
   .sum-return {
@@ -122,6 +163,10 @@ const Container = styled.div`
     font-size: 1rem;
     color: #b86969;
     padding: 0.1rem 0 0.5rem 0;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      font-size: 0.9rem;
+    }
   }
 
   .sum-total {
@@ -129,6 +174,10 @@ const Container = styled.div`
     justify-content: center;
     align-items: center;
     margin: 0 1rem 0 1rem;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      margin: 0;
+    }
   }
 
   .sum-total-prize {

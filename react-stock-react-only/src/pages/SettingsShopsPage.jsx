@@ -6,7 +6,6 @@ import {
   actionTypes,
   shopReducer,
 } from '../reducers/shops_settings_reducer'
-
 import {
   Navbar,
   Sidebar,
@@ -15,6 +14,7 @@ import {
   AddShop,
   ShopItem,
 } from '../components/index'
+import { size } from '../styles/devices'
 
 const pageTitle = 'Ustawienia - Sklepy'
 const { VITE_APP_SETTINGS_API } = import.meta.env
@@ -202,6 +202,11 @@ const Container = styled.div`
   flex-grow: 1;
   margin-bottom: 8rem;
   margin-top: 10rem;
+  max-width: 100vw;
+
+  @media screen and (max-width: ${size.mobileL}) {
+    margin-top: 5rem;
+  }
 
   .message {
     padding-bottom: 1rem;
@@ -226,6 +231,10 @@ const Container = styled.div`
     margin-bottom: 1rem;
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
+  }
+
+  .shopsListSettings {
+    margin: 0 auto;
   }
 `
 

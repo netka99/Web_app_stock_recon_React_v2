@@ -5,6 +5,7 @@ import { fetchData, updateDataOnApi } from '../api/fetchAPI'
 import shopImg from '../assets/store-img.svg'
 import editImg from '../assets/edit.png'
 import saveImg from '../assets/save-icon.png'
+import { size } from '../styles/devices'
 
 import {
   Navbar,
@@ -225,6 +226,10 @@ const Container = styled.div`
   margin-bottom: 8rem;
   margin-top: 10rem;
 
+  @media screen and (max-width: ${size.mobileL}) {
+    margin-top: 4rem;
+  }
+
   .message {
     padding-bottom: 1rem;
     color: #ef3a4f;
@@ -252,6 +257,10 @@ const Container = styled.div`
 
   .shopsListSettings {
     width: 65%;
+
+    @media screen and (max-width: ${size.mobileL}) {
+      width: 95%;
+    }
   }
 
   .address-container {
@@ -291,7 +300,7 @@ const Container = styled.div`
     cursor: pointer;
     padding-right: 2rem;
 
-    @media screen and (max-width: $mobileL) {
+    @media screen and (max-width: ${size.mobileL}) {
       padding-right: 0rem;
     }
     img {

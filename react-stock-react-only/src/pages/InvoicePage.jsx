@@ -49,7 +49,7 @@ const InvoicePage = () => {
     paymentType: 'Przelew',
     seller:
       'SMACZNY KĄSEK -catering-Ewelina Radoń\nul. Sejneńska 21/1\n16-400 Suwałki\nNIP 8442120248',
-    invoiceNumber: 'FV .../01/2024',
+    invoiceNumber: 'FV .../01/2025',
     comment: '',
   }
 
@@ -414,151 +414,186 @@ const InvoicePage = () => {
       <Navbar pageTitle={pageTitle} />
       <Sidebar />
       <Container>
-        <div className="invoices-details">
-          <div className="title">Podaj dane do faktury</div>
-          <div className="seller">
-            <label htmlFor="seller">
-              Sprzedawca:
-              <textarea
-                id="seller"
-                type="text"
-                rows={5}
-                value={invoiceData.seller}
-                onChange={(e) => {
-                  setInvoiceData((prevState) => ({
-                    ...prevState,
-                    seller: e.target.value,
-                  }))
-                }}
-              />
-            </label>
-          </div>
-          <div className="details">
-            <div className="invoiceNumber">
-              <label>Numer Faktury: </label>
-              <textarea
-                name="invoiceNumber"
-                value={invoiceData.invoiceNumber}
-                rows={1}
-                onChange={(e) =>
-                  setInvoiceData((prev) => ({
-                    ...prev,
-                    invoiceNumber: e.target.value,
-                  }))
-                }
-              ></textarea>
+        <div className="details-container">
+          <div className="invoices-details">
+            <div className="title">
+              Podaj dane do faktury
             </div>
+            <div className="invoice-seller">
+              <label htmlFor="seller">
+                <div className="text">Sprzedawca:</div>
+                <textarea
+                  id="seller"
+                  type="text"
+                  rows={5}
+                  value={invoiceData.seller}
+                  onChange={(e) => {
+                    setInvoiceData((prevState) => ({
+                      ...prevState,
+                      seller: e.target.value,
+                    }))
+                  }}
+                />
+              </label>
+            </div>
+            <div className="invoice-details">
+              <div className="invoiceNumber">
+                <label>
+                  <div className="text">Numer Faktury:</div>
+                </label>
+                <textarea
+                  name="invoiceNumber"
+                  value={invoiceData.invoiceNumber}
+                  rows={1}
+                  onChange={(e) =>
+                    setInvoiceData((prev) => ({
+                      ...prev,
+                      invoiceNumber: e.target.value,
+                    }))
+                  }
+                ></textarea>
+              </div>
+              <div className="city">
+                <label htmlFor="city">
+                  <div className="text">
+                    Miejsce wystawienia:
+                  </div>
+                  <input
+                    type="text"
+                    value={invoiceData.city}
+                    onChange={(e) => {
+                      setInvoiceData((prevState) => ({
+                        ...prevState,
+                        city: e.target.value,
+                      }))
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="invoice-date">
+                <label>
+                  <div className="text">
+                    Data wystawienia:
+                  </div>
+                  <input
+                    type="date"
+                    value={invoiceData.invoiceDate}
+                    onChange={(e) => {
+                      setInvoiceData((prevState) => ({
+                        ...prevState,
+                        invoiceDate: e.target.value,
+                      }))
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="sale-end-date">
+                <label>
+                  <div className="text">
+                    Data zakończenia dostawy/usługi:
+                  </div>
+                  <input
+                    type="date"
+                    value={invoiceData.endSaleDate}
+                    onChange={(e) => {
+                      setInvoiceData((prev) => ({
+                        ...prev,
+                        endSaleDate: e.target.value,
+                      }))
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="payment-date">
+                <label>
+                  <div className="text">
+                    Termin płatności:
+                  </div>
+                  <input
+                    type="date"
+                    value={invoiceData.paymentDate}
+                    onChange={(e) => {
+                      setInvoiceData((prevState) => ({
+                        ...prevState,
+                        paymentDate: e.target.value,
+                      }))
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="payment-type">
+                <label>
+                  <div className="text">
+                    Forma płatności:
+                  </div>
+                  <input
+                    type="text"
+                    value={invoiceData.paymentType}
+                    onChange={(e) => {
+                      setInvoiceData((prevState) => ({
+                        ...prevState,
+                        paymentType: e.target.value,
+                      }))
+                    }}
+                  />
+                </label>
+              </div>
 
-            <div className="city">
-              <label htmlFor="city">
-                Miejsce wystawienia:
+              <div className="comment">
+                <div className="text">
+                  Dodatkowy komentarz:
+                </div>
                 <input
                   type="text"
-                  value={invoiceData.city}
-                  onChange={(e) => {
-                    setInvoiceData((prevState) => ({
-                      ...prevState,
-                      city: e.target.value,
-                    }))
-                  }}
-                />
-              </label>
-            </div>
-            <div className="invoice-date">
-              <label>
-                Data wystawienia:
-                <input
-                  type="date"
-                  value={invoiceData.invoiceDate}
-                  onChange={(e) => {
-                    setInvoiceData((prevState) => ({
-                      ...prevState,
-                      invoiceDate: e.target.value,
-                    }))
-                  }}
-                />
-              </label>
-            </div>
-            <div className="sale-end-date">
-              <label>
-                Data zakończenia dostawy/usługi:
-                <input
-                  type="date"
-                  value={invoiceData.endSaleDate}
+                  value={invoiceData.comment}
                   onChange={(e) => {
                     setInvoiceData((prev) => ({
                       ...prev,
-                      endSaleDate: e.target.value,
+                      comment: e.target.value,
                     }))
                   }}
                 />
-              </label>
-            </div>
-            <div className="payment-date">
-              <label>
-                Termin płatności:
-                <input
-                  type="date"
-                  value={invoiceData.paymentDate}
-                  onChange={(e) => {
-                    setInvoiceData((prevState) => ({
-                      ...prevState,
-                      paymentDate: e.target.value,
-                    }))
-                  }}
-                />
-              </label>
-            </div>
-            <div className="payment-type">
-              <label>
-                <input
-                  type="text"
-                  value={invoiceData.paymentType}
-                  onChange={(e) => {
-                    setInvoiceData((prevState) => ({
-                      ...prevState,
-                      paymentType: e.target.value,
-                    }))
-                  }}
-                />
-              </label>
+              </div>
             </div>
             <div className="dateRange">
-              <p>Okres sprzedaży</p>
-              <input
-                type="date"
-                value={invoiceData.startDate}
-                onChange={(e) => {
-                  setInvoiceData((prev) => ({
-                    ...prev,
-                    startDate: e.target.value,
-                  }))
-                }}
-                required
-              ></input>
-              <input
-                type="date"
-                value={invoiceData.endDate}
-                onChange={(e) => {
-                  setInvoiceData((prev) => ({
-                    ...prev,
-                    endDate: e.target.value,
-                  }))
-                }}
-                required
-              ></input>
-              <div className="search">
-                <button
-                  className="searchButton"
-                  onClick={dataSearchedByDates}
-                >
-                  Szukaj
-                </button>
-              </div>
+              <label>
+                <div className="text">Okres sprzedaży</div>
+                <div className="dates-of-sales">
+                  <input
+                    type="date"
+                    value={invoiceData.startDate}
+                    onChange={(e) => {
+                      setInvoiceData((prev) => ({
+                        ...prev,
+                        startDate: e.target.value,
+                      }))
+                    }}
+                    required
+                  ></input>
+                  <input
+                    type="date"
+                    value={invoiceData.endDate}
+                    onChange={(e) => {
+                      setInvoiceData((prev) => ({
+                        ...prev,
+                        endDate: e.target.value,
+                      }))
+                    }}
+                    required
+                  ></input>
+                </div>
+                <div className="search">
+                  <button
+                    className="searchButton"
+                    onClick={dataSearchedByDates}
+                  >
+                    Szukaj
+                  </button>
+                </div>
+              </label>
             </div>
             <div className="shopName">
               <label>
-                Nazwa sklepu :
                 {settings ? (
                   <select
                     value={invoiceData.shopName}
@@ -590,7 +625,7 @@ const InvoicePage = () => {
               </label>
             </div>
             <div className="shopAddress">
-              <div>Adres sklepu:</div>
+              <div className="text">Adres sklepu:</div>
               <div className="addressDetails">
                 {invoiceData.address && (
                   <div className="address">
@@ -603,316 +638,394 @@ const InvoicePage = () => {
                 )}
               </div>
             </div>
-            <div className="comment">
-              <div>Dodatkowy komentarz: </div>
-              <input
-                type="text"
-                value={invoiceData.comment}
-                onChange={(e) => {
-                  setInvoiceData((prev) => ({
-                    ...prev,
-                    comment: e.target.value,
-                  }))
-                }}
-              />
-            </div>
           </div>
         </div>
-        <div className="selling-form">
-          {((summarySale &&
-            Object.keys(summarySale).length > 0) ||
-            (summaryReturns &&
-              Object.keys(summaryReturns).length > 0) ||
-            titlesVisibility) && (
-            <div className="titles">
-              <div className="number">Lp.</div>
-              <div className="product-name">
-                Towar/Usługa
+        {((summarySale &&
+          Object.keys(summarySale).length > 0) ||
+          (summaryReturns &&
+            Object.keys(summaryReturns).length > 0)) && (
+          <div className="values-container">
+            <div className="selling-form">
+              <div className="titles-data">
+                <div className="values-titles number">
+                  Dodaj
+                </div>
+                <div className="values-titles product-name">
+                  Towar/Usługa
+                </div>
+                <div className="values-titles product-code">
+                  PKWIU
+                </div>
+                <div className="values-titles product-unit">
+                  J.m.
+                </div>
+                <div className="values-titles product-quantity">
+                  Ilość
+                </div>
+                <div className="values-titles net-price">
+                  Cena netto
+                </div>
+                <div className="values-titles vat">VAT</div>
+                <div className="values-titles gross-price">
+                  Cena brutto
+                </div>
+                <div className="values-titles total-net">
+                  Wartość netto
+                </div>
+                <div className="values-titles total-gross">
+                  Wartość brutto
+                </div>
               </div>
-              <div className="product-code">PKWIU</div>
-              <div className="product-unit">J.m.</div>
-              <div className="product-quantity">Ilość</div>
-              <div className="net-price">Cena netto</div>
-              <div className="vat">VAT</div>
-              <div className="gross-price">Cena brutto</div>
-              <div className="total-net">Wartość netto</div>
-              <div className="total-gross">
-                Wartość brutto
-              </div>
-            </div>
-          )}
-          {(summarySale || summaryReturns) &&
-            productsData.map(
-              (product) =>
-                product.quantity !== 0 && (
+              {(summarySale || summaryReturns) &&
+                productsData.map(
+                  (product) =>
+                    product.quantity !== 0 && (
+                      <div
+                        className="product-details-data"
+                        key={product.product}
+                      >
+                        <div
+                          className="values-product number"
+                          data-title="Dodaj"
+                        >
+                          <label htmlFor={product.product}>
+                            <input
+                              type="checkbox"
+                              name={product.product}
+                              checked={product.checked}
+                              onChange={(e) =>
+                                setProductsData((prod) =>
+                                  prod.map((p) =>
+                                    p.product ===
+                                    product.product
+                                      ? {
+                                          ...p,
+                                          checked:
+                                            e.target
+                                              .checked,
+                                        }
+                                      : p,
+                                  ),
+                                )
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div
+                          className="values-product product-name"
+                          data-title="Towar/Usługa"
+                        >
+                          {product.product}
+                        </div>
+                        <div
+                          className="values-product product-code"
+                          data-title="PKWIU"
+                        >
+                          <label>
+                            <input
+                              type="text"
+                              value={product.code}
+                              onChange={(e) =>
+                                setProductsData((prod) =>
+                                  prod.map((p) =>
+                                    p.product ===
+                                    product.product
+                                      ? {
+                                          ...p,
+                                          code: e.target
+                                            .value,
+                                        }
+                                      : p,
+                                  ),
+                                )
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div
+                          className="values-product product-unit"
+                          data-title="J.m."
+                        >
+                          {product.units}
+                        </div>
+                        <div
+                          className="values-product product-quantity"
+                          data-title="Ilość"
+                        >
+                          <label>
+                            <input
+                              value={product.quantity}
+                              onChange={(e) =>
+                                updateProductTotals(
+                                  product,
+                                  'quantity',
+                                  Number(e.target.value),
+                                  setProductsData,
+                                )
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div
+                          className="values-product net-price"
+                          data-title="Cena netto"
+                        >
+                          {product.netPrice.toFixed(2)}
+                        </div>
+                        <div
+                          className="values-product vat"
+                          data-title="VAT"
+                        >
+                          <label>
+                            <input
+                              type="number"
+                              value={product.vat}
+                              onChange={(e) =>
+                                updateProductTotals(
+                                  product,
+                                  'vat',
+                                  Number(
+                                    e.target.value,
+                                  ).toFixed(2),
+                                  setProductsData,
+                                )
+                              }
+                            />
+                            %
+                          </label>
+                        </div>
+                        <div
+                          className="values-product gross-price"
+                          data-title="Cena brutto"
+                        >
+                          <input
+                            type="number"
+                            placeholder="0"
+                            value={product.grossPrice}
+                            onChange={(e) =>
+                              updateProductTotals(
+                                product,
+                                'grossPrice',
+                                Number(
+                                  e.target.value,
+                                ).toFixed(2),
+                                setProductsData,
+                              )
+                            }
+                          />
+                        </div>
+                        <div
+                          className="values-product total-net"
+                          data-title="Wartość netto"
+                        >
+                          {Number(product.totalNet).toFixed(
+                            2,
+                          )}
+                        </div>
+                        <div
+                          className="values-product total-gross"
+                          data-title="Wartość brutto"
+                        >
+                          {Number(
+                            product.totalGross,
+                          ).toFixed(2)}
+                        </div>
+                      </div>
+                    ),
+                )}
+              {extraProduct.map((line, index) => (
+                <div
+                  key={index}
+                  className="product-details-data"
+                >
                   <div
-                    className="product-details"
-                    key={product.product}
+                    className="values-product number"
+                    data-title="Dodaj"
                   >
-                    <div className="number">
-                      <label htmlFor={product.product}>
-                        <input
-                          type="checkbox"
-                          name={product.product}
-                          checked={product.checked}
-                          onChange={(e) =>
-                            setProductsData((prod) =>
-                              prod.map((p) =>
-                                p.product ===
-                                product.product
-                                  ? {
-                                      ...p,
-                                      checked:
-                                        e.target.checked,
-                                    }
-                                  : p,
-                              ),
-                            )
-                          }
-                        />
-                      </label>
-                    </div>
-                    <div className="product-name">
-                      {product.product}
-                    </div>
-                    <div className="product-code">
-                      <label>
-                        <input
-                          type="text"
-                          value={product.code}
-                          onChange={(e) =>
-                            setProductsData((prod) =>
-                              prod.map((p) =>
-                                p.product ===
-                                product.product
-                                  ? {
-                                      ...p,
-                                      code: e.target.value,
-                                    }
-                                  : p,
-                              ),
-                            )
-                          }
-                        />
-                      </label>
-                    </div>
-                    <div className="product-unit">
-                      {product.units}
-                    </div>
-                    <div className="product-quantity">
-                      <label>
-                        <input
-                          value={product.quantity}
-                          onChange={(e) =>
-                            updateProductTotals(
-                              product,
-                              'quantity',
-                              Number(e.target.value),
-                              setProductsData,
-                            )
-                          }
-                        />
-                      </label>
-                    </div>
-                    <div className="net-price">
-                      {product.netPrice.toFixed(2)}
-                    </div>
-                    <div className="vat">
-                      <label>
-                        <input
-                          type="number"
-                          value={product.vat}
-                          onChange={(e) =>
-                            updateProductTotals(
-                              product,
-                              'vat',
-                              Number(
-                                e.target.value,
-                              ).toFixed(2),
-                              setProductsData,
-                            )
-                          }
-                        />
-                        %
-                      </label>
-                    </div>
-                    <div className="gross-price">
+                    <label>
+                      <input
+                        type="checkbox"
+                        name={line.product}
+                        checked={line.checked}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[index].checked =
+                            e.target.checked
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div
+                    className="values-product product-name"
+                    data-title="Towar/Usługa"
+                  >
+                    <label>
+                      <input
+                        type="text"
+                        value={line.productName}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[
+                            index
+                          ].productName = e.target.value
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div
+                    className="values-product product-code"
+                    data-title="PKWIU"
+                  >
+                    <label>
+                      <input
+                        type="text"
+                        value={line.code}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[index].code =
+                            e.target.value
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div
+                    className="values-product product-unit"
+                    data-title="J.m."
+                  >
+                    <label>
+                      <input
+                        type="text"
+                        value={line.units}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[index].units =
+                            e.target.value
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div
+                    className="values-product product-quantity"
+                    data-title="Ilość"
+                  >
+                    <label>
                       <input
                         type="number"
-                        placeholder="0"
-                        value={product.grossPrice}
+                        value={line.quantity}
+                        onChange={(e) => {
+                          const updatedProducts = [
+                            ...extraProduct,
+                          ]
+                          updatedProducts[index].quantity =
+                            Number(e.target.value)
+                          setExtraProduct(updatedProducts)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div
+                    className="values-product net-price"
+                    data-title="Cena netto"
+                  >
+                    {line.netPrice.toFixed(2)}
+                  </div>
+                  <div
+                    className="values-product vat"
+                    data-title="VAT"
+                  >
+                    <label>
+                      <input
+                        type="number"
+                        value={line.vat}
                         onChange={(e) =>
                           updateProductTotals(
-                            product,
-                            'grossPrice',
-                            Number(e.target.value).toFixed(
-                              2,
-                            ),
-                            setProductsData,
+                            line.productName,
+                            'vat',
+                            Number(e.target.value),
+                            setExtraProduct,
                           )
                         }
                       />
-                    </div>
-                    <div className="total-net">
-                      {Number(product.totalNet).toFixed(2)}
-                    </div>
-                    <div className="total-gross">
-                      {Number(product.totalGross).toFixed(
-                        2,
-                      )}
-                    </div>
+                      %
+                    </label>
                   </div>
-                ),
-            )}
-          {extraProduct.map((line, index) => (
-            <div key={index} className="product-details">
-              <div className="number">
-                <label>
-                  <input
-                    type="checkbox"
-                    name={line.product}
-                    checked={line.checked}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].checked =
-                        e.target.checked
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                </label>
-              </div>
-              <div className="product-name">
-                <label>
-                  <input
-                    type="text"
-                    value={line.productName}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].productName =
-                        e.target.value
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                </label>
-              </div>
-              <div className="product-code">
-                <label>
-                  <input
-                    type="text"
-                    value={line.code}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].code =
-                        e.target.value
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                </label>
-              </div>
-              <div className="product-unit">
-                <label>
-                  <input
-                    type="text"
-                    value={line.units}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].units =
-                        e.target.value
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                </label>
-              </div>
-              <div className="product-quantity">
-                <label>
-                  <input
-                    type="number"
-                    value={line.quantity}
-                    onChange={(e) => {
-                      const updatedProducts = [
-                        ...extraProduct,
-                      ]
-                      updatedProducts[index].quantity =
-                        Number(e.target.value)
-                      setExtraProduct(updatedProducts)
-                    }}
-                  />
-                </label>
-              </div>
-              <div className="net-price">
-                {line.netPrice.toFixed(2)}
-              </div>
-              <div className="vat">
-                <label>
-                  <input
-                    type="number"
-                    value={line.vat}
-                    onChange={(e) =>
-                      updateProductTotals(
-                        line.productName,
-                        'vat',
-                        Number(e.target.value),
-                        setExtraProduct,
-                      )
-                    }
-                  />
-                  %
-                </label>
-              </div>
-              <div className="gross-price">
-                <label>
-                  <input
-                    type="number"
-                    step=".01"
-                    value={line.grossPrice}
-                    onChange={(e) =>
-                      updateProductTotals(
-                        line.productName,
-                        'grossPrice',
-                        Number(e.target.value),
-                        setExtraProduct,
-                      )
-                    }
-                  />
-                </label>
-              </div>
-              <div className="total-net">
-                {Number(line.totalNet).toFixed(2)}
-              </div>
-              <div className="total-gross">
-                {Number(line.totalGross).toFixed(2)}
+                  <div
+                    className="values-product gross-price"
+                    data-title="Cena brutto"
+                  >
+                    <label>
+                      <input
+                        type="number"
+                        step=".01"
+                        value={line.grossPrice}
+                        onChange={(e) =>
+                          updateProductTotals(
+                            line.productName,
+                            'grossPrice',
+                            Number(e.target.value),
+                            setExtraProduct,
+                          )
+                        }
+                      />
+                    </label>
+                  </div>
+                  <div
+                    className="values-product total-net"
+                    data-title="Wartość netto"
+                  >
+                    {Number(line.totalNet).toFixed(2)}
+                  </div>
+                  <div
+                    className="values-product total-gross"
+                    data-title="Wartość brutto"
+                  >
+                    {Number(line.totalGross).toFixed(2)}
+                  </div>
+                </div>
+              ))}
+              <div className="add-extra-product">
+                <button onClick={addExtraProduct}>
+                  Dodaj nowy produkt
+                </button>
               </div>
             </div>
-          ))}
-
-          <button onClick={addExtraProduct}>
-            Dodaj nowy produkt
-          </button>
-        </div>
-        <div className="generateButton">
-          <button
-            onClick={() =>
-              !isInvoiceVisible && setIsInvoiceVisible(true)
-            }
-          >
-            Wygeneruj fakturę
-          </button>
-          {isInvoiceVisible && (
-            <InvoiceLayout
-              extraProduct={extraProduct}
-              invoiceData={invoiceData}
-              productsData={productsData}
-            />
-          )}
-        </div>
+          </div>
+        )}
+        {((summarySale &&
+          Object.keys(summarySale).length > 0) ||
+          (summaryReturns &&
+            Object.keys(summaryReturns).length > 0)) && (
+          <div className="generateButton">
+            <button
+              className={isInvoiceVisible ? 'hide' : ''}
+              onClick={() =>
+                !isInvoiceVisible &&
+                setIsInvoiceVisible(true)
+              }
+            >
+              Wygeneruj fakturę
+            </button>
+          </div>
+        )}
+        {isInvoiceVisible && (
+          <InvoiceLayout
+            extraProduct={extraProduct}
+            invoiceData={invoiceData}
+            productsData={productsData}
+          />
+        )}
       </Container>
       <Footer />
     </StyledMain>
@@ -938,27 +1051,102 @@ const Container = styled.div`
   padding-top: 3rem;
   padding-bottom: 6rem;
   flex-grow: 1;
+  color: #333232;
 
   @media screen and (max-width: ${size.tabletS}) {
     padding-top: 1rem;
   }
 
-  h1 {
-    font-size: 60px;
+  .details-container {
+    background-color: #f5f5f5;
+    width: 40%;
+    border-radius: 15px;
+    box-shadow:
+      0 4px 8px 0 rgba(0, 0, 0, 0.2),
+      0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    padding: 1rem 1rem;
+    margin: auto;
+  }
+
+  .invoices-details {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    flex-direction: column;
   }
 
   .title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333232;
+    padding-left: 1rem;
+    margin: 1rem;
   }
 
-  .seller {
-    textarea {
+  .invoice-details {
+    width: 100%;
+  }
+
+  .invoice-seller {
+    width: 90%;
+  }
+
+  .invoice-seller,
+  .invoiceNumber,
+  .city,
+  .invoice-date,
+  .sale-end-date,
+  .payment-date,
+  .payment-type,
+  .dateRange,
+  .shopName,
+  .shopAddress,
+  .comment,
+  .addressDetails {
+    margin: 0.8rem auto 0.8rem auto;
+    width: 100%;
+
+    .text {
+      margin-left: 5%;
+    }
+
+    textarea,
+    input,
+    select,
+    .address {
       display: flex;
       flex-direction: column;
       padding: 0.5rem;
-      width: 100%;
+      width: 90%;
+      border-radius: 10px;
+      transition: border-color 0.3s ease;
+      margin: 0.8rem auto 0.8rem auto;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.9rem;
+      border: 1px solid #a3a3a3;
+    }
+    textarea:focus,
+    input:focus,
+    select:focus {
+      border-color: #653db5; /* Border color on focus */
+      outline: none; /* Remove default outline */
+      box-shadow: 0 0 5px rgba(127, 127, 127, 0.5); /* Add shadow for focus effect */
     }
   }
+
+  .dates-of-sales {
+    display: flex;
+    flex-direction: row;
+    width: 90%;
+    margin: auto;
+
+    input {
+      width: 45%;
+      margin: 0.3rem;
+    }
+  }
+
   .dates {
     display: flex;
     flex-direction: row;
@@ -969,21 +1157,21 @@ const Container = styled.div`
   }
 
   .searchButton {
-    width: 10rem;
+    width: 90%;
     border: none;
-    padding: 1rem 2rem;
-    /* margin: 0 1rem; */
+    padding: 0.5rem 1.5rem;
     position: relative;
     line-height: 24px;
     overflow: hidden;
     text-align: center;
     display: inline-block;
-    border-radius: 15px;
-    background-color: #fdfdfd;
+    border-radius: 10px;
+    background-color: #8162c6;
     font-weight: bold;
     outline: none;
     height: 100%;
-    color: #5c35b6;
+    margin: 1rem auto;
+    color: #fdfdfd;
     cursor: pointer;
     box-shadow:
       6px 6px 8px 0 rgba(0, 0, 0, 0.3),
@@ -1005,12 +1193,12 @@ const Container = styled.div`
   }
 
   .selling-form {
-    background-color: #fdfdfd;
-    width: 95%;
+    width: 100%;
+    margin: auto;
   }
 
-  .titles,
-  .product-details {
+  .titles-data,
+  .product-details-data {
     display: grid;
     grid-template-columns: [first] 3rem [line2] 30% repeat(
         8,
@@ -1019,6 +1207,105 @@ const Container = styled.div`
 
     input {
       width: 60%;
+    }
+  }
+
+  .values-titles,
+  .values-product {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid #818181;
+  }
+
+  .values-titles {
+    padding: 0.5rem 0.1rem 0.5rem 0.1rem;
+    background: #dbdbdb;
+  }
+
+  .values-product {
+    padding: 0.3rem 0.1rem 0.3rem 0.1rem;
+  }
+
+  .values-product.product-name {
+    justify-content: flex-start;
+  }
+
+  .values-product[data-title='Towar/Usługa'] input {
+    width: 100%;
+  }
+
+  @media screen and (max-width: ${size.tablet}) {
+    .details-container {
+      width: 80%;
+    }
+
+    .titles-data {
+      display: none;
+    }
+    .product-details-data {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      box-shadow:
+        0 4px 8px 0 rgba(0, 0, 0, 0.2),
+        0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+
+    .values-product {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-right: 10px;
+      border: none;
+      border-bottom: 1px solid #d2d2d2;
+    }
+
+    .values-product::before {
+      content: attr(data-title);
+      display: inline-block;
+      width: 120px;
+      text-align: left;
+      padding-left: 10px;
+      color: #6a6a6a;
+    }
+
+    .values-product label {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .values-product input {
+      width: 5rem;
+      font-weight: 500;
+      margin-left: auto;
+      text-align: right;
+      border-radius: 5px;
+      border: 1px solid #cdcdcd;
+      font-size: 0.9rem;
+      font-family: 'Lato', sans-serif;
+    }
+
+    .values-product.number[data-title='Dodaj']::before {
+      content: attr(data-title);
+      font-weight: bold;
+      color: #8162c6;
+      font-size: 1rem;
+    }
+
+    .values-product[data-title='Towar/Usługa'] input {
+      width: 80%;
+    }
+
+    .values-product.product-name {
+      justify-content: space-between;
     }
   }
 
@@ -1031,6 +1318,71 @@ const Container = styled.div`
   /* Firefox */
   input[type='number'] {
     -moz-appearance: textfield;
+  }
+
+  .values-container {
+    background-color: #f5f5f5;
+    width: 95%;
+    border-radius: 15px;
+    box-shadow:
+      0 4px 8px 0 rgba(0, 0, 0, 0.2),
+      0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    padding: 1rem 1rem;
+    margin: 2rem auto 1rem auto;
+    font-size: 0.9rem;
+
+    @media screen and (max-width: ${size.tablet}) {
+      width: 80%;
+    }
+  }
+
+  .add-extra-product {
+    button {
+      border-radius: 10px;
+      background-color: #dbdbdb;
+      font-weight: bold;
+      outline: none;
+      height: 100%;
+      margin: 1rem auto;
+      color: #383838;
+      cursor: pointer;
+      box-shadow:
+        6px 6px 8px 0 rgba(0, 0, 0, 0.3),
+        -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+      align-items: center;
+      justify-content: center;
+      border: none;
+      padding: 0.5rem 1.5rem;
+    }
+  }
+
+  .generateButton {
+    button {
+      border-radius: 10px;
+      background: linear-gradient(
+        to bottom right,
+        #c91a97,
+        #c376a7
+      );
+      font-weight: bold;
+      font-size: 1rem;
+      outline: none;
+      height: 100%;
+      margin: 1rem auto;
+      color: #f3f3f3;
+      cursor: pointer;
+      box-shadow:
+        6px 6px 8px 0 rgba(0, 0, 0, 0.3),
+        -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+      align-items: center;
+      justify-content: center;
+      border: none;
+      padding: 0.5rem 4rem;
+    }
+  }
+
+  .hide {
+    display: none;
   }
 `
 export default InvoicePage

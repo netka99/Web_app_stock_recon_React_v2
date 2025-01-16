@@ -136,13 +136,13 @@ const SummaryPage = () => {
       <Sidebar />
       <Container>
         <div className="dates">
-          <DatePicker
+          <StyledDatePicker
             todaysDate={startDate}
             setTodaysDate={setStartDate}
             setSentQuantities={setSentQuantities}
           />
           <h2 className="date-separator">-</h2>
-          <DatePicker
+          <StyledDatePicker
             todaysDate={endDate}
             setTodaysDate={setEndDate}
             setSentQuantities={setSentQuantities}
@@ -212,12 +212,22 @@ const StyledMain = styled.main`
   max-width: 100%;
 `
 
+const StyledDatePicker = styled(DatePicker)`
+  @media screen and (max-width: ${size.tabletS}) {
+    padding: 0.5rem;
+    input[type='date'] {
+      font-size: 1rem;
+      padding: 5px;
+    }
+  }
+`
+
 const Container = styled.div`
   overflow-x: hidden;
   max-width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex-direction: column;
   overflow-y: scroll;
   min-height: 70vh;
@@ -227,6 +237,7 @@ const Container = styled.div`
 
   @media screen and (max-width: ${size.tabletS}) {
     padding-top: 1rem;
+    justify-content: flex-start;
   }
 
   h1 {
@@ -236,6 +247,11 @@ const Container = styled.div`
   .dates {
     display: flex;
     flex-direction: row;
+    align-items: center;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      max-height: 5rem;
+    }
   }
 
   .date-separator {

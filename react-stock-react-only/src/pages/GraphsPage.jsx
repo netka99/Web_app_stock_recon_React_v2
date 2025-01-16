@@ -21,6 +21,7 @@ import {
   Tooltip,
   Legend,
   ComposedChart,
+  ResponsiveContainer,
 } from 'recharts'
 
 const {
@@ -180,13 +181,13 @@ const GraphsPage = () => {
       <Sidebar />
       <Container>
         <div className="dates">
-          <DatePicker
+          <StyledDatePicker
             todaysDate={startDate}
             setTodaysDate={setStartDate}
             setSentQuantities={setSentQuantities}
           />
           <h2 className="date-separator">-</h2>
-          <DatePicker
+          <StyledDatePicker
             todaysDate={endDate}
             setTodaysDate={setEndDate}
             setSentQuantities={setSentQuantities}
@@ -231,27 +232,29 @@ const GraphsPage = () => {
         {loading && <Spinner />}
         {showContainer && settings && (
           <div className="chart">
-            <ComposedChart
-              width={800}
-              height={400}
-              data={dates}
-            >
-              <CartesianGrid stroke="#f5f5f5" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar
-                dataKey="sprzedaż"
-                barSize={20}
-                fill="rgba(131, 99, 192, 0.5)"
-              />
-              <Line
-                type="monotone"
-                dataKey="zwroty"
-                stroke="#ff7300"
-              />
-            </ComposedChart>
+            <ResponsiveContainer width="98%" aspect={2}>
+              <ComposedChart
+                // width={800}
+                // height={400}
+                data={dates}
+              >
+                <CartesianGrid stroke="#f5f5f5" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="sprzedaż"
+                  barSize={20}
+                  fill="rgba(131, 99, 192, 0.5)"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="zwroty"
+                  stroke="#ff7300"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
           </div>
         )}
       </Container>
@@ -259,6 +262,16 @@ const GraphsPage = () => {
     </StyledMain>
   )
 }
+
+const StyledDatePicker = styled(DatePicker)`
+  @media screen and (max-width: ${size.tabletS}) {
+    padding: 0.5rem;
+    input[type='date'] {
+      font-size: 1rem;
+      padding: 5px;
+    }
+  }
+`
 
 const StyledMain = styled.main`
   display: flex;
@@ -282,6 +295,7 @@ const Container = styled.div`
 
   @media screen and (max-width: ${size.tabletS}) {
     padding-top: 1rem;
+    justify-content: flex-start;
   }
 
   h1 {
@@ -387,7 +401,15 @@ const Container = styled.div`
       0 3px 10px 0 rgba(0, 0, 0, 0.19);
   }
   .chart {
-    margin: 3rem auto 4rem auto;
+    /* margin: 3rem auto 4rem auto; */
+    width: 98vw;
+    height: 50vh;
+    max-width: 800px;
+    margin: 1rem auto 4rem auto;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      font-size: 0.8rem;
+    }
   }
 `
 export default GraphsPage

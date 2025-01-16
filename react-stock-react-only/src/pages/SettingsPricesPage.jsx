@@ -134,21 +134,26 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 1rem);
+  /* height: calc(100vh - 1rem); */
+  height: auto;
+  margin: 3rem auto;
 
-  @media screen and (max-width: ${size.tablet}) {
-    height: calc(100vh - 5rem);
+  @media screen and (max-width: ${size.mobileL}) {
+    width: 95%;
+    margin-top: 30%;
   }
 
   .formContainer {
     display: flex;
     flex-direction: column;
+    @media screen and (max-width: ${size.mobileL}) {
+      width: 100%;
+    }
   }
 
   .container {
     background-color: #ffffff;
     border-radius: 15px;
-    margin: 1rem auto;
     padding: 1rem 2rem;
     box-shadow:
       0 4px 8px 0 rgba(0, 0, 0, 0.2),

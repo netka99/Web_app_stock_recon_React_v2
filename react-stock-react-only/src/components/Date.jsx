@@ -8,9 +8,10 @@ const DatePicker = ({
   todaysDate,
   setTodaysDate,
   setSentQuantities,
+  className,
 }) => {
   return (
-    <DateContainer>
+    <DateContainer className={className}>
       <input
         value={todaysDate}
         type="date"

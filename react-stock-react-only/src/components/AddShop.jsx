@@ -2,6 +2,7 @@ import React from 'react'
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
+import { size } from '../styles/devices'
 
 const AddShop = ({ onAddShop }) => {
   const [shopName, setShopName] = useState('')
@@ -25,6 +26,11 @@ const AddShop = ({ onAddShop }) => {
 }
 const Container = styled.div`
   margin: 1rem auto 3rem auto;
+  max-width: 100%;
+
+  @media screen and (max-width: ${size.mobileL}) {
+    margin: 1rem auto 2rem auto;
+  }
 
   input {
     width: 90%;
@@ -41,6 +47,11 @@ const Container = styled.div`
     font-size: 1rem;
     margin-bottom: 1rem;
     padding: 0 2rem 0 2rem;
+
+    @media screen and (max-width: ${size.mobileL}) {
+      width: 70%;
+      margin-left: 1rem;
+    }
   }
 
   button {
@@ -57,6 +68,10 @@ const Container = styled.div`
       #8461c5
     );
     cursor: pointer;
+
+    @media screen and (max-width: ${size.mobileL}) {
+      margin-left: 1rem;
+    }
   }
 `
 

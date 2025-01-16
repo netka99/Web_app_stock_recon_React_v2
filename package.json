@@ -2,5 +2,8 @@
   "dependencies": {
     "html2canvas": "^1.4.1",
     "jspdf-autotable": "^3.8.4"
+  },
+  "devDependencies": {
+    "babel-plugin-styled-components": "^2.1.4"
   }
 }

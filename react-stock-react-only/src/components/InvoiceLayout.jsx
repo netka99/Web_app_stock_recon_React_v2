@@ -173,7 +173,7 @@ const InvoiceLayout = ({
   return (
     <Container>
       <div className="generate_pdf">
-        <button onClick={generatePdf}>Wygeneruj PDF</button>
+        <button onClick={generatePdf}>Zapisz PDF</button>
       </div>
       <div ref={invoiceRef} className="invoice-preview">
         <div className="invoice-header">
@@ -786,6 +786,31 @@ const Container = styled.div`
     align-items: center;
     justify-content: center;
     margin: 1rem;
+
+    button {
+      border: none;
+      padding: 0.5rem 1.5rem;
+      position: relative;
+      line-height: 24px;
+      overflow: hidden;
+      text-align: center;
+      display: inline-block;
+      border-radius: 10px;
+      background-color: #8162c6;
+      font-weight: bold;
+      outline: none;
+      height: 100%;
+      margin: 1rem auto;
+      color: #fdfdfd;
+      cursor: pointer;
+      font-size: 1rem;
+      box-shadow:
+        6px 6px 8px 0 rgba(0, 0, 0, 0.3),
+        -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 `
 

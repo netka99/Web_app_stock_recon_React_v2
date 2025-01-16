@@ -6,6 +6,7 @@ import cog from '../assets/cog-solid.svg'
 import priceTag from '../assets/price-tag.svg'
 import store from '../assets/store-img.svg'
 import address from '../assets/address.svg'
+import invoice from '../assets/invoice.svg'
 
 export const homeLabels = [
   {
@@ -54,6 +55,18 @@ export const homeLabels = [
       backgroundsecondary: '#736efe',
       hoverprimary: '#54decb',
       hoversecondary: '#635fde',
+    },
+  },
+  {
+    id: 5,
+    url: '/faktury',
+    icon: invoice,
+    title: 'Faktury',
+    colors: {
+      backgroundprimary: '#ffb3c6',
+      backgroundsecondary: '#9b51e0',
+      hoverprimary: '#e2a3b7',
+      hoversecondary: '#8a46c9',
     },
   },
 ]

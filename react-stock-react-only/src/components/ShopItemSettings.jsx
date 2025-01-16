@@ -5,6 +5,7 @@ import editImg from '../assets/edit.png'
 import saveImg from '../assets/save-icon.png'
 import trashImg from '../assets/delete.png'
 import shopImg from '../assets/store-img.svg'
+import { size } from '../styles/devices'
 
 const ShopItem = ({
   id,
@@ -117,6 +118,10 @@ const ShopContainer = styled.div`
   .store-picture {
     width: 24px;
     margin: 8px;
+
+    @media screen and (max-width: ${size.mobileL}) {
+      padding-left: 0.3rem;
+    }
     filter: invert(41%) sepia(0%) saturate(0%)
       hue-rotate(102deg) brightness(91%) contrast(85%);
   }
@@ -154,6 +159,10 @@ const ShopContainer = styled.div`
 
   .delete-button {
     padding-right: 2rem;
+
+    @media screen and (max-width: ${size.mobileL}) {
+      padding-right: 1rem;
+    }
     img {
       filter: brightness(0) saturate(100%) invert(33%)
         sepia(87%) saturate(3694%) hue-rotate(335deg)

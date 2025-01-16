@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { units } from '../utils/productDetails'
+import { size } from '../styles/devices'
 import Arrow from '../assets/chevron-down.svg'
 import { SummaryShopProductDetails } from '../components/index'
 
@@ -185,22 +186,22 @@ const Container = styled.div`
   box-shadow:
     0 4px 8px 0 rgba(0, 0, 0, 0.2),
     0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  /* 
-    @media screen and (max-width: $tabletS) {
-      width: 95%;
-    }
 
-    @media screen and (min-width: $tabletS) and (max-width: $tablet) {
-      width: 80%;
-    }
+  @media screen and (max-width: ${size.tabletS}) {
+    width: 95%;
+  }
 
-    @media screen and (min-width: $tablet) and (max-width: $desktop) {
-      width: 70%;
-    }
+  @media screen and (min-width: ${size.tabletS}) and (max-width: ${size.tablet}) {
+    width: 80%;
+  }
 
-    @media screen and (min-width: $desktop) and (max-width: $desktopXS) {
-      width: 60%;
-    } */
+  @media screen and (min-width: ${size.tablet}) and (max-width: ${size.desktop}) {
+    width: 70%;
+  }
+
+  @media screen and (min-width: ${size.desktop}) and (max-width: ${size.desktopXS}) {
+    width: 60%;
+  }
 
   .summary-product-image {
     width: 60px;
@@ -217,6 +218,11 @@ const Container = styled.div`
     padding: 0rem 1rem 0rem 1rem;
     margin: 0rem 2rem 0rem 2rem;
 
+    @media screen and (max-width: ${size.mobileL}) {
+      grid-template-columns: 40% 23% 25% 12%;
+      margin: 0rem;
+    }
+
     p {
       display: flex;
       justify-content: center;
@@ -228,6 +234,10 @@ const Container = styled.div`
 
     .title-shop {
       justify-content: left;
+
+      @media screen and (max-width: ${size.mobileL}) {
+        padding-left: 10px;
+      }
     }
   }
 
@@ -249,21 +259,27 @@ const Container = styled.div`
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
       padding: 0.5rem 0 1rem 0;
+
+      @media screen and (max-width: ${size.mobileL}) {
+        grid-template-columns: 40% 23% 25% 12%;
+      }
     }
 
     .summary-total-shop {
       padding-right: 0rem;
       margin: 0em 0em;
       padding-left: 15px;
+      text-align: left;
     }
 
     .summary-total-quantity {
       display: flex;
       justify-content: center;
       align-items: center;
+      text-align: right;
       /* color: rgb(92, 53, 182); */
 
-      @media screen and (max-width: $desktopXS) {
+      @media screen and (max-width: ${size.desktopXS}) {
         padding-left: 0px;
       }
     }
@@ -274,26 +290,27 @@ const Container = styled.div`
       align-items: center;
       /* color: rgb(92, 53, 182); */
 
-      @media screen and (max-width: $desktopXS) {
+      @media screen and (max-width: ${size.desktopXS}) {
         padding-left: 0px;
       }
     }
 
     @media screen and (max-width: 370px) {
-      margin: 1rem 0.2rem 2rem 0.2rem;
-      padding: 1rem 0rem 1rem 0rem;
+      margin: 1rem 0.2rem 0.2rem 0.2rem;
+      padding: 0.5rem 0rem 0.5rem 0rem;
+      font-size: 0.8rem;
+    }
+
+    @media screen and (min-width: 370px) and (max-width: ${size.mobileL}) {
+      margin: 1rem 0.5rem 1rem 0.5rem;
+      padding: 0.5rem 0rem 0.5rem 0rem;
       font-size: 0.9rem;
     }
 
-    @media screen and (min-width: 370px) and (max-width: $mobileL) {
-      margin: 1rem 0.5rem 2rem 0.5rem;
-      padding: 1rem 0rem 1rem 0rem;
-      font-size: 1rem;
-    }
-
-    @media screen and (min-width: $mobileL) and (max-width: $desktopXS) {
+    @media screen and (min-width: ${size.mobileL}) and (max-width: ${size.desktopXS}) {
       margin: 1rem 1rem 2rem 1rem;
-      padding: 1rem 0rem 1rem 1rem;
+      padding: 0.8rem 0rem 0.8rem 0rem;
+      font-size: 0.9rem;
     }
   }
 
@@ -302,6 +319,11 @@ const Container = styled.div`
     align-items: center;
     justify-content: flex-end;
     padding-right: 20px;
+
+    @media screen and (max-width: ${size.tabletS}) {
+      justify-content: right;
+      padding-right: 10px;
+    }
   }
   .accordion-arrow {
     width: 18px;
@@ -312,9 +334,9 @@ const Container = styled.div`
       brightness(91%) contrast(94%);
     cursor: pointer;
 
-    /* @media screen and (max-width: 256px) {
+    @media screen and (max-width: 256px) {
       width: 18px;
-    } */
+    }
   }
 
   .accordion-arrow.rotate {
