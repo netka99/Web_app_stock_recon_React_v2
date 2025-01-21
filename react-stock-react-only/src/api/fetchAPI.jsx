@@ -1,14 +1,22 @@
 // Function to fetch data from the API
 export const fetchData = async (url) => {
   try {
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      method: 'GET', // Or POST, PUT, etc.
+      credentials: 'include', // THIS IS THE ONLY CHANGE NEEDED HERE
+    })
     if (!response.ok) {
-      throw new Error(response.statusText)
+      const errorData = await response.json() // Try to parse error
+      throw new Error(
+        errorData?.message ||
+          `HTTP error! status: ${response.status}`,
+      )
     }
     const data = await response.json()
     return data
   } catch (error) {
-    throw new Error(`Error fetching data: ${error.message}`)
+    console.error('Fetch error:', error)
+    throw error
   }
 }
 
@@ -25,10 +33,13 @@ export const updateDataOnApi = async (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(updatedData),
+      credentials: 'include',
     })
     if (!response.ok) {
+      const errorData = await response.json() // Try to parse error
       throw new Error(
-        `Failed to update data on API: ${response.statusText}`,
+        errorData?.message ||
+          `Failed to update data on API: ${response.statusText}`,
       )
     }
     if (response.status === 204) {

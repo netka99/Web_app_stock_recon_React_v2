@@ -170,7 +170,7 @@ SummaryPerProduct.propTypes = {
 
 const Container = styled.div`
   overflow-x: hidden;
-  width: 60%;
+  width: 70%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -191,16 +191,8 @@ const Container = styled.div`
     width: 95%;
   }
 
-  @media screen and (min-width: ${size.tabletS}) and (max-width: ${size.tablet}) {
-    width: 80%;
-  }
-
-  @media screen and (min-width: ${size.tablet}) and (max-width: ${size.desktop}) {
-    width: 70%;
-  }
-
-  @media screen and (min-width: ${size.desktop}) and (max-width: ${size.desktopXS}) {
-    width: 60%;
+  @media screen and (min-width: ${size.tabletS}) {
+    width: 90%;
   }
 
   .summary-product-image {

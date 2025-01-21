@@ -6,6 +6,12 @@ import React, {
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
 import PropTypes from 'prop-types'
 
+const {
+  VITE_APP_SETTINGS_API,
+  VITE_APP_SALES_API,
+  VITE_APP_RETURNS_API,
+} = import.meta.env
+
 const PricesContext = createContext()
 
 export const PricesProvider = ({ children }) => {
@@ -14,7 +20,7 @@ export const PricesProvider = ({ children }) => {
   const [isSent, setIsSent] = useState(false)
 
   useEffect(() => {
-    fetchData('http://localhost:8000/settings/aneta')
+    fetchData(VITE_APP_SETTINGS_API)
       .then((data) => setSettingsData(data))
       .catch((error) =>
         console.error('Error fetching data:', error),
@@ -48,7 +54,7 @@ export const PricesProvider = ({ children }) => {
       }
       const response = await updateDataOnApi(
         updatedData,
-        'http://localhost:8000/settings/aneta',
+        VITE_APP_SETTINGS_API,
         'PUT',
       )
       console.log('Response status:', response.status)

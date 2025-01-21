@@ -62,18 +62,19 @@ const SummaryPage = () => {
     }
   }
 
-  const fetchDataByAPI = (url, setDatafromAPI) => {
-    fetchData(url)
-      .then((data) => {
-        setDatafromAPI(data)
-        setMessageText('')
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error),
-          setTimeout(() => {
-            setMessageText(getMessagesText('errorFetching'))
-          }, 4000)
-      })
+  const fetchDataByAPI = async (url, setDatafromAPI) => {
+    try {
+      const data = await fetchData(url)
+      setDatafromAPI(data)
+      setMessageText('')
+      return data
+    } catch (error) {
+      console.error('Error fetching data:', error),
+        setTimeout(() => {
+          setMessageText(getMessagesText('errorFetching'))
+        }, 4000)
+      throw error
+    }
   }
 
   const sortData = (data) => {
@@ -92,16 +93,19 @@ const SummaryPage = () => {
     const urlReturns = `${VITE_APP_RETURNS_API}?start=${startDate}&end=${endDate}`
 
     try {
-      const settingsData = fetchDataByAPI(
+      const settingsData = await fetchDataByAPI(
         VITE_APP_SETTINGS_API,
         setSettings,
       )
-      const saleData = fetchDataByAPI(urlSales, (data) => {
-        const sortedSaleData = sortData(data)
-        setSale(sortedSaleData)
-        return sortedSaleData
-      })
-      const returnsData = fetchDataByAPI(
+      const saleData = await fetchDataByAPI(
+        urlSales,
+        (data) => {
+          const sortedSaleData = sortData(data)
+          setSale(sortedSaleData)
+          return sortedSaleData
+        },
+      )
+      const returnsData = await fetchDataByAPI(
         urlReturns,
         (data) => {
           const sortedReturnsData = sortData(data)

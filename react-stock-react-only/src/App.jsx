@@ -21,7 +21,7 @@ import './App.css'
 
 function App() {
   return (
-    <Router>
+    <Router basename="/indexAplikacja.html">
       {/* <Navbar />
       <Sidebar /> */}
       <Routes>
