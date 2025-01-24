@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
 } from 'react-router-dom'
-import { Navbar, Sidebar, Footer } from './components/index'
 import {
   HomePage,
   SalePage,
@@ -21,7 +20,8 @@ import './App.css'
 
 function App() {
   return (
-    <Router basename="/indexAplikacja.html">
+    <Router>
+      {/* <Router basename="/indexAplikacja.html"> */}
       {/* <Navbar />
       <Sidebar /> */}
       <Routes>

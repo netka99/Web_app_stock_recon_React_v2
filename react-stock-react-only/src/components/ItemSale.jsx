@@ -36,11 +36,12 @@ const ItemSale = ({
           <input
             type="number"
             min="0"
-            value={value}
+            value={value === 0 ? '' : value}
             id={`input-${shopName}`}
             name={shopName}
             onChange={handleChange}
             disabled={isShopDisabled(shopName)}
+            placeholder="0"
           ></input>
           <p className="item-units">{unit}</p>
         </div>
@@ -54,7 +55,10 @@ ItemSale.propTypes = {
   productName: PropTypes.string.isRequired,
   saleType: PropTypes.string.isRequired,
   unit: PropTypes.string.isRequired,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
   shopName: PropTypes.string.isRequired,

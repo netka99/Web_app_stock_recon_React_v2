@@ -76,15 +76,15 @@ const SummaryShopProductDetails = ({
     setEditType(type)
   }
 
-  const formatcentsToEuros = (cents) => {
-    const euros = cents / 100
-    const convertedValue = euros.toLocaleString('pl-PL', {
-      useGrouping: true,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-    return convertedValue
-  }
+  // const formatcentsToEuros = (cents) => {
+  //   const euros = cents / 100
+  //   const convertedValue = euros.toLocaleString('pl-PL', {
+  //     useGrouping: true,
+  //     minimumFractionDigits: 2,
+  //     maximumFractionDigits: 2,
+  //   })
+  //   return convertedValue
+  // }
 
   //message displayed on the screen after updated data are saved
   const getMessageText = (messageType) => {
@@ -194,7 +194,7 @@ const SummaryShopProductDetails = ({
             </div>
           ) : (
             <div className="detailed-quantity">
-              {`${minus}${item.quantity} ${units[productSelected]}`}
+              {`${minus}${item.quantity.toFixed(2)} ${units[productSelected]}`}
             </div>
           )}
 
@@ -318,6 +318,14 @@ SummaryShopProductDetails.propTypes = {
   }).isRequired,
   updateLocalReturn: PropTypes.func,
   updateLocalSale: PropTypes.func,
+}
+
+SaveButton.propTypes = {
+  onClick: PropTypes.func,
+}
+
+EditButton.propTypes = {
+  onClick: PropTypes.func,
 }
 
 const Button = styled.button`

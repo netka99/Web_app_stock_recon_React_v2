@@ -29,6 +29,7 @@ DatePicker.propTypes = {
   todaysDate: PropTypes.string.isRequired,
   setTodaysDate: PropTypes.func,
   setSentQuantities: PropTypes.func,
+  className: PropTypes.string,
 }
 const DateContainer = styled.div`
   display: flex;

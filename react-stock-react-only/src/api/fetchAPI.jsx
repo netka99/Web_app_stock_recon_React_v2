@@ -3,7 +3,7 @@ export const fetchData = async (url) => {
   try {
     const response = await fetch(url, {
       method: 'GET', // Or POST, PUT, etc.
-      credentials: 'include', // THIS IS THE ONLY CHANGE NEEDED HERE
+      // credentials: 'include',
     })
     if (!response.ok) {
       const errorData = await response.json() // Try to parse error
@@ -33,7 +33,7 @@ export const updateDataOnApi = async (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(updatedData),
-      credentials: 'include',
+      // credentials: 'include',
     })
     if (!response.ok) {
       const errorData = await response.json() // Try to parse error

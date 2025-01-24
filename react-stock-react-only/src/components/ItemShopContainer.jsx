@@ -215,7 +215,10 @@ ItemShopContainer.propTypes = {
   saleType: PropTypes.string.isRequired,
   unit: PropTypes.string.isRequired,
   shopName: PropTypes.string.isRequired,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
   valueExtra: PropTypes.number,
   disabled: PropTypes.bool,
   saveData: PropTypes.func,

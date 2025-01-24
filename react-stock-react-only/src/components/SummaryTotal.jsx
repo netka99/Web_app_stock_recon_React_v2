@@ -21,17 +21,17 @@ const SummaryTotal = ({
     <Container>
       <div className="sum-container">
         <div className="sum-header">Suma</div>
-        <div className="sum-total">{`${summary(saleData) - summary(returnsData)} ${units[productSelected]}`}</div>
+        <div className="sum-total">{`${(summary(saleData) - summary(returnsData)).toFixed(2)} ${units[productSelected]}`}</div>
         <div className="sum-total-prize">{`${(((summary(saleData) - summary(returnsData)) * settingsData.prices[productSelected]) / 100).toFixed(2)} zł`}</div>
       </div>
       <div className="sum-sale">
         <div className="sum-header-sale">Sprzedaż</div>
-        <div className="sum-total">{`  ${summary(saleData)} ${units[productSelected]}`}</div>
+        <div className="sum-total">{`  ${summary(saleData).toFixed(2)} ${units[productSelected]}`}</div>
         <div className="sum-total-prize">{`  ${((summary(saleData) * settingsData.prices[productSelected]) / 100).toFixed(2)} zł`}</div>
       </div>
       <div className="sum-return">
         <div className="sum-header-sale">Zwrot</div>
-        <div className="sum-total">{`-${summary(returnsData)} ${units[productSelected]}`}</div>
+        <div className="sum-total">{`-${summary(returnsData).toFixed(2)} ${units[productSelected]}`}</div>
         <div className="sum-total-prize">{`-${((summary(returnsData) * settingsData.prices[productSelected]) / 100).toFixed(2)} zł`}</div>
       </div>
     </Container>

@@ -56,7 +56,7 @@ const SalePage = () => {
     fetchData(VITE_APP_SETTINGS_API)
       .then((data) => {
         setShopsprices(data)
-        console.log('dataAllSettings:', data)
+        // console.log('dataAllSettings:', data)
       })
       .catch((error) =>
         console.error(
@@ -68,7 +68,7 @@ const SalePage = () => {
       .then((dataSale) => {
         setSale(dataSale)
         setUpdatedSale(dataSale)
-        console.log('dataAllSale:', dataSale)
+        // console.log('dataAllSale:', dataSale)
       })
       .catch((error) =>
         console.error(
@@ -90,12 +90,6 @@ const SalePage = () => {
       )
     filterByProduct(saleByProduct)
   }, [saleByProduct, todaysDate])
-  console.log('Data Sale', sale)
-  console.log('Data Return', returns)
-  console.log('dataAllSaleUpdated:', updatedSale)
-  console.log('dataAllReturnUpdated:', updatedReturn)
-  console.log('data Extra Sale:', extraSaleValues)
-  console.log('data Extra Return:', extraReturnValues)
 
   const filterByProduct = (productName) => {
     setSaleByProduct(productName)
@@ -104,18 +98,18 @@ const SalePage = () => {
   useEffect(() => {
     setExtraSaleValues([])
     setExtraReturnValues([])
-    console.log('Selected date changed:', todaysDate)
   }, [todaysDate])
 
   const valueCurrent = (shop) => {
     const data = isSale ? updatedSale : updatedReturn
+    const filteredData = data?.filter(
+      (s) => s.shop === shop && s.product === saleByProduct,
+    )
     return (
-      data
-        ?.filter(
-          (s) =>
-            s.shop === shop && s.product === saleByProduct,
-        )
-        ?.reduce((acc, curr) => acc + curr.quantity, 0) ?? 0
+      filteredData?.reduce(
+        (acc, curr) => acc + curr.quantity,
+        0,
+      ) || 0
     )
   }
 
@@ -186,7 +180,7 @@ const SalePage = () => {
   ])
 
   const saveData = async (quantity, shopName) => {
-    console.log('Button clicked!:', quantity, shopName)
+    // console.log('Button clicked!:', quantity, shopName)
     const data = {
       id: null,
       product: saleByProduct,
@@ -237,7 +231,7 @@ const SalePage = () => {
 
       setSentQuantities((prev) => {
         const updatedQuantities = [...prev, newSentQuantity]
-        console.log('NewSentQuantities:', updatedQuantities) // Log after state update
+        // console.log('NewSentQuantities:', updatedQuantities) // Log after state update
         return updatedQuantities
       })
 
@@ -252,11 +246,6 @@ const SalePage = () => {
   }
 
   const saveExtraData = async (quantity, shopName) => {
-    console.log(
-      'Button clicked Extra!:',
-      quantity,
-      shopName,
-    )
     const data = {
       id: null,
       product: saleByProduct,
@@ -302,7 +291,7 @@ const SalePage = () => {
 
       setSentQuantities((prev) => {
         const updatedQuantities = [...prev, newSentQuantity]
-        console.log('NewSentQuantities:', updatedQuantities) // Log after state update
+        // console.log('NewSentQuantities:', updatedQuantities) // Log after state update
         return updatedQuantities
       })
       return result

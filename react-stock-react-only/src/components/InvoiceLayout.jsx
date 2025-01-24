@@ -2,11 +2,12 @@ import * as React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
 // import { size } from '../styles/devices'
-import { units } from '../utils/productDetails'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 import PropTypes from 'prop-types'
 import n2words from 'n2words' //*
+import logoComp from '../assets/Logo.png'
+const { VITE_APP_BANK_ACCOUNT } = import.meta.env
 
 const InvoiceLayout = ({
   invoiceData,
@@ -126,11 +127,11 @@ const InvoiceLayout = ({
   useEffect(() => {
     const handleResize = () => {
       const viewportWidth = window.innerWidth
-      const viewportHeight = window.innerHeight
+      // const viewportHeight = window.innerHeight
 
-      // Invoice original dimensions
-      const invoiceWidth = 880 // Original width of the invoice
-      const invoiceHeight = 297 * 3.77953 // Convert mm to px (1 mm = 3.77953 px)
+      // // Invoice original dimensions
+      // const invoiceWidth = 880 // Original width of the invoice
+      // const invoiceHeight = 297 * 3.77953 // Convert mm to px (1 mm = 3.77953 px)
 
       // Set scaling behavior based on viewport width
       let scaleFactor = 1
@@ -177,7 +178,13 @@ const InvoiceLayout = ({
       </div>
       <div ref={invoiceRef} className="invoice-preview">
         <div className="invoice-header">
-          <div className="invoice-logo">Logo</div>
+          <div className="invoice-logo">
+            <img
+              src={logoComp}
+              className="logo"
+              alt="logo Smaczny Kąsek"
+            />
+          </div>
           <div className="invoice-info">
             <div className="info">
               <div>Miejsce wystawienia:</div>
@@ -227,7 +234,7 @@ const InvoiceLayout = ({
           <div className="account">
             <div>Nr konta: </div>
             <div className="account-number">
-              37 1020 1332 0000 XXXX XXXX XXXX
+              {VITE_APP_BANK_ACCOUNT}
             </div>
           </div>
           <div className="swift">
@@ -425,6 +432,36 @@ InvoiceLayout.propTypes = {
   productCode: PropTypes.objectOf(PropTypes.string),
   vat: PropTypes.objectOf(PropTypes.number),
   netPrice: PropTypes.objectOf(PropTypes.number),
+  invoiceData: PropTypes.shape({
+    shopName: PropTypes.string,
+    address: PropTypes.string,
+    startDate: PropTypes.string,
+    endDate: PropTypes.string,
+    city: PropTypes.string,
+    invoiceDate: PropTypes.string,
+    endSaleDate: PropTypes.string,
+    paymentDate: PropTypes.string,
+    paymentType: PropTypes.string,
+    seller: PropTypes.string,
+    invoiceNumber: PropTypes.string,
+    comment: PropTypes.string,
+  }),
+
+  productsData: PropTypes.arrayOf(
+    PropTypes.shape({
+      checked: PropTypes.bool,
+      product: PropTypes.string,
+      productName: PropTypes.string,
+      code: PropTypes.string,
+      units: PropTypes.string,
+      quantity: PropTypes.number,
+      netPrice: PropTypes.number,
+      vat: PropTypes.number,
+      grossPrice: PropTypes.number,
+      totalNet: PropTypes.number,
+      totalGross: PropTypes.number,
+    }),
+  ),
   extraProduct: PropTypes.arrayOf(
     PropTypes.shape({
       product: PropTypes.string,
@@ -462,6 +499,11 @@ const Container = styled.div`
   flex-direction: column;
   /* overflow: 'hidden'; // Prevent unwanted scrolling */
   margin: 1rem;
+
+  .logo {
+    height: 5rem;
+    padding-left: 1rem;
+  }
 
   .invoice-preview {
     /* width: 100%; */

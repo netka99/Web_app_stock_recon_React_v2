@@ -133,6 +133,8 @@ const InvoicePage = () => {
     switch (messageType) {
       case 'errorFetching':
         return 'Problem z pobraniem danych!'
+      case 'correctFetching':
+        return 'Dane zostały pobrane! Wybierz Sklep.'
       default:
         return ''
     }
@@ -210,6 +212,7 @@ const InvoicePage = () => {
     } finally {
       setLoading(false)
       setTitlesVisibility(true)
+      getMessagesText('correctFetching')
     }
   }, [
     fetchDataByAPI,
@@ -784,9 +787,9 @@ const InvoicePage = () => {
                                 updateProductTotals(
                                   product,
                                   'vat',
-                                  Number(
+                                  parseFloat(
                                     e.target.value,
-                                  ).toFixed(2),
+                                  ),
                                   setProductsData,
                                 )
                               }
@@ -806,9 +809,7 @@ const InvoicePage = () => {
                               updateProductTotals(
                                 product,
                                 'grossPrice',
-                                Number(
-                                  e.target.value,
-                                ).toFixed(2),
+                                parseFloat(e.target.value),
                                 setProductsData,
                               )
                             }
