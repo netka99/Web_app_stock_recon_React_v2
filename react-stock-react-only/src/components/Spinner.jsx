@@ -1,5 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import { size } from '../styles/devices'
+
 // source code: https://codepen.io/travis_john/pen/xMNLam
 
 const Spinner = () => {
@@ -40,7 +42,8 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  height: 30vh;
+  width: 100%;
   flex-direction: row;
   flex-wrap: wrap;
 
@@ -53,6 +56,10 @@ const Container = styled.div`
     height: 50%;
     position: relative;
     filter: url(#gooey);
+
+    @media screen and (max-width: ${size.tabletS}) {
+      width: 80%;
+    }
   }
 
   .loader-container > * {

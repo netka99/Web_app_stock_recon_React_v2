@@ -344,7 +344,7 @@ const Container = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0 auto 0.5rem auto;
+    margin: 1rem auto 0.5rem auto;
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
     box-shadow:

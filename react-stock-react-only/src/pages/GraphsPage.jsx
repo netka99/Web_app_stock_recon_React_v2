@@ -80,18 +80,18 @@ const GraphsPage = () => {
     }
   }
 
-  const fetchDataByAPI = (url, setDatafromAPI) => {
-    fetchData(url)
-      .then((data) => {
-        setDatafromAPI(data)
-        setMessageText('')
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error),
-          setTimeout(() => {
-            setMessageText(getMessagesText('errorFetching'))
-          }, 4000)
-      })
+  const fetchDataByAPI = async (url, setDatafromAPI) => {
+    try {
+      const data = await fetchData(url)
+      setDatafromAPI(data)
+      setMessageText('')
+      return data
+    } catch (error) {
+      console.error('Error fetching data:', error),
+        setTimeout(() => {
+          setMessageText(getMessagesText('errorFetching'))
+        }, 2000)
+    }
   }
 
   const summary = (date, data, shop) => {
@@ -393,7 +393,7 @@ const Container = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0 auto 0.5rem auto;
+    margin: 1rem auto 0.5rem auto;
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
     box-shadow:

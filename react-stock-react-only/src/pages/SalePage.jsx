@@ -23,8 +23,6 @@ const {
 } = import.meta.env
 import { size } from '../styles/devices'
 
-//http://localhost:8000/sales?start=2024-04-19&end=2024-04-19
-
 const pageTitle = 'Sprzedaż'
 
 const SalePage = () => {
@@ -42,6 +40,8 @@ const SalePage = () => {
   const [isSale, setIsSale] = useState(true)
   const [isReturnSaved, setIsReturnSaved] = useState(false)
   const [typeOfSale, setTypeOfSale] = useState('Sprzedaż')
+  const [messageText, setMessageText] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const today = new Date().toISOString().split('T')[0]
   const [todaysDate, setTodaysDate] = useState(today)
@@ -49,51 +49,65 @@ const SalePage = () => {
   const [disabledExtraShops, setDisabledExtraShops] =
     useState([])
 
-  const apiWithDate = `${VITE_APP_SALES_API}?start=${todaysDate}&end=${todaysDate}`
-  const apiWithDateReturn = `${VITE_APP_RETURNS_API}?start=${todaysDate}&end=${todaysDate}`
-
-  useEffect(() => {
-    fetchData(VITE_APP_SETTINGS_API)
-      .then((data) => {
-        setShopsprices(data)
-        // console.log('dataAllSettings:', data)
-      })
-      .catch((error) =>
-        console.error(
-          'Error fetching data from Settings:',
-          error,
-        ),
-      )
-    fetchData(apiWithDate)
-      .then((dataSale) => {
-        setSale(dataSale)
-        setUpdatedSale(dataSale)
-        // console.log('dataAllSale:', dataSale)
-      })
-      .catch((error) =>
-        console.error(
-          'Error fetching data from Sales:',
-          error,
-        ),
-      )
-    fetchData(apiWithDateReturn)
-      .then((dataReturn) => {
-        setReturns(dataReturn)
-        setUpdatedReturn(dataReturn)
-        console.log('dataAllReturn:', dataReturn)
-      })
-      .catch((error) =>
-        console.error(
-          'Error fetching data from Sales:',
-          error,
-        ),
-      )
-    filterByProduct(saleByProduct)
-  }, [saleByProduct, todaysDate])
+  const getMessagesText = (messageType) => {
+    switch (messageType) {
+      case 'errorFetching':
+        return 'Problem z pobraniem danych!'
+      default:
+        return ''
+    }
+  }
 
   const filterByProduct = (productName) => {
     setSaleByProduct(productName)
   }
+
+  const fetchDataByAPI = async (url, setDatafromAPI) => {
+    try {
+      const data = await fetchData(url)
+      setDatafromAPI(data)
+      setMessageText('')
+      return data
+    } catch (error) {
+      console.error('Error fetching data:', error),
+        setTimeout(() => {
+          setMessageText(getMessagesText('errorFetching'))
+        }, 4000)
+      throw error
+    }
+  }
+
+  const searchByDate = async () => {
+    setLoading(true)
+
+    const urlSales = `${VITE_APP_SALES_API}?start=${todaysDate}&end=${todaysDate}`
+    const urlReturns = `${VITE_APP_RETURNS_API}?start=${todaysDate}&end=${todaysDate}`
+
+    try {
+      await fetchDataByAPI(
+        VITE_APP_SETTINGS_API,
+        setShopsprices,
+      )
+      await fetchDataByAPI(urlSales, (dataSale) => {
+        setSale(dataSale)
+        setUpdatedSale(dataSale)
+      })
+      await fetchDataByAPI(urlReturns, (dataReturn) => {
+        setReturns(dataReturn)
+        setUpdatedReturn(dataReturn)
+      })
+      filterByProduct(saleByProduct)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setMessageText(getMessagesText('errorFetching'))
+    } finally {
+      setLoading(false) // Hide spinner
+    }
+  }
+
+  useEffect(() => {
+    searchByDate()
+  }, [saleByProduct, todaysDate])
 
   useEffect(() => {
     setExtraSaleValues([])
@@ -352,7 +366,13 @@ const SalePage = () => {
             </button>
           ))}
         </div>
-        {shopsprices ? (
+        {messageText && (
+          <div className="error-notification">
+            {messageText}
+          </div>
+        )}
+        {loading && <Spinner />}
+        {shopsprices &&
           shopsprices.shops.map((shop, index) => (
             <ItemShopContainer
               key={`${shop}-${index}`}
@@ -374,10 +394,7 @@ const SalePage = () => {
               extraReturnValues={extraReturnValues}
               todaysDate={todaysDate}
             />
-          ))
-        ) : (
-          <Spinner />
-        )}
+          ))}
       </Container>
       <SummarySale
         sale={sale}
@@ -497,6 +514,22 @@ const Container = styled.div`
     box-shadow:
       inset 3px 3px 8px 0 rgba(0, 0, 0, 0.3),
       inset -6px -6px 10px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .error-notification {
+    background-color: #f8d7da;
+    width: 50%;
+    padding: 0.3rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem auto 0.5rem auto;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+    box-shadow:
+      0 3px 6px 0 rgba(0, 0, 0, 0.2),
+      0 3px 10px 0 rgba(0, 0, 0, 0.19);
   }
 `
 export default SalePage
