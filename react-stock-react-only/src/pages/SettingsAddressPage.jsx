@@ -1,11 +1,13 @@
 import React from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
+import PropTypes from 'prop-types'
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
 import shopImg from '../assets/store-img.svg'
 import editImg from '../assets/edit.png'
 import saveImg from '../assets/save-icon.png'
 import { size } from '../styles/devices'
+import useTemporaryMessage from '../hooks/useTemporaryMessage'
 
 import {
   Navbar,
@@ -18,48 +20,26 @@ const pageTitle = 'Ustawienia - Adresy'
 const { VITE_APP_SETTINGS_API } = import.meta.env
 
 const SettingsAddressPage = () => {
-  const [messageText, setMessageText] = useState('')
+  const [messageText, showMessage] = useTemporaryMessage()
   const [settings, setSettings] = useState(null)
   const [addresses, setAddresses] = useState({})
-  const [loading, setLoading] = useState(false)
   const [editingShop, setEditingShop] = useState(null)
 
-  const handleMessage = (messageType) => {
-    getMessageText(messageType)
-    setMessageText(messageType)
-    setTimeout(() => {
-      setMessageText(false)
-    }, 10000)
-  }
-
-  const getMessageText = (messageType) => {
-    switch (messageType) {
-      case 'added':
-        return 'Adres został zapisany!'
-      case 'error':
-        return 'Dane nie zostały pobrane lub zapisane, skontaktuj się z administratorem!'
-      default:
-        return ''
-    }
-  }
-
-  const handleError = (error) => {
-    console.error('Error fetching data:', error),
-      setTimeout(() => {
-        setMessageText(getMessageText('error'))
-      }, 4000)
-  }
+  const handleError = useCallback(
+    (error) => {
+      console.error('Error fetching data:', error),
+        showMessage('Problem z pobraniem danych!', 6000)
+    },
+    [showMessage],
+  )
 
   const loadSettings = async () => {
-    setLoading(true)
     try {
       const data = await fetchData(VITE_APP_SETTINGS_API)
       setSettings(data)
       setAddresses(data.address)
     } catch (error) {
       handleError(error)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -88,14 +68,13 @@ const SettingsAddressPage = () => {
         VITE_APP_SETTINGS_API,
         'PUT',
       )
-      console.log('Response status:', response.status)
-      console.log('Response data:', response.data)
       if (response.status === 200) {
-        handleMessage('added')
-        console.log('data sent')
+        showMessage('Adres został zapisany!', 4000)
       } else {
-        console.log('data not sent')
-        handleMessage('error')
+        showMessage(
+          'Dane nie zostały pobrane lub zapisane!',
+          4000,
+        )
       }
     } catch (error) {
       console.error('Error saving shops:', error)
@@ -107,17 +86,13 @@ const SettingsAddressPage = () => {
     loadSettings()
   }, [])
 
-  useEffect(() => {
-    console.log(editingShop)
-  }, [editingShop])
-
   return (
     <main>
       <Navbar pageTitle={pageTitle} />
       <Container>
         {messageText && (
           <div className="error-notification">
-            {getMessageText(messageText)}
+            {messageText}
           </div>
         )}
         <div className="shopsListSettings">
@@ -214,6 +189,14 @@ const SaveButton = ({ onClick }) => (
     />
   </Button>
 )
+
+SaveButton.propTypes = {
+  onClick: PropTypes.func,
+}
+
+EditButton.propTypes = {
+  onClick: PropTypes.func,
+}
 
 const Container = styled.div`
   display: flex;

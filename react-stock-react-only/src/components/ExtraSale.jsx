@@ -12,7 +12,6 @@ const ExtraSale = forwardRef(function ExtraSale(
   {
     unit,
     shopName,
-    // handleMessage,
     handleSaveData,
     saleType,
     extraShopDisabled,
@@ -108,7 +107,6 @@ ExtraSale.propTypes = {
   onChange: PropTypes.func,
   shopName: PropTypes.string.isRequired,
   saveData: PropTypes.func,
-  handleMessage: PropTypes.func,
   handleSaveData: PropTypes.func,
   saleType: PropTypes.string.isRequired,
   extraShopDisabled: PropTypes.func,

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
-import { useContext, useState, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import {
   Navbar,
   Sidebar,
@@ -11,6 +11,7 @@ import {
 import { PricesContext } from '../context/index'
 import { size } from '../styles/devices'
 import { pictures } from '../utils/productDetails'
+import useTemporaryMessage from '../hooks/useTemporaryMessage'
 
 const SettingsPricesPage = () => {
   const {
@@ -22,21 +23,11 @@ const SettingsPricesPage = () => {
     handleSavePrices,
   } = useContext(PricesContext)
   const pageTitle = 'Ustawienia - Ceny'
-  const [showSavedMsg, setShowSaveMsg] = useState(false)
-
-  const messageStyle = {
-    color: '#e51ead',
-    fontWeight: 'bold',
-    fontStyle: 'italic',
-  }
+  const [messageText, showMessage] = useTemporaryMessage()
 
   useEffect(() => {
     if (isSent) {
-      setShowSaveMsg(true)
-      const timer = setTimeout(() => {
-        setShowSaveMsg(false)
-      }, 9000)
-      return () => clearTimeout(timer)
+      showMessage('Ceny zostały zapisane!', 6000)
     }
   }, [isSent])
 
@@ -99,10 +90,10 @@ const SettingsPricesPage = () => {
                   Zapisz
                 </button>
               )}
-              {showSavedMsg && (
-                <p style={messageStyle}>
-                  Ceny zostały zapisane
-                </p>
+              {messageText && (
+                <div className="error-notification">
+                  {messageText}
+                </div>
               )}
             </div>
           </form>
@@ -296,6 +287,22 @@ const Container = styled.div`
       #e086bf
     );
     cursor: pointer;
+  }
+
+  .error-notification {
+    background-color: #f8d7da;
+    width: 85%;
+    padding: 0.3rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem auto 0.5rem auto;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+    box-shadow:
+      0 3px 6px 0 rgba(0, 0, 0, 0.2),
+      0 3px 10px 0 rgba(0, 0, 0, 0.19);
   }
 `
 

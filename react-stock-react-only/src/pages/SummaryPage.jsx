@@ -16,6 +16,7 @@ import {
   pictures,
 } from '../utils/productDetails'
 import { fetchData } from '../api/fetchAPI'
+import useTemporaryMessage from '../hooks/useTemporaryMessage'
 
 const {
   VITE_APP_SETTINGS_API,
@@ -35,7 +36,7 @@ const SummaryPage = () => {
   const [settings, setSettings] = useState(null)
   const [sale, setSale] = useState(null)
   const [returns, setReturns] = useState(null)
-  const [messageText, setMessageText] = useState('')
+  const [messageText, showMessage] = useTemporaryMessage()
   const [showContainer, setShowContainer] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isOpenIndex, setIsOpenIndex] = useState([])
@@ -47,32 +48,15 @@ const SummaryPage = () => {
     setIsOpenIndex([])
   }
 
-  const getMessagesText = (messageType) => {
-    switch (messageType) {
-      case 'errorFetching':
-        return 'Problem z pobraniem danych!'
-      case 'saleSaved':
-        return 'Sprzedaż została zapisana!'
-      case 'errorSave':
-        return 'Problem z wysłaniem danych do bazy danych!'
-      case 'returnSaved':
-        return 'Zwrot został zapisany!'
-      default:
-        return ''
-    }
-  }
-
   const fetchDataByAPI = async (url, setDatafromAPI) => {
     try {
       const data = await fetchData(url)
       setDatafromAPI(data)
-      setMessageText('')
+      showMessage('')
       return data
     } catch (error) {
       console.error('Error fetching data:', error),
-        setTimeout(() => {
-          setMessageText(getMessagesText('errorFetching'))
-        }, 4000)
+        showMessage('Problem z pobraniem danych!', 4000)
       throw error
     }
   }
@@ -122,7 +106,7 @@ const SummaryPage = () => {
       setShowContainer(true)
     } catch (error) {
       console.error('Error fetching data:', error)
-      setMessageText(getMessagesText('errorFetching'))
+      showMessage('Problem z pobraniem danych!', 4000)
     } finally {
       setLoading(false) // Hide spinner
     }

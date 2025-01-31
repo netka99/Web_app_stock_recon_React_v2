@@ -8,6 +8,7 @@ import { updateDataOnApi } from '../api/fetchAPI'
 import { size } from '../styles/devices'
 const { VITE_APP_SALES_API, VITE_APP_RETURNS_API } =
   import.meta.env
+import useTemporaryMessage from '../hooks/useTemporaryMessage'
 
 const SummaryShopProductDetails = ({
   localSaleData,
@@ -27,7 +28,7 @@ const SummaryShopProductDetails = ({
   const [editIndex, setEditIndex] = useState(null)
   const [editValue, setEditValue] = useState('')
   const [editType, setEditType] = useState(null)
-  const [messageText, setMessageText] = useState(false)
+  const [messageText, showMessage] = useTemporaryMessage()
 
   useEffect(() => {
     if (contentRef.current) {
@@ -76,35 +77,6 @@ const SummaryShopProductDetails = ({
     setEditType(type)
   }
 
-  // const formatcentsToEuros = (cents) => {
-  //   const euros = cents / 100
-  //   const convertedValue = euros.toLocaleString('pl-PL', {
-  //     useGrouping: true,
-  //     minimumFractionDigits: 2,
-  //     maximumFractionDigits: 2,
-  //   })
-  //   return convertedValue
-  // }
-
-  //message displayed on the screen after updated data are saved
-  const getMessageText = (messageType) => {
-    switch (messageType) {
-      case 'dataSaved':
-        return 'Dane zostały poprawnie zapisane!'
-      case 'errorSave':
-        return 'Problem z wysłaniem danych do bazy danych!'
-      default:
-        return ''
-    }
-  }
-
-  const handleMessage = (messageType) => {
-    setMessageText(getMessageText(messageType))
-    setTimeout(() => {
-      setMessageText(false)
-    }, 5000)
-  }
-
   const updateItem = async (quantity, dateItem, idItem) => {
     const quantityNumber = Number(quantity)
     console.log('save button clicked', quantity, idItem)
@@ -125,9 +97,15 @@ const SummaryShopProductDetails = ({
         result = await updateDataOnApi(data, urlSale, 'PUT')
         console.log(result.status)
         if (result && result.status !== 204) {
-          handleMessage('errorSave')
+          showMessage(
+            'Problem z wysłaniem danych do bazy danych!',
+            4000,
+          )
         } else {
-          handleMessage('dataSaved')
+          showMessage(
+            'Dane zostały poprawnie zapisane!',
+            4000,
+          )
           updateLocalSale((prevData) =>
             prevData.map((item) =>
               item.id === idItem
@@ -145,9 +123,12 @@ const SummaryShopProductDetails = ({
         )
         console.log(result.status)
         if (result && result.status !== 204) {
-          handleMessage('errorSave')
+          showMessage('Problem z wysłaniem danych!', 4000)
         } else {
-          handleMessage('dataSaved')
+          showMessage(
+            'Dane zostały poprawnie zapisane!',
+            4000,
+          )
           updateLocalReturn((prevData) =>
             prevData.map((item) =>
               item.id === idItem

@@ -22,6 +22,7 @@ const {
   VITE_APP_RETURNS_API,
 } = import.meta.env
 import { size } from '../styles/devices'
+import useTemporaryMessage from '../hooks/useTemporaryMessage'
 
 const pageTitle = 'Sprzedaż'
 
@@ -40,7 +41,7 @@ const SalePage = () => {
   const [isSale, setIsSale] = useState(true)
   const [isReturnSaved, setIsReturnSaved] = useState(false)
   const [typeOfSale, setTypeOfSale] = useState('Sprzedaż')
-  const [messageText, setMessageText] = useState('')
+  const [messageText, showMessage] = useTemporaryMessage()
   const [loading, setLoading] = useState(false)
 
   const today = new Date().toISOString().split('T')[0]
@@ -48,15 +49,6 @@ const SalePage = () => {
   const [disabledShops, setDisabledShops] = useState([])
   const [disabledExtraShops, setDisabledExtraShops] =
     useState([])
-
-  const getMessagesText = (messageType) => {
-    switch (messageType) {
-      case 'errorFetching':
-        return 'Problem z pobraniem danych!'
-      default:
-        return ''
-    }
-  }
 
   const filterByProduct = (productName) => {
     setSaleByProduct(productName)
@@ -66,13 +58,11 @@ const SalePage = () => {
     try {
       const data = await fetchData(url)
       setDatafromAPI(data)
-      setMessageText('')
+      showMessage('')
       return data
     } catch (error) {
       console.error('Error fetching data:', error),
-        setTimeout(() => {
-          setMessageText(getMessagesText('errorFetching'))
-        }, 4000)
+        showMessage('Problem z pobraniem danych!', 6000)
       throw error
     }
   }
@@ -99,7 +89,7 @@ const SalePage = () => {
       filterByProduct(saleByProduct)
     } catch (error) {
       console.error('Error fetching data:', error)
-      setMessageText(getMessagesText('errorFetching'))
+      showMessage('Problem z pobraniem danych!', 6000)
     } finally {
       setLoading(false) // Hide spinner
     }

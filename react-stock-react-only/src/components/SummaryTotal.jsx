@@ -132,7 +132,7 @@ const Container = styled.div`
 
   .sum-container {
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1rem;
     padding: 0.5rem 0 1rem 0;
 
     @media screen and (max-width: ${size.tabletS}) {

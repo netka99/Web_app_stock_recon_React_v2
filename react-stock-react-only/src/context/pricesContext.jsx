@@ -6,11 +6,7 @@ import React, {
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
 import PropTypes from 'prop-types'
 
-const {
-  VITE_APP_SETTINGS_API,
-  VITE_APP_SALES_API,
-  VITE_APP_RETURNS_API,
-} = import.meta.env
+const { VITE_APP_SETTINGS_API } = import.meta.env
 
 const PricesContext = createContext()
 

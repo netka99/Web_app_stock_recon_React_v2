@@ -15,6 +15,7 @@ import {
   ShopItem,
 } from '../components/index'
 import { size } from '../styles/devices'
+import useTemporaryMessage from '../hooks/useTemporaryMessage'
 
 const pageTitle = 'Ustawienia - Sklepy'
 const { VITE_APP_SETTINGS_API } = import.meta.env
@@ -24,7 +25,8 @@ const SettingsShopsPage = () => {
     shops: null,
   }
   const [dataAll, setDataAll] = useState(null)
-  const [messageText, setmessageText] = useState(false)
+  // const [messageText, setmessageText] = useState(false)
+  const [messageText, showMessage] = useTemporaryMessage()
   const [state, dispatch] = useReducer(
     shopReducer,
     initialShopsState,
@@ -47,7 +49,6 @@ const SettingsShopsPage = () => {
           type: actionTypes.SET_SHOPS,
           payload: shopsData,
         })
-        console.log('dataAll:', data)
       })
       .catch((error) =>
         console.error('Error fetching data:', error),
@@ -60,29 +61,6 @@ const SettingsShopsPage = () => {
     }
   }, [state.shops])
 
-  const handleMessage = (messageType) => {
-    getMessageText(messageType)
-    setmessageText(messageType)
-    setTimeout(() => {
-      setmessageText(false)
-    }, 10000)
-  }
-
-  const getMessageText = (messageType) => {
-    switch (messageType) {
-      case 'added':
-        return 'Sklep został dodany!'
-      case 'deleted':
-        return 'Sklep został skasowany!'
-      case 'saved':
-        return 'Nowa nazwa sklepu została zapisana!'
-      case 'error':
-        return 'Dane nie zostały pobrane lub zapisane, skontaktuj się z administratorem!'
-      default:
-        return ''
-    }
-  }
-
   const handleAddShop = (shopName) => {
     dispatch({
       type: actionTypes.ADD_SHOP,
@@ -91,7 +69,7 @@ const SettingsShopsPage = () => {
         name: shopName,
       },
     })
-    handleMessage('added')
+    showMessage('Sklep został dodany!', 4000)
   }
 
   const handleChange = (e, id) => {
@@ -107,7 +85,7 @@ const SettingsShopsPage = () => {
       type: actionTypes.DELETE_SHOP,
       payload: { id },
     })
-    handleMessage('deleted')
+    showMessage('Sklep został skasowany!', 4000)
   }
 
   const toggleEdit = (id) => {
@@ -122,7 +100,7 @@ const SettingsShopsPage = () => {
       type: actionTypes.SAVE_SHOP,
       payload: { id },
     })
-    handleMessage('saved')
+    showMessage('Nowa nazwa sklepu została zapisana!', 4000)
   }
 
   const saveShopsOnApi = async () => {
@@ -145,12 +123,17 @@ const SettingsShopsPage = () => {
       if (response.status === 200) {
         console.log('data sent')
       } else {
-        console.log('data not sent')
-        handleMessage('error')
+        showMessage(
+          'Dane nie zostały pobrane lub zapisane!',
+          4000,
+        )
       }
     } catch (error) {
       console.error('Error saving shops:', error)
-      handleMessage('error')
+      showMessage(
+        'Dane nie zostały pobrane lub zapisane!',
+        4000,
+      )
     }
   }
 
@@ -161,7 +144,7 @@ const SettingsShopsPage = () => {
         <AddShop onAddShop={handleAddShop} />
         {messageText && (
           <div className="error-notification">
-            {getMessageText(messageText)}
+            {messageText}
           </div>
         )}
         <div className="shopsListSettings">

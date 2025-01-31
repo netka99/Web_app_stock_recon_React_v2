@@ -5,13 +5,13 @@ import {
   Navbar,
   Sidebar,
   Footer,
-  //   Spinner,
   InvoiceLayout,
 } from '../components/index'
 import { size } from '../styles/devices'
 import { fetchData } from '../api/fetchAPI'
 // import n2words from 'n2words'
 import Big from 'big.js'
+import useTemporaryMessage from '../hooks/useTemporaryMessage'
 
 const {
   VITE_APP_SETTINGS_API,
@@ -24,10 +24,9 @@ const pageTitle = 'Faktury'
 const InvoicePage = () => {
   const today = new Date().toISOString().split('T')[0]
 
-  const [messageText, setMessageText] = useState('')
+  const [messageText, showMessage] = useTemporaryMessage()
   const [settings, setSettings] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [dates, setDates] = useState([])
+  // const [dates, setDates] = useState([])
   const [sale, setSale] = useState(null)
   const [returns, setReturns] = useState(null)
   const [summarySale, setSummarySale] = useState({})
@@ -35,8 +34,8 @@ const InvoicePage = () => {
   const [isInvoiceVisible, setIsInvoiceVisible] =
     useState(false)
   const [extraProduct, setExtraProduct] = useState([])
-  const [titlesVisibility, setTitlesVisibility] =
-    useState(false)
+  // const [titlesVisibility, setTitlesVisibility] =
+  useState(false)
   const initialInvoiceData = {
     shopName: '',
     address: '',
@@ -123,44 +122,35 @@ const InvoicePage = () => {
         })
         currentDate.setDate(currentDate.getDate() + 1)
       }
-      setDates(dates)
+      // setDates(dates)
       return dates
     },
     [],
   )
 
-  const getMessagesText = (messageType) => {
-    switch (messageType) {
-      case 'errorFetching':
-        return 'Problem z pobraniem danych!'
-      case 'correctFetching':
-        return 'Dane zostały pobrane! Wybierz Sklep.'
-      default:
-        return ''
-    }
-  }
-
-  const handleError = useCallback((error) => {
-    console.error('Error fetching data:', error),
-      setTimeout(() => {
-        setMessageText(getMessagesText('errorFetching'))
-      }, 4000)
-  }, [])
+  const handleError = useCallback(
+    (error) => {
+      console.error('Error fetching data:', error),
+        showMessage('Problem z pobraniem danych!', 6000)
+    },
+    [showMessage],
+  )
 
   const fetchDataByAPI = useCallback(
-    (url, setDatafromAPI) => {
-      fetchData(url)
-        .then((data) => {
-          setDatafromAPI(data)
-          setMessageText('')
-        })
-        .catch(handleError)
+    async (url, setDatafromAPI) => {
+      try {
+        const data = await fetchData(url)
+        setDatafromAPI(data)
+        return data
+      } catch (error) {
+        handleError(error)
+        throw error
+      }
     },
     [handleError],
   )
 
   const loadSettings = useCallback(async () => {
-    setLoading(true)
     try {
       await fetchDataByAPI(
         VITE_APP_SETTINGS_API,
@@ -183,13 +173,10 @@ const InvoicePage = () => {
       )
     } catch (error) {
       handleError(error)
-    } finally {
-      setLoading(false) // Hide spinner
     }
   }, [fetchDataByAPI, handleError, productsData])
 
   const dataSearchedByDates = useCallback(async () => {
-    setLoading(true)
     getDatesBetween(
       invoiceData.startDate,
       invoiceData.endDate,
@@ -199,20 +186,25 @@ const InvoicePage = () => {
     const urlReturns = `${VITE_APP_RETURNS_API}?start=${invoiceData.startDate}&end=${invoiceData.endDate}`
 
     try {
-      await fetchDataByAPI(urlSales, (dataSale) => {
-        setSale(dataSale)
-        console.log('Fetched Sales Data:', dataSale)
-      })
-      await fetchDataByAPI(urlReturns, (dataReturns) => {
-        setReturns(dataReturns)
-        console.log('Fetched Returns Data:', dataReturns)
-      })
+      const salesData = await fetchDataByAPI(
+        urlSales,
+        setSale,
+      )
+      const returnsData = await fetchDataByAPI(
+        urlReturns,
+        setReturns,
+      )
+      if (salesData && returnsData) {
+        showMessage(
+          'Dane zostały pobrane! Wybierz Sklep.',
+          6000,
+        )
+        console.log('Sales from fetching:', returns)
+      }
     } catch (error) {
       handleError(error)
     } finally {
-      setLoading(false)
-      setTitlesVisibility(true)
-      getMessagesText('correctFetching')
+      // setTitlesVisibility(true)
     }
   }, [
     fetchDataByAPI,
@@ -220,6 +212,7 @@ const InvoicePage = () => {
     handleError,
     invoiceData.startDate,
     invoiceData.endDate,
+    showMessage,
   ])
 
   const summary = useCallback((data, shop, stateVar) => {
@@ -370,7 +363,7 @@ const InvoicePage = () => {
         totalGross: 0,
       },
     ])
-    setTitlesVisibility(true)
+    // setTitlesVisibility(true)
   }, [])
 
   useEffect(() => {
@@ -390,11 +383,6 @@ const InvoicePage = () => {
         invoiceData.shopName,
         setSummaryReturns,
       )
-      console.log('settings data:', settings)
-      console.log('shop Name:', invoiceData.shopName)
-      console.log('adress:', invoiceData.address)
-      console.log('sum Sale:', summarySale)
-      console.log('sum Returns:', summaryReturns)
     }
   }, [invoiceData.shopName, sale, returns])
 
@@ -595,6 +583,11 @@ const InvoicePage = () => {
                 </div>
               </label>
             </div>
+            {messageText && (
+              <div className="error-notification">
+                {messageText}
+              </div>
+            )}
             <div className="shopName">
               <label>
                 {settings ? (
@@ -622,9 +615,7 @@ const InvoicePage = () => {
                       </option>
                     ))}
                   </select>
-                ) : (
-                  getMessagesText('errorFetching')
-                )}
+                ) : null}
               </label>
             </div>
             <div className="shopAddress">
@@ -1384,6 +1375,26 @@ const Container = styled.div`
 
   .hide {
     display: none;
+  }
+
+  .error-notification {
+    background-color: #f8d7da;
+    width: 80%;
+    padding: 0.3rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem auto 0.5rem auto;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+    box-shadow:
+      0 3px 6px 0 rgba(0, 0, 0, 0.2),
+      0 3px 10px 0 rgba(0, 0, 0, 0.19);
+
+    @media screen and (max-width: ${size.tablet}) {
+      width: 80%;
+    }
   }
 `
 export default InvoicePage

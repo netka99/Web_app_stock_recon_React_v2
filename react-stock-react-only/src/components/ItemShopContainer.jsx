@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import StoreImg from '../assets/store-img.svg'
 import Arrow from '../assets/chevron-down.svg'
 import { size } from '../styles/devices'
-
+import useTemporaryMessage from '../hooks/useTemporaryMessage'
 import { ExtraSale, ItemSale } from '../components/index'
 
 const ItemShopContainer = ({
@@ -28,11 +28,11 @@ const ItemShopContainer = ({
 }) => {
   const [inputValue, setInputValue] = useState(value)
   const [extraSale, setExtraSale] = useState(false)
-  const [messageText, setMessageText] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const contentRef = useRef(null)
   const contentRefExtra = useRef(null)
   const [contentHeight, setContentHeight] = useState(0)
+  const [messageText, showMessage] = useTemporaryMessage()
 
   const toggleAccordion = () => {
     setIsOpen(!isOpen)
@@ -65,12 +65,12 @@ const ItemShopContainer = ({
   ) => {
     const result = await savingData(valueofData, shopName)
     if (result && result.status !== 200) {
-      handleMessage('errorSave')
+      showMessage('Problem z pobraniem danych!', 6000)
     } else {
       if (isSale) {
-        handleMessage('saleSaved')
+        showMessage('Sprzedaż została zapisana!', 4000)
       } else if (!isSale) {
-        handleMessage('returnSaved')
+        showMessage('Zwrot został zapisany!!', 4000)
       }
     }
   }
@@ -88,27 +88,6 @@ const ItemShopContainer = ({
     setTimeout(() => {
       setExtraSale(true)
     }, 500)
-  }
-
-  const handleMessage = (messageType) => {
-    getMessageText(messageType)
-    setMessageText(messageType)
-    setTimeout(() => {
-      setMessageText(false)
-    }, 5000)
-  }
-
-  const getMessageText = (messageType) => {
-    switch (messageType) {
-      case 'saleSaved':
-        return 'Sprzedaż została zapisana!'
-      case 'errorSave':
-        return 'Problem z wysłaniem danych do bazy danych!'
-      case 'returnSaved':
-        return 'Zwrot został zapisany!'
-      default:
-        return ''
-    }
   }
 
   return (
@@ -141,7 +120,7 @@ const ItemShopContainer = ({
       </div>
       {messageText && (
         <div className="error-notification">
-          {getMessageText(messageText)}
+          {messageText}
         </div>
       )}
       <div
@@ -189,7 +168,6 @@ const ItemShopContainer = ({
             unit={unit}
             shopName={shopName}
             handleSaveData={handleSaveData}
-            handleMessage={handleMessage}
             ref={contentRefExtra}
             saleType={saleType}
             extraShopDisabled={extraShopDisabled}

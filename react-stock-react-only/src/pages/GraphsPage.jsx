@@ -12,6 +12,7 @@ import {
 import { size } from '../styles/devices'
 import { productsData } from '../utils/productDetails'
 import { fetchData } from '../api/fetchAPI'
+import useTemporaryMessage from '../hooks/useTemporaryMessage'
 import {
   Line,
   Bar,
@@ -42,7 +43,7 @@ const GraphsPage = () => {
   const [settings, setSettings] = useState(null)
   const [sale, setSale] = useState(null)
   const [returns, setReturns] = useState(null)
-  const [messageText, setMessageText] = useState('')
+  const [messageText, showMessage] = useTemporaryMessage()
   const [showContainer, setShowContainer] = useState(false)
   const [loading, setLoading] = useState(false)
   const [dates, setDates] = useState([])
@@ -71,26 +72,15 @@ const GraphsPage = () => {
     return dates
   }
 
-  const getMessagesText = (messageType) => {
-    switch (messageType) {
-      case 'errorFetching':
-        return 'Problem z pobraniem danych!'
-      default:
-        return ''
-    }
-  }
-
   const fetchDataByAPI = async (url, setDatafromAPI) => {
     try {
       const data = await fetchData(url)
       setDatafromAPI(data)
-      setMessageText('')
+      showMessage('')
       return data
     } catch (error) {
       console.error('Error fetching data:', error),
-        setTimeout(() => {
-          setMessageText(getMessagesText('errorFetching'))
-        }, 2000)
+        showMessage('Problem z pobraniem danych!', 6000)
     }
   }
 
@@ -162,7 +152,7 @@ const GraphsPage = () => {
       setShowContainer(true)
     } catch (error) {
       console.error('Error fetching data:', error)
-      setMessageText(getMessagesText('errorFetching'))
+      showMessage('Problem z pobraniem danych!', 4000)
     } finally {
       setLoading(false) // Hide spinner
     }
