@@ -6,6 +6,7 @@ import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 import PropTypes from 'prop-types'
 import n2words from 'n2words' //*
+import signature from '../assets/signature.png'
 import logoComp from '../assets/Logo.png'
 const { VITE_APP_BANK_ACCOUNT } = import.meta.env
 
@@ -81,17 +82,17 @@ const InvoiceLayout = ({
     invoiceRef.current.style.transform = 'none'
 
     const canvas = await html2canvas(invoiceRef.current, {
-      scale: 4, // Increase the scale (default is 1)
+      scale: 3, // Increase the scale (default is 1)
       useCORS: true, // Allow external resources like fonts and images
     })
 
     // Restore the original styles after capturing
     invoiceRef.current.style.transform = originalTransform
 
-    const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF('portrait', 'pt', 'a4') // A4 size PDF
+    const imgData = canvas.toDataURL('image/jpeg', 0.5)
+    const pdf = new jsPDF('portrait', 'mm', 'a4') // A4 size PDF
 
-    const imgWidth = 595.28 // PDF width (A4)
+    const imgWidth = 210 // PDF width (A4)
     const imgHeight =
       (canvas.height * imgWidth) / canvas.width // Calculate height to keep aspect ratio
     let heightLeft = imgHeight
@@ -121,7 +122,9 @@ const InvoiceLayout = ({
       )
       heightLeft -= pdf.internal.pageSize.height
     }
-    pdf.save(`${invoiceData.invoiceNumber}.pdf`)
+    pdf.save(
+      `${invoiceData.invoiceNumber}_${invoiceData.shopName}.pdf`,
+    )
   }
 
   useEffect(() => {
@@ -400,6 +403,14 @@ const InvoiceLayout = ({
             {`Razem słownie: ${paymentSpelling()} i ${vatSum.totalGross.toString().split('.')[1] || '0'}/100 PLN`}
           </div>
         </div>
+        <div className="comment">{invoiceData.comment}</div>
+        <div className="signature-container">
+          <img
+            src={signature}
+            className="signature"
+            alt="signature"
+          />
+        </div>
         <div className="signatures">
           <div className="signature-seller">
             Fakturę wystawił
@@ -408,7 +419,6 @@ const InvoiceLayout = ({
             Fakturę odebrał
           </div>
         </div>
-        <div className="comment">{invoiceData.comment}</div>
       </div>
     </Container>
   )
@@ -853,6 +863,17 @@ const Container = styled.div`
       align-items: center;
       justify-content: center;
     }
+  }
+
+  .signature-container {
+    display: flex;
+    position: absolute;
+    bottom: 9rem;
+    padding-left: 4rem;
+  }
+
+  .signature {
+    width: 15rem;
   }
 `
 

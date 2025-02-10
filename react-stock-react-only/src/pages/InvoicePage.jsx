@@ -517,8 +517,9 @@ const InvoicePage = () => {
                   <div className="text">
                     Forma płatności:
                   </div>
-                  <input
+                  <select
                     type="text"
+                    className="payment-type-field"
                     value={invoiceData.paymentType}
                     onChange={(e) => {
                       setInvoiceData((prevState) => ({
@@ -526,7 +527,10 @@ const InvoicePage = () => {
                         paymentType: e.target.value,
                       }))
                     }}
-                  />
+                  >
+                    <option value="Przelew">Przelew</option>
+                    <option value="Gotówka">Gotówka</option>
+                  </select>
                 </label>
               </div>
 
@@ -1127,6 +1131,10 @@ const Container = styled.div`
     }
   }
 
+  .address {
+    width: 87% !important;
+  }
+
   .dates-of-sales {
     display: flex;
     flex-direction: row;
@@ -1395,6 +1403,10 @@ const Container = styled.div`
     @media screen and (max-width: ${size.tablet}) {
       width: 80%;
     }
+  }
+
+  .payment-type-field {
+    width: 93% !important;
   }
 `
 export default InvoicePage

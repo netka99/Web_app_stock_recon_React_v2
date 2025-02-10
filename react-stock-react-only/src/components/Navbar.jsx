@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { FaBars } from 'react-icons/fa'
-import logo from '../assets/Logo_SK.png'
+import logo from '../assets/Logo_white.png'
 import backgroundImgBig from '../assets/backgroundBig.png'
 import backgroundImgS from '../assets/background.png'
 import { size } from '../styles/devices'
@@ -84,8 +84,10 @@ const NavContainer = styled.nav`
     align-items: center;
     justify-content: space-between;
     img {
-      width: 175px;
+      height: 50px;
       margin-left: -15px;
+      padding-top: 10px;
+      padding-left: 10px;
     }
   }
   .nav-toggle {

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import logo from '../assets/Logo_SK.png'
+import logo from '../assets/Logo_white.png'
 import backgroundImgBig from '../assets/backgroundBig.png'
 import backgroundImgS from '../assets/background.png'
 

@@ -26,7 +26,7 @@ const ExtraSale = forwardRef(function ExtraSale(
   },
   ref,
 ) {
-  const [extraInputValue, setExtraInputValue] = useState(0)
+  const [extraInputValue, setExtraInputValue] = useState('')
 
   const extraValueCurrent = (shop) => {
     const data = isSale
@@ -35,8 +35,8 @@ const ExtraSale = forwardRef(function ExtraSale(
     const currentValue =
       data?.find(
         (s) => s.shop === shop && s.product === productName,
-      )?.quantity ?? 0
-    return currentValue
+      )?.quantity ?? ''
+    return currentValue.toString()
   }
 
   useEffect(() => {
@@ -52,11 +52,12 @@ const ExtraSale = forwardRef(function ExtraSale(
   ])
 
   const handleChangeExtra = (e) => {
-    const value =
-      e.target.value !== ''
-        ? parseInt(e.target.value, 10)
-        : 0
-    setExtraInputValue(value)
+    setExtraInputValue(e.target.value)
+  }
+
+  const handleSave = () => {
+    const numericValue = parseFloat(extraInputValue) || 0
+    handleSaveData(numericValue, saveExtraData)
   }
   return (
     <Container ref={ref}>
@@ -73,11 +74,11 @@ const ExtraSale = forwardRef(function ExtraSale(
           <div className="extra-sale-input">
             <label htmlFor={shopName}>{saleType}</label>
             <input
-              type="number"
-              min="0"
+              type="text"
               value={extraInputValue}
               onChange={handleChangeExtra}
               disabled={extraShopDisabled(shopName)}
+              placeholder="0"
             />
             <p className="item-units">{unit}</p>
           </div>
@@ -85,9 +86,7 @@ const ExtraSale = forwardRef(function ExtraSale(
       </div>
       <div className="sale-extra-sale">
         <button
-          onClick={() => {
-            handleSaveData(extraInputValue, saveExtraData)
-          }}
+          onClick={handleSave}
           className="sale-extra-sale-button"
           disabled={extraShopDisabled(shopName)}
         >

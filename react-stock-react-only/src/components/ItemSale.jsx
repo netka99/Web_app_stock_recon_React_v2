@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import { size } from '../styles/devices'
@@ -13,9 +13,21 @@ const ItemSale = ({
   shopName,
   isShopDisabled,
 }) => {
+  const [inputValue, setInputValue] = useState(
+    value === 0 ? '' : value.toString(),
+  )
+
+  useEffect(() => {
+    setInputValue(value === 0 ? '' : value.toString())
+  }, [value])
+
   const handleChange = (e) => {
-    const newValue = parseFloat(e.target.value)
-    onChange(isNaN(newValue) ? 0 : newValue)
+    setInputValue(e.target.value)
+  }
+
+  const handleBlur = () => {
+    const numericValue = parseFloat(inputValue)
+    onChange(isNaN(numericValue) ? 0 : numericValue)
   }
 
   return (
@@ -34,12 +46,12 @@ const ItemSale = ({
             {saleType}
           </label>
           <input
-            type="number"
-            min="0"
-            value={value === 0 ? '' : value}
+            type="text"
+            value={inputValue}
             id={`input-${shopName}`}
             name={shopName}
             onChange={handleChange}
+            onBlur={handleBlur}
             disabled={isShopDisabled(shopName)}
             placeholder="0"
           ></input>
