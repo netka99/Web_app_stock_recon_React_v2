@@ -121,8 +121,6 @@ const ItemShopContainer = ({
           value={inputValue}
           disabled={disabled}
           onChange={handleChange}
-          updatedSale={updatedSale}
-          updatedReturn={updatedReturn}
           isShopDisabled={(shop) => isShopDisabled(shop, updatedSale, updatedReturn)}
         />
         <div className="saving-buttons">

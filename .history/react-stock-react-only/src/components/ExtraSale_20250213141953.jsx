@@ -43,9 +43,7 @@ const ExtraSale = forwardRef(function ExtraSale(
   const handleSave = () => {
     const numericValue = parseFloat(extraInputValue) || 0
     console.log('Saving value:', numericValue, 'for shop:', shopName)
-    handleSaveData(numericValue, (quantity, shopName) =>
-      saveExtraData(quantity, shopName, true),
-    )
+    handleSaveData(numericValue, saveExtraData)
   }
 
   useEffect(() => {

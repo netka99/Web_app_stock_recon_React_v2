@@ -12,8 +12,6 @@ const ItemSale = ({
   onChange,
   shopName,
   isShopDisabled,
-  updatedSale,
-  updatedReturn,
 }) => {
   const [inputValue, setInputValue] = useState(value === 0 ? '' : value.toString())
 
@@ -46,7 +44,7 @@ const ItemSale = ({
             name={shopName}
             onChange={handleChange}
             onBlur={handleBlur}
-            disabled={isShopDisabled(shopName, updatedSale, updatedReturn)}
+            disabled={isShopDisabled(shopName)}
             placeholder="0"
           ></input>
           <p className="item-units">{unit}</p>

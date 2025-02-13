@@ -226,7 +226,7 @@ const SalePage = () => {
               isSale={isSale}
               isReturnSaved={isReturnSaved}
               isShopDisabled={shopDisabled}
-              saveExtraData={(quantity, shopName) => saveEntry(quantity, shopName, true)}
+              saveExtraData={saveEntry}
               disabledExtraShops={disabledExtraShops[index]}
               extraSaleValues={extraSaleValues}
               extraReturnValues={extraReturnValues}

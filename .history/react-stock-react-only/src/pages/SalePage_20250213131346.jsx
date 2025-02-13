@@ -22,7 +22,6 @@ const pageTitle = 'Sprzedaż'
 const SalePage = () => {
   const [shopsprices, setShopsprices] = useState(null)
   const [updatedSale, setUpdatedSale] = useState([])
-  const [saleByProduct, setSaleByProduct] = useState('Kartacze')
   const [updatedReturn, setUpdatedReturn] = useState([])
   const [extraSaleValues, setExtraSaleValues] = useState([])
   const [extraReturnValues, setExtraReturnValues] = useState([])
@@ -131,7 +130,6 @@ const SalePage = () => {
   ])
 
   const saveEntry = async (quantity, shopName, isExtra = false) => {
-    console.log('Saving extra data:', { quantity, shopName, isExtra })
     const data = {
       id: null,
       product: saleByProduct,
@@ -226,7 +224,7 @@ const SalePage = () => {
               isSale={isSale}
               isReturnSaved={isReturnSaved}
               isShopDisabled={shopDisabled}
-              saveExtraData={(quantity, shopName) => saveEntry(quantity, shopName, true)}
+              saveExtraData={saveEntry}
               disabledExtraShops={disabledExtraShops[index]}
               extraSaleValues={extraSaleValues}
               extraReturnValues={extraReturnValues}

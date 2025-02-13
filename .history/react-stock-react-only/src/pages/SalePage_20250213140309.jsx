@@ -119,6 +119,7 @@ const SalePage = () => {
       (shop) => shopDisabled(shop, extraSaleValues, extraReturnValues),
       setDisabledExtraShops,
     )
+    console.log('isShopDisabled result:', shopDisabled)
   }, [
     shopsprices,
     extraSaleValues,
@@ -131,7 +132,6 @@ const SalePage = () => {
   ])
 
   const saveEntry = async (quantity, shopName, isExtra = false) => {
-    console.log('Saving extra data:', { quantity, shopName, isExtra })
     const data = {
       id: null,
       product: saleByProduct,
@@ -226,7 +226,7 @@ const SalePage = () => {
               isSale={isSale}
               isReturnSaved={isReturnSaved}
               isShopDisabled={shopDisabled}
-              saveExtraData={(quantity, shopName) => saveEntry(quantity, shopName, true)}
+              saveExtraData={saveEntry}
               disabledExtraShops={disabledExtraShops[index]}
               extraSaleValues={extraSaleValues}
               extraReturnValues={extraReturnValues}

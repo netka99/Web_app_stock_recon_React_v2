@@ -46,7 +46,7 @@ const ItemSale = ({
             name={shopName}
             onChange={handleChange}
             onBlur={handleBlur}
-            disabled={isShopDisabled(shopName, updatedSale, updatedReturn)}
+            disabled={isShopDisabled(shopName)}
             placeholder="0"
           ></input>
           <p className="item-units">{unit}</p>

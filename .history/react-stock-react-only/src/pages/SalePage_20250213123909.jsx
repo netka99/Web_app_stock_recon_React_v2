@@ -21,14 +21,14 @@ const pageTitle = 'Sprzedaż'
 
 const SalePage = () => {
   const [shopsprices, setShopsprices] = useState(null)
-  const [updatedSale, setUpdatedSale] = useState([])
-  const [saleByProduct, setSaleByProduct] = useState('Kartacze')
-  const [updatedReturn, setUpdatedReturn] = useState([])
-  const [extraSaleValues, setExtraSaleValues] = useState([])
-  const [extraReturnValues, setExtraReturnValues] = useState([])
-  const [isSale, setIsSale] = useState(true)
-  const [isReturnSaved, setIsReturnSaved] = useState(false)
-  const [typeOfSale, setTypeOfSale] = useState('Sprzedaż')
+  const [selectedProduct, setSelectedProduct] = useState('Kartacze')
+  const [salesData, setSalesData] = useState([])
+  const [returnsData, setReturnsData] = useState([])
+  const [extraSales, setExtraSales] = useState([])
+  const [extraReturns, setExtraReturns] = useState([])
+  const [isSaleMode, setIsSaleMode] = useState(true)
+  const [isReturnProcessed, setIsReturnProcessed] = useState(false)
+  const [saleType, setSaleType] = useState('Sprzedaż')
   const [messageText, showMessage] = useTemporaryMessage()
   const [loading, setLoading] = useState(false)
   const [todaysDate, setTodaysDate] = useState(new Date().toISOString().split('T')[0])
@@ -36,7 +36,7 @@ const SalePage = () => {
   const [disabledExtraShops, setDisabledExtraShops] = useState([])
 
   const filterByProduct = (productName) => {
-    setSaleByProduct(productName)
+    setSelectedProduct(productName)
   }
 
   const fetchDataByAPI = async (url, setDatafromAPI) => {
@@ -61,12 +61,12 @@ const SalePage = () => {
     try {
       await fetchDataByAPI(VITE_APP_SETTINGS_API, setShopsprices)
       await fetchDataByAPI(urlSales, (dataSale) => {
-        setUpdatedSale(dataSale)
+        setSalesData(dataSale)
       })
       await fetchDataByAPI(urlReturns, (dataReturn) => {
-        setUpdatedReturn(dataReturn)
+        setReturnsData(dataReturn)
       })
-      filterByProduct(saleByProduct)
+      filterByProduct(selectedProduct)
     } catch (error) {
       console.error('Error fetching data:', error)
       showMessage('Problem z pobraniem danych!', 6000)
@@ -77,17 +77,17 @@ const SalePage = () => {
 
   useEffect(() => {
     searchByDate()
-  }, [saleByProduct, todaysDate])
+  }, [selectedProduct, todaysDate])
 
   useEffect(() => {
-    setExtraSaleValues([])
-    setExtraReturnValues([])
+    setExtraSales([])
+    setExtraReturns([])
   }, [todaysDate])
 
   const valueCurrent = (shop) => {
-    const data = isSale ? updatedSale : updatedReturn
+    const data = isSaleMode ? salesData : returnsData
     const filteredData = data?.filter(
-      (s) => s.shop === shop && s.product === saleByProduct,
+      (s) => s.shop === shop && s.product === selectedProduct,
     )
     return filteredData?.reduce((acc, curr) => acc + curr.quantity, 0) || 0
   }
@@ -96,12 +96,12 @@ const SalePage = () => {
     (shop) => {
       valueCurrent(shop)
     },
-    [updatedSale, updatedReturn, todaysDate],
+    [salesData, returnsData, todaysDate],
   )
 
   const shopDisabled = (shop, sale, returns) => {
-    const data = isSale ? sale : returns
-    return data?.some((s) => s.shop === shop && s.product === saleByProduct) ?? false
+    const data = isSaleMode ? sale : returns
+    return data?.some((s) => s.shop === shop && s.product === selectedProduct) ?? false
   }
 
   useEffect(() => {
@@ -112,33 +112,32 @@ const SalePage = () => {
       }
     }
     updateDisabledShopsState(
-      (shop) => shopDisabled(shop, updatedSale, updatedReturn),
+      (shop) => shopDisabled(shop, salesData, returnsData),
       setDisabledShops,
     )
     updateDisabledShopsState(
-      (shop) => shopDisabled(shop, extraSaleValues, extraReturnValues),
+      (shop) => shopDisabled(shop, extraSales, extraReturns),
       setDisabledExtraShops,
     )
   }, [
     shopsprices,
-    extraSaleValues,
-    extraReturnValues,
-    isSale,
-    saleByProduct,
+    extraSales,
+    extraReturns,
+    isSaleMode,
+    selectedProduct,
     todaysDate,
-    updatedSale,
-    updatedReturn,
+    salesData,
+    returnsData,
   ])
 
   const saveEntry = async (quantity, shopName, isExtra = false) => {
-    console.log('Saving extra data:', { quantity, shopName, isExtra })
     const data = {
       id: null,
-      product: saleByProduct,
+      product: selectedProduct,
       shop: shopName,
       quantity: quantity,
       date: todaysDate,
-      ...(isSale && { is_discounted: 0 }),
+      ...(isSaleMode && { is_discounted: 0 }),
     }
 
     const { id, ...newSaveItem } = data
@@ -147,18 +146,18 @@ const SalePage = () => {
     try {
       const result = await updateDataOnApi(
         data,
-        isSale ? VITE_APP_SALES_API : VITE_APP_RETURNS_API,
+        isSaleMode ? VITE_APP_SALES_API : VITE_APP_RETURNS_API,
         'POST',
       )
       if (isExtra) {
-        setExtraSaleValues(isSale ? [...extraSaleValues, data] : extraSaleValues)
-        setExtraReturnValues(!isSale ? [...extraReturnValues, data] : extraReturnValues)
+        setExtraSales(isSaleMode ? [...extraSales, data] : extraSales)
+        setExtraReturns(!isSaleMode ? [...extraReturns, data] : extraReturns)
       } else {
-        setUpdatedSale(isSale ? [...updatedSale, newSaveItem] : updatedSale)
-        setUpdatedReturn(!isSale ? [...updatedReturn, newSaveItem] : updatedReturn)
+        setSalesData(isSaleMode ? [...salesData, newSaveItem] : salesData)
+        setReturnsData(!isSaleMode ? [...returnsData, newSaveItem] : returnsData)
       }
-      if (!isSale) {
-        setIsReturnSaved(true)
+      if (!isSaleMode) {
+        setIsReturnProcessed(true)
       }
       return result
     } catch (error) {
@@ -179,19 +178,19 @@ const SalePage = () => {
         <div className="saleReturn">
           <button
             onClick={() => {
-              setTypeOfSale('Sprzedaż')
-              setIsSale(true)
+              setSaleType('Sprzedaż')
+              setIsSaleMode(true)
             }}
-            className={`saleReturnButtons ${isSale ? 'checked' : ''}`}
+            className={`saleReturnButtons ${isSaleMode ? 'checked' : ''}`}
           >
             Sprzedaż
           </button>
           <button
             onClick={() => {
-              setTypeOfSale('Zwrot')
-              setIsSale(false)
+              setSaleType('Zwrot')
+              setIsSaleMode(false)
             }}
-            className={`saleReturnButtons ${!isSale ? 'checked' : ''}`}
+            className={`saleReturnButtons ${!isSaleMode ? 'checked' : ''}`}
           >
             Zwrot
           </button>
@@ -201,7 +200,9 @@ const SalePage = () => {
             <button
               key={product.name}
               className={
-                saleByProduct === product.name ? 'productButton active' : 'productButton'
+                selectedProduct === product.name
+                  ? 'productButton active'
+                  : 'productButton'
               }
               onClick={() => filterByProduct(product.name)}
             >
@@ -215,32 +216,32 @@ const SalePage = () => {
           shopsprices.shops.map((shop, index) => (
             <ItemShopContainer
               key={`${shop}-${index}`}
-              imageProduct={pictures[saleByProduct]}
-              productName={saleByProduct}
-              saleType={typeOfSale}
-              unit={units[saleByProduct]}
+              imageProduct={pictures[selectedProduct]}
+              productName={selectedProduct}
+              saleType={saleType}
+              unit={units[selectedProduct]}
               shopName={shop}
               value={valueCurrent(shop)}
               disabled={disabledShops[index]}
               saveData={saveEntry}
-              isSale={isSale}
-              isReturnSaved={isReturnSaved}
-              isShopDisabled={shopDisabled}
-              saveExtraData={(quantity, shopName) => saveEntry(quantity, shopName, true)}
+              isSale={isSaleMode}
+              isReturnSaved={isReturnProcessed}
+              shopDisabled={shopDisabled}
+              saveExtraData={saveEntry}
               disabledExtraShops={disabledExtraShops[index]}
-              extraSaleValues={extraSaleValues}
-              extraReturnValues={extraReturnValues}
+              extraSales={extraSales}
+              extraReturns={extraReturns}
               todaysDate={todaysDate}
-              updatedSale={updatedSale}
-              updatedReturn={updatedReturn}
+              updatedSale={salesData}
+              updatedReturn={returnsData}
             />
           ))}
       </Container>
       <SummarySale
-        sale={updatedSale}
-        returns={updatedReturn}
-        extraSaleValues={extraSaleValues}
-        extraReturnValues={extraReturnValues}
+        sale={salesData}
+        returns={returnsData}
+        extraSales={extraSales}
+        extraReturns={extraReturns}
       />
       <Footer />
     </StyledMain>

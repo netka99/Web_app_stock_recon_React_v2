@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import { size } from '../styles/devices'
 
-const SummarySale = ({ sale, sentQuantities, returns }) => {
+const SummarySale = ({ sale, returns, extraReturns, extraSales }) => {
   const [totals, setTotals] = useState({
     kartaczeSale: 0,
     kartaczeReturn: 0,
@@ -17,41 +17,23 @@ const SummarySale = ({ sale, sentQuantities, returns }) => {
     return (
       saleType
         ?.filter((p) => p.product === productType)
-        ?.reduce((acc, curr) => acc + curr.quantity, 0) ?? 0
-    )
-  }
-
-  const calculationNewSale = (saleType, productType) => {
-    return (
-      sentQuantities
-        ?.filter((t) => t.saleType === saleType)
-        ?.filter((p) => p.product === productType)
-        ?.reduce((acc, curr) => acc + curr.quantity, 0) ?? 0
+        ?.reduce((acc, curr) => acc + Number(curr.quantity), 0) ?? 0
     )
   }
 
   useEffect(() => {
+    const consolidatedSales = [...(sale || []), ...(extraSales || [])]
+    const consolidatedReturns = [...(returns || []), ...(extraReturns || [])]
+
     setTotals({
-      kartaczeSale:
-        calculationByProduct('Kartacze', sale) +
-        calculationNewSale('Sprzedaż', 'Kartacze'),
-      kartaczeReturn:
-        calculationByProduct('Kartacze', returns) +
-        calculationNewSale('Zwrot', 'Kartacze'),
-      babkaSale:
-        calculationByProduct('Babka', sale) +
-        calculationNewSale('Sprzedaż', 'Babka'),
-      babkaReturn:
-        calculationByProduct('Babka', returns) +
-        calculationNewSale('Zwrot', 'Babka'),
-      kiszkaSale:
-        calculationByProduct('Kiszka', sale) +
-        calculationNewSale('Sprzedaż', 'Kiszka'),
-      kiszkaReturn:
-        calculationByProduct('Kiszka', returns) +
-        calculationNewSale('Zwrot', 'Kiszka'),
+      kartaczeSale: calculationByProduct('Kartacze', consolidatedSales),
+      kartaczeReturn: calculationByProduct('Kartacze', consolidatedReturns),
+      babkaSale: calculationByProduct('Babka', consolidatedSales),
+      babkaReturn: calculationByProduct('Babka', consolidatedReturns),
+      kiszkaSale: calculationByProduct('Kiszka', consolidatedSales),
+      kiszkaReturn: calculationByProduct('Kiszka', consolidatedReturns),
     })
-  }, [sale, sentQuantities, returns])
+  }, [sale, returns, extraSales, extraReturns])
 
   return (
     <Container>
@@ -83,16 +65,10 @@ const SummarySale = ({ sale, sentQuantities, returns }) => {
           {totals.kartaczeSale - totals.kartaczeReturn} szt
         </div>
         <div className="sum sum-quantities">
-          {(totals.babkaSale - totals.babkaReturn).toFixed(
-            2,
-          )}{' '}
-          kg
+          {(totals.babkaSale - totals.babkaReturn).toFixed(2)} kg
         </div>
         <div className="sum sum-quantities">
-          {(
-            totals.kiszkaSale - totals.kiszkaReturn
-          ).toFixed(2)}{' '}
-          kg
+          {(totals.kiszkaSale - totals.kiszkaReturn).toFixed(2)} kg
         </div>
       </div>
     </Container>
@@ -109,14 +85,24 @@ SummarySale.propTypes = {
       is_discounted: PropTypes.number,
     }),
   ),
-  sentQuantities: PropTypes.arrayOf(
+  extraSales: PropTypes.arrayOf(
     PropTypes.shape({
-      saleType: PropTypes.string,
       product: PropTypes.string,
       quantity: PropTypes.number,
+      shop: PropTypes.string,
+      date: PropTypes.string,
+      is_discounted: PropTypes.number,
     }),
   ),
   returns: PropTypes.arrayOf(
+    PropTypes.shape({
+      product: PropTypes.string,
+      quantity: PropTypes.number,
+      shop: PropTypes.string,
+      date: PropTypes.string,
+    }),
+  ),
+  extraReturns: PropTypes.arrayOf(
     PropTypes.shape({
       product: PropTypes.string,
       quantity: PropTypes.number,

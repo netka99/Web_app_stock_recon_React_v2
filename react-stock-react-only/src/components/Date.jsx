@@ -7,7 +7,7 @@ import { size } from '../styles/devices'
 const DatePicker = ({
   todaysDate,
   setTodaysDate,
-  setSentQuantities,
+  // setSentQuantities,
   className,
 }) => {
   return (
@@ -17,7 +17,7 @@ const DatePicker = ({
         type="date"
         onChange={(e) => {
           setTodaysDate(e.target.value)
-          setSentQuantities([])
+          // setSentQuantities([])
         }}
         required
       />
@@ -28,7 +28,7 @@ const DatePicker = ({
 DatePicker.propTypes = {
   todaysDate: PropTypes.string.isRequired,
   setTodaysDate: PropTypes.func,
-  setSentQuantities: PropTypes.func,
+  // setSentQuantities: PropTypes.func,
   className: PropTypes.string,
 }
 const DateContainer = styled.div`

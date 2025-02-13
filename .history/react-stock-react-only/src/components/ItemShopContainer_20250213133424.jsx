@@ -121,9 +121,9 @@ const ItemShopContainer = ({
           value={inputValue}
           disabled={disabled}
           onChange={handleChange}
-          updatedSale={updatedSale}
-          updatedReturn={updatedReturn}
-          isShopDisabled={(shop) => isShopDisabled(shop, updatedSale, updatedReturn)}
+          isShopDisabled={(shop) =>
+            isShopDisabled(shop, extraSaleValues, extraReturnValues)
+          }
         />
         <div className="saving-buttons">
           <button onClick={openExtraSale} className="add-sale">

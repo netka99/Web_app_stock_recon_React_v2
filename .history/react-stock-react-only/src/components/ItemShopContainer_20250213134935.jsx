@@ -153,9 +153,7 @@ const ItemShopContainer = ({
             handleSaveData={handleSaveData}
             ref={contentRefExtra}
             saleType={saleType}
-            isShopDisabled={(shop) =>
-              isShopDisabled(shop, extraSaleValues, extraReturnValues)
-            }
+            isShopDisabled={isShopDisabled}
             saveExtraData={saveExtraData}
             isSale={isSale}
             disabledExtraShops={disabledExtraShops}
