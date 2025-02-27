@@ -21,22 +21,15 @@ interface ExtraSaleProps {
   saveData?: () => void
   handleSaveData: (
     value: number,
-    callback: (
-      quantity: number,
-      shopName: string,
-    ) => Promise<{ status: number; data: { message: string } }>,
-  ) => Promise<void>
+    callback: (quantity: number | string, shopName: string) => void,
+  ) => void
   saleType: string
   isShopDisabled: (
     shopName: string,
     extraSaleValues: ExtraSaleValue[],
     extraReturnValues: ExtraSaleValue[],
   ) => boolean
-  saveExtraData: (
-    quantity: number,
-    shopName: string,
-    isSale: boolean,
-  ) => Promise<{ status: number; data: { message: string } }>
+  saveExtraData: (quantity: number, shopName: string, isSale: boolean) => void
   isSale: boolean
   valueExtra?: ExtraSaleValue[]
   productName?: string
@@ -80,9 +73,9 @@ const ExtraSale = forwardRef<HTMLDivElement, ExtraSaleProps>(function ExtraSale(
 
   const handleSave = () => {
     const numericValue = parseFloat(extraInputValue) || 0
-    handleSaveData(numericValue, (quantity, shopName) => {
-      return saveExtraData(quantity, shopName, true) // ✅ Explicit return of a Promise
-    })
+    handleSaveData(numericValue, (quantity, shopName) =>
+      saveExtraData(quantity, shopName, true),
+    )
   }
 
   return (

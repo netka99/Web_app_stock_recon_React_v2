@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import {
@@ -32,6 +32,8 @@ const SalePage = () => {
   const [messageText, showMessage] = useTemporaryMessage()
   const [loading, setLoading] = useState(false)
   const [todaysDate, setTodaysDate] = useState(new Date().toISOString().split('T')[0])
+  const [disabledShops, setDisabledShops] = useState([])
+  // const [disabledExtraShops, setDisabledExtraShops] = useState([])
 
   const filterByProduct = (productName: string): void => {
     setSaleByProduct(productName)
@@ -101,6 +103,32 @@ const SalePage = () => {
     const data = isSale ? sale : returns
     return data?.some((s) => s.shop === shop && s.product === saleByProduct) ?? false
   }
+
+  // useEffect(() => {
+  //   const updateDisabledShopsState = (getData, setStateFunction) => {
+  //     if (shopsprices) {
+  //       const disabled = shopsprices.shops.map((shop) => getData(shop))
+  //       setStateFunction(disabled)
+  //     }
+  //   }
+  //   updateDisabledShopsState(
+  //     (shop) => shopDisabled(shop, updatedSale, updatedReturn),
+  //     setDisabledShops,
+  //   )
+  //   updateDisabledShopsState(
+  //     (shop) => shopDisabled(shop, extraSaleValues, extraReturnValues),
+  //     setDisabledExtraShops,
+  //   )
+  // }, [
+  //   shopsprices,
+  //   extraSaleValues,
+  //   extraReturnValues,
+  //   isSale,
+  //   saleByProduct,
+  //   todaysDate,
+  //   updatedSale,
+  //   updatedReturn,
+  // ])
 
   const saveEntry = async (quantity, shopName, isExtra = false) => {
     const data = {
@@ -192,6 +220,7 @@ const SalePage = () => {
               unit={units[saleByProduct]}
               shopName={shop}
               value={valueCurrent(shop)}
+              disabled={disabledShops[index]}
               saveData={saveEntry}
               isSale={isSale}
               isReturnSaved={isReturnSaved}

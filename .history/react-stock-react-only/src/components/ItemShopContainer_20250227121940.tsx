@@ -24,17 +24,21 @@ interface ItemShopContainerProps {
   shopName: string
   value: number | string
   valueExtra: SaleValue[]
+  disabled: boolean
   saveData: (
     quantity: number,
     shopName: string,
     isExtra?: boolean,
   ) => Promise<{ status: number; data: { message: string } }>
+  // onChange: func
   isSale: boolean
   isShopDisabled: (shop: string, sale: SaleValue[], returns: SaleValue[]) => boolean
+  // extraShopDisabled: func
   saveExtraData: (
     quantity: number,
     shopName: string,
   ) => Promise<{ status: number; data: { message: string } }>
+  disabledExtraShops: boolean[]
   extraSaleValues: SaleValue[]
   extraReturnValues: SaleValue[]
   updatedSale: SaleValue[]
@@ -50,6 +54,7 @@ const ItemShopContainer: React.FC<ItemShopContainerProps> = ({
   shopName,
   value,
   valueExtra,
+  disabled,
   saveData,
   isSale,
   isShopDisabled,
@@ -156,6 +161,7 @@ const ItemShopContainer: React.FC<ItemShopContainerProps> = ({
           unit={unit}
           shopName={shopName}
           value={inputValue}
+          disabled={disabled}
           onChange={handleChange}
           updatedSale={updatedSale}
           updatedReturn={updatedReturn}

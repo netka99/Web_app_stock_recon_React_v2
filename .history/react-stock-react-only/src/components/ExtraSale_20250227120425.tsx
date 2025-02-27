@@ -32,11 +32,7 @@ interface ExtraSaleProps {
     extraSaleValues: ExtraSaleValue[],
     extraReturnValues: ExtraSaleValue[],
   ) => boolean
-  saveExtraData: (
-    quantity: number,
-    shopName: string,
-    isSale: boolean,
-  ) => Promise<{ status: number; data: { message: string } }>
+  saveExtraData: (quantity: number, shopName: string, isSale: boolean) => void
   isSale: boolean
   valueExtra?: ExtraSaleValue[]
   productName?: string
