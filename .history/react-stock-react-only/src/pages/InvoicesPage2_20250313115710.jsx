@@ -1,21 +1,32 @@
 // import * as React from 'react'
 // import { useState, useEffect, useCallback } from 'react'
 // import styled from 'styled-components'
-// import { Navbar, Sidebar, Footer, Spinner, InvoiceLayout } from '../components/index'
+// import {
+//   Navbar,
+//   Sidebar,
+//   Footer,
+//   Spinner,
+//   InvoiceLayout,
+// } from '../components/index'
 // import { size } from '../styles/devices'
 // import { fetchData } from '../api/fetchAPI'
 // import { units } from '../utils/productDetails'
 // import n2words from 'n2words'
 
-// const { VITE_APP_SETTINGS_API, VITE_APP_SALES_API, VITE_APP_RETURNS_API } = import.meta
-//   .env
+// const {
+//   VITE_APP_SETTINGS_API,
+//   VITE_APP_SALES_API,
+//   VITE_APP_RETURNS_API,
+// } = import.meta.env
 
 // const pageTitle = 'Faktury'
 
 // const InvoicePage2 = () => {
 //   const today = new Date().toISOString().split('T')[0]
 
-//   const [invoiceNumber, setInvoiceNumber] = useState('FV .../01/2024') //*
+//   const [invoiceNumber, setInvoiceNumber] = useState(
+//     'FV .../01/2024',
+//   ) //*
 //   const [messageText, setMessageText] = useState('')
 //   const [settings, setSettings] = useState(null)
 //   const [loading, setLoading] = useState(false)
@@ -40,8 +51,10 @@
 //   })
 //   const [netPrice, setNetPrice] = useState()
 //   const [extraProduct, setExtraProduct] = useState([])
-//   const [titlesVisibility, setTitlesVisibility] = useState(false)
-//   const [invoiceVisibility, setInvoiceVisibility] = useState(true)
+//   const [titlesVisibility, setTitlesVisibility] =
+//     useState(false)
+//   const [invoiceVisibility, setInvoiceVisibility] =
+//     useState(true)
 //   //states required for summaries
 //   const [totals, setTotals] = useState([])
 //   const [vatTotals, setVatTotals] = useState({})
@@ -65,7 +78,8 @@
 //     comment: '',
 //   })
 
-//   const [summariesUpdated, setSummariesUpdated] = useState(false)
+//   const [summariesUpdated, setSummariesUpdated] =
+//     useState(false)
 
 //   const calculateNetPrice = (grossPrice, vat) => {
 //     return Number((grossPrice / (1 + vat / 100)).toFixed(2))
@@ -121,7 +135,9 @@
 //     },
 //   ])
 
-//   const filteredCheckedProducts = productsData.filter((product) => product.checked)
+//   const filteredCheckedProducts = productsData.filter(
+//     (product) => product.checked,
+//   )
 
 //   const paymentSpelling = () => {
 //     let sum = n2words(Math.trunc(vatSum.totalGross), {
@@ -172,7 +188,10 @@
 //             updatedProduct.grossPrice,
 //             updatedProduct.vat,
 //           )
-//           const totalNet = calculateTotalNet(updatedProduct.quantity, netPrice)
+//           const totalNet = calculateTotalNet(
+//             updatedProduct.quantity,
+//             netPrice,
+//           )
 //           const totalGross = calculateTotalGross(
 //             updatedProduct.quantity,
 //             updatedProduct.grossPrice,
@@ -194,7 +213,9 @@
 //     if (prices) {
 //       const updatedNetPrices = {}
 //       Object.keys(prices).forEach((key) => {
-//         updatedNetPrices[key] = Number(calculateNet(prices[key], vat[key]))
+//         updatedNetPrices[key] = Number(
+//           calculateNet(prices[key], vat[key]),
+//         )
 //       })
 //       return updatedNetPrices
 //     }
@@ -229,19 +250,26 @@
 //   const loadSettings = async () => {
 //     setLoading(true)
 //     try {
-//       await fetchDataByAPI(VITE_APP_SETTINGS_API, (data) => {
-//         setSettings(data)
-//         setPrices(data.prices)
-//         const updatedProductData = productsData.map((product) => {
-//           const price = data.prices[product.product]
-//           return {
-//             ...product,
-//             grossPrice:
-//               price !== undefined ? Number((price / 100).toFixed(2)) : product.grossPrice,
-//           }
-//         })
-//         setProductsData(updatedProductData)
-//       })
+//       await fetchDataByAPI(
+//         VITE_APP_SETTINGS_API,
+//         (data) => {
+//           setSettings(data)
+//           setPrices(data.prices)
+//           const updatedProductData = productsData.map(
+//             (product) => {
+//               const price = data.prices[product.product]
+//               return {
+//                 ...product,
+//                 grossPrice:
+//                   price !== undefined
+//                     ? Number((price / 100).toFixed(2))
+//                     : product.grossPrice,
+//               }
+//             },
+//           )
+//           setProductsData(updatedProductData)
+//         },
+//       )
 //     } catch (error) {
 //       handleError(error)
 //     } finally {
@@ -250,17 +278,22 @@
 //   }
 
 //   const summary = (data, shop, stateVar) => {
-//     const filteredByShop = data?.filter((d) => d.shop === shop)
+//     const filteredByShop = data?.filter(
+//       (d) => d.shop === shop,
+//     )
 
-//     const productSum = filteredByShop?.reduce((acc, curr) => {
-//       const { product, quantity } = curr
-//       if (!acc[product]) {
-//         acc[product] = 0
-//       }
-//       acc[product] += quantity
+//     const productSum = filteredByShop?.reduce(
+//       (acc, curr) => {
+//         const { product, quantity } = curr
+//         if (!acc[product]) {
+//           acc[product] = 0
+//         }
+//         acc[product] += quantity
 
-//       return acc
-//     }, {})
+//         return acc
+//       },
+//       {},
+//     )
 //     return stateVar(productSum)
 //   }
 
@@ -276,27 +309,33 @@
 //     const totals = Object.fromEntries(
 //       [...allKeys].map((k) => [
 //         k,
-//         (safeSummarySale[k] || 0) - (safeSummaryReturns[k] || 0),
+//         (safeSummarySale[k] || 0) -
+//           (safeSummaryReturns[k] || 0),
 //       ]),
 //     )
 
 //     console.log(totals)
 //     setTotalsOfSale(totals)
 
-//     const updateProductData = productsData.map((product) => {
-//       const quantity = totals[product.product] || 0
-//       return {
-//         ...product,
-//         quantity: quantity,
-//       }
-//     })
+//     const updateProductData = productsData.map(
+//       (product) => {
+//         const quantity = totals[product.product] || 0
+//         return {
+//           ...product,
+//           quantity: quantity,
+//         }
+//       },
+//     )
 
 //     setProductsData(updateProductData)
 //   }
 
 //   const dataSearchedByDates = async () => {
 //     setLoading(true)
-//     getDatesBetween(invoiceData.startDate, invoiceData.endDate)
+//     getDatesBetween(
+//       invoiceData.startDate,
+//       invoiceData.endDate,
+//     )
 
 //     const urlSales = `${VITE_APP_SALES_API}?start=${invoiceData.startDate}&end=${invoiceData.endDate}`
 //     const urlReturns = `${VITE_APP_RETURNS_API}?start=${invoiceData.startDate}&end=${invoiceData.endDate}`
@@ -351,8 +390,12 @@
 //     Object.keys(checkedItems).forEach((key) => {
 //       if (checkedItems[key]) {
 //         const details = productDetails[key]
-//         const netTotal = Number(netPrice[key] * totalsOfSale[key]).toFixed(2)
-//         const grossTotal = Number(prices[key] * totalsOfSale[key]).toFixed(2)
+//         const netTotal = Number(
+//           netPrice[key] * totalsOfSale[key],
+//         ).toFixed(2)
+//         const grossTotal = Number(
+//           prices[key] * totalsOfSale[key],
+//         ).toFixed(2)
 
 //         newTotals.push({
 //           productName: details.name,
@@ -370,8 +413,12 @@
 
 //     extraProduct.forEach((line) => {
 //       const netPrice = calculateNet(line.price, line.vat)
-//       const netTotal = Number(netPrice * line.quantity).toFixed(2)
-//       const grossTotal = Number(line.price * line.quantity).toFixed(2)
+//       const netTotal = Number(
+//         netPrice * line.quantity,
+//       ).toFixed(2)
+//       const grossTotal = Number(
+//         line.price * line.quantity,
+//       ).toFixed(2)
 
 //       newTotals.push({
 //         productName: line.product,
@@ -387,7 +434,15 @@
 //     })
 
 //     setTotals(newTotals)
-//   }, [checkedItems, extraProduct, productCode, netPrice, prices, totalsOfSale, vat])
+//   }, [
+//     checkedItems,
+//     extraProduct,
+//     productCode,
+//     netPrice,
+//     prices,
+//     totalsOfSale,
+//     vat,
+//   ])
 
 //   useEffect(() => {
 //     gatherTotals()
@@ -419,9 +474,18 @@
 
 //   const calculations = () => {
 //     const updatedProductsData = productsData.map((prod) => {
-//       const netPrice = calculateNetPrice(prod.grossPrice, prod.vat)
-//       const totalNet = calculateTotalNet(prod.quantity, netPrice)
-//       const totalGross = calculateTotalGross(prod.quantity, prod.grossPrice)
+//       const netPrice = calculateNetPrice(
+//         prod.grossPrice,
+//         prod.vat,
+//       )
+//       const totalNet = calculateTotalNet(
+//         prod.quantity,
+//         netPrice,
+//       )
+//       const totalGross = calculateTotalGross(
+//         prod.quantity,
+//         prod.grossPrice,
+//       )
 //       return {
 //         ...prod,
 //         netPrice: netPrice,
@@ -463,9 +527,18 @@
 //   }, [])
 
 //   useEffect(() => {
-//     if (settings || invoiceData.shopName || sale || returns) {
+//     if (
+//       settings ||
+//       invoiceData.shopName ||
+//       sale ||
+//       returns
+//     ) {
 //       summary(sale, invoiceData.shopName, setSummarySale)
-//       summary(returns, invoiceData.shopName, setSummaryReturns)
+//       summary(
+//         returns,
+//         invoiceData.shopName,
+//         setSummaryReturns,
+//       )
 //       // calculations()
 //       setSummariesUpdated(true)
 //       console.log('settings data:', settings)
@@ -483,7 +556,9 @@
 //         {/* {!invoiceVisibility && ( */}
 //         {invoiceVisibility && (
 //           <div className="invoices-details">
-//             <div className="title">Podaj dane do faktury</div>
+//             <div className="title">
+//               Podaj dane do faktury
+//             </div>
 //             <div className="seller">
 //               <label htmlFor="seller">
 //                 Sprzedawca:
@@ -508,7 +583,9 @@
 //                   name="invoiceNumber"
 //                   value={invoiceNumber}
 //                   rows={1}
-//                   onChange={(e) => setInvoiceNumber(e.target.value)}
+//                   onChange={(e) =>
+//                     setInvoiceNumber(e.target.value)
+//                   }
 //                 ></textarea>
 //               </div>
 //               <div className="shopName">
@@ -522,13 +599,19 @@
 //                         setInvoiceData((prev) => ({
 //                           ...prev,
 //                           shopName: selectedShop,
-//                           address: settings.address[selectedShop],
+//                           address:
+//                             settings.address[selectedShop],
 //                         }))
 //                       }}
 //                     >
-//                       <option value="">{'Wybierz sklep'}</option>
+//                       <option value="">
+//                         {'Wybierz sklep'}
+//                       </option>
 //                       {settings.shops.map((shop, index) => (
-//                         <option key={`${shop}${index}`} value={shop}>
+//                         <option
+//                           key={`${shop}${index}`}
+//                           value={shop}
+//                         >
 //                           {shop}
 //                         </option>
 //                       ))}
@@ -543,9 +626,11 @@
 //                 <div className="addressDetails">
 //                   {invoiceData.address && (
 //                     <div className="address">
-//                       {invoiceData.address.split('\n').map((line, idx) => (
-//                         <div key={idx}>{line}</div>
-//                       ))}
+//                       {invoiceData.address
+//                         .split('\n')
+//                         .map((line, idx) => (
+//                           <div key={idx}>{line}</div>
+//                         ))}
 //                     </div>
 //                   )}
 //                 </div>
@@ -646,14 +731,18 @@
 //                   required
 //                 ></input>
 //                 <div className="search">
-//                   <button className="searchButton" onClick={dataSearchedByDates}>
+//                   <button
+//                     className="searchButton"
+//                     onClick={dataSearchedByDates}
+//                   >
 //                     Szukaj
 //                   </button>
 //                 </div>
 //               </div>
 //               <div className="summary-details">
 //                 <p>Sprzedaż</p>
-//                 {summarySale && Object.keys(summarySale).length > 0 ? (
+//                 {summarySale &&
+//                 Object.keys(summarySale).length > 0 ? (
 //                   Object.keys(summarySale).map((key) => (
 //                     <p key={key}>
 //                       {key}: {summarySale[key]}
@@ -664,7 +753,8 @@
 //                 )}
 
 //                 <p>Zwrot</p>
-//                 {summaryReturns && Object.keys(summaryReturns).length ? (
+//                 {summaryReturns &&
+//                 Object.keys(summaryReturns).length ? (
 //                   Object.keys(summaryReturns).map((key) => (
 //                     <p key={key}>
 //                       {key}: {summaryReturns[key]}
@@ -676,7 +766,8 @@
 //               </div>
 //               <div className="total-sale">
 //                 Łączna sprzedaż za okres:
-//                 {totalsOfSale && Object.keys(totalsOfSale).length > 0 ? (
+//                 {totalsOfSale &&
+//                 Object.keys(totalsOfSale).length > 0 ? (
 //                   Object.keys(totalsOfSale).map((key) => (
 //                     <div key={key}>
 //                       <label
@@ -705,22 +796,37 @@
 //               {titlesVisibility && (
 //                 <div className="titles">
 //                   <div className="number">Lp.</div>
-//                   <div className="product-name">Towar/Usługa</div>
+//                   <div className="product-name">
+//                     Towar/Usługa
+//                   </div>
 //                   <div className="product-code">PKWIU</div>
 //                   <div className="product-unit">J.m.</div>
-//                   <div className="product-quantity">Ilość</div>
-//                   <div className="net-price">Cena netto</div>
+//                   <div className="product-quantity">
+//                     Ilość
+//                   </div>
+//                   <div className="net-price">
+//                     Cena netto
+//                   </div>
 //                   <div className="vat">VAT</div>
-//                   <div className="gross-price">Cena brutto</div>
-//                   <div className="total-net">Wartość netto</div>
-//                   <div className="total-gross">Wartość brutto</div>
+//                   <div className="gross-price">
+//                     Cena brutto
+//                   </div>
+//                   <div className="total-net">
+//                     Wartość netto
+//                   </div>
+//                   <div className="total-gross">
+//                     Wartość brutto
+//                   </div>
 //                 </div>
 //               )}
 //               {(summarySale || summaryReturns) &&
 //                 productsData.map(
 //                   (product) =>
 //                     product.quantity !== 0 && (
-//                       <div className="product-details" key={product.product}>
+//                       <div
+//                         className="product-details"
+//                         key={product.product}
+//                       >
 //                         <div className="number">
 //                           <label htmlFor={product.product}>
 //                             <input
@@ -728,24 +834,36 @@
 //                               name={product.product}
 //                               checked={product.checked}
 //                               onChange={(e) =>
-//                                 updateProductData(product, 'checked', e.target.checked)
+//                                 updateProductData(
+//                                   product,
+//                                   'checked',
+//                                   e.target.checked,
+//                                 )
 //                               }
 //                             />
 //                           </label>
 //                         </div>
-//                         <div className="product-name">{product.product}</div>
+//                         <div className="product-name">
+//                           {product.product}
+//                         </div>
 //                         <div className="product-code">
 //                           <label>
 //                             <input
 //                               type="text"
 //                               value={product.code}
 //                               onChange={(e) =>
-//                                 updateProductData(product, 'code', e.target.value)
+//                                 updateProductData(
+//                                   product,
+//                                   'code',
+//                                   e.target.value,
+//                                 )
 //                               }
 //                             />
 //                           </label>
 //                         </div>
-//                         <div className="product-unit">{product.units}</div>
+//                         <div className="product-unit">
+//                           {product.units}
+//                         </div>
 //                         <div className="product-quantity">
 //                           <label>
 //                             <input
@@ -760,14 +878,20 @@
 //                             />
 //                           </label>
 //                         </div>
-//                         <div className="net-price">{product.netPrice.toFixed(2)}</div>
+//                         <div className="net-price">
+//                           {product.netPrice.toFixed(2)}
+//                         </div>
 //                         <div className="vat">
 //                           <label>
 //                             <input
 //                               type="number"
 //                               value={product.vat}
 //                               onChange={(e) =>
-//                                 updateProductData(product, 'vat', Number(e.target.value))
+//                                 updateProductData(
+//                                   product,
+//                                   'vat',
+//                                   Number(e.target.value),
+//                                 )
 //                               }
 //                             />
 //                             %
@@ -788,10 +912,14 @@
 //                           />
 //                         </div>
 //                         <div className="total-net">
-//                           {Number(product.totalNet).toFixed(2)}
+//                           {Number(product.totalNet).toFixed(
+//                             2,
+//                           )}
 //                         </div>
 //                         <div className="total-gross">
-//                           {Number(product.totalGross).toFixed(2)}
+//                           {Number(
+//                             product.totalGross,
+//                           ).toFixed(2)}
 //                         </div>
 //                       </div>
 //                     ),
@@ -913,7 +1041,10 @@
 //                 </>
 //               )} */}
 //               {extraProduct.map((line, index) => (
-//                 <div key={index} className="product-details">
+//                 <div
+//                   key={index}
+//                   className="product-details"
+//                 >
 //                   <div className="number">
 //                     <label>
 //                       <input
@@ -929,8 +1060,11 @@
 //                         type="text"
 //                         value={line.product}
 //                         onChange={(e) => {
-//                           const updatedProducts = [...extraProduct]
-//                           updatedProducts[index].product = e.target.value
+//                           const updatedProducts = [
+//                             ...extraProduct,
+//                           ]
+//                           updatedProducts[index].product =
+//                             e.target.value
 //                           setExtraProduct(updatedProducts)
 //                         }}
 //                       />
@@ -942,8 +1076,11 @@
 //                         type="text"
 //                         value={line.code}
 //                         onChange={(e) => {
-//                           const updatedProducts = [...extraProduct]
-//                           updatedProducts[index].code = e.target.value
+//                           const updatedProducts = [
+//                             ...extraProduct,
+//                           ]
+//                           updatedProducts[index].code =
+//                             e.target.value
 //                           setExtraProduct(updatedProducts)
 //                         }}
 //                       />
@@ -955,8 +1092,11 @@
 //                         type="text"
 //                         value={line.units}
 //                         onChange={(e) => {
-//                           const updatedProducts = [...extraProduct]
-//                           updatedProducts[index].units = e.target.value
+//                           const updatedProducts = [
+//                             ...extraProduct,
+//                           ]
+//                           updatedProducts[index].units =
+//                             e.target.value
 //                           setExtraProduct(updatedProducts)
 //                         }}
 //                       />
@@ -968,22 +1108,30 @@
 //                         type="number"
 //                         value={line.quantity}
 //                         onChange={(e) => {
-//                           const updatedProducts = [...extraProduct]
-//                           updatedProducts[index].quantity = Number(e.target.value)
+//                           const updatedProducts = [
+//                             ...extraProduct,
+//                           ]
+//                           updatedProducts[index].quantity =
+//                             Number(e.target.value)
 //                           setExtraProduct(updatedProducts)
 //                         }}
 //                       />
 //                     </label>
 //                   </div>
-//                   <div className="net-price">{calculateNet(line.price, line.vat)}</div>
+//                   <div className="net-price">
+//                     {calculateNet(line.price, line.vat)}
+//                   </div>
 //                   <div className="vat">
 //                     <label>
 //                       <input
 //                         type="number"
 //                         value={line.vat}
 //                         onChange={(e) => {
-//                           const updatedProducts = [...extraProduct]
-//                           updatedProducts[index].vat = Number(e.target.value)
+//                           const updatedProducts = [
+//                             ...extraProduct,
+//                           ]
+//                           updatedProducts[index].vat =
+//                             Number(e.target.value)
 //                           setExtraProduct(updatedProducts)
 //                         }}
 //                       />
@@ -997,27 +1145,35 @@
 //                         step=".01"
 //                         value={line.price}
 //                         onChange={(e) => {
-//                           const updatedProducts = [...extraProduct]
-//                           updatedProducts[index].price = Number(e.target.value)
+//                           const updatedProducts = [
+//                             ...extraProduct,
+//                           ]
+//                           updatedProducts[index].price =
+//                             Number(e.target.value)
 //                           setExtraProduct(updatedProducts)
 //                         }}
 //                       />
 //                     </label>
 //                   </div>
 //                   <div className="total-net">
-//                     {Number(calculateNet(line.price, line.vat) * line.quantity).toFixed(
-//                       2,
-//                     )}
+//                     {Number(
+//                       calculateNet(line.price, line.vat) *
+//                         line.quantity,
+//                     ).toFixed(2)}
 //                   </div>
 //                   <div className="total-gross">
-//                     {Number((Math.round(line.price * 100) * line.quantity) / 100).toFixed(
-//                       2,
-//                     )}
+//                     {Number(
+//                       (Math.round(line.price * 100) *
+//                         line.quantity) /
+//                         100,
+//                     ).toFixed(2)}
 //                   </div>
 //                 </div>
 //               ))}
 
-//               <button onClick={addExtraProduct}>Dodaj nowy produkt</button>
+//               <button onClick={addExtraProduct}>
+//                 Dodaj nowy produkt
+//               </button>
 //             </div>
 //             <div className="comment">
 //               <label>
@@ -1168,7 +1324,10 @@
 //   .titles,
 //   .product-details {
 //     display: grid;
-//     grid-template-columns: [first] 3rem [line2] 30% repeat(8, 1fr);
+//     grid-template-columns: [first] 3rem [line2] 30% repeat(
+//         8,
+//         1fr
+//       );
 
 //     input {
 //       width: 60%;

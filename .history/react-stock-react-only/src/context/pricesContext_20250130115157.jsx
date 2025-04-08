@@ -1,4 +1,8 @@
-import React, { createContext, useState, useEffect } from 'react'
+import React, {
+  createContext,
+  useState,
+  useEffect,
+} from 'react'
 import { fetchData, updateDataOnApi } from '../api/fetchAPI'
 import PropTypes from 'prop-types'
 
@@ -14,7 +18,9 @@ export const PricesProvider = ({ children }) => {
   useEffect(() => {
     fetchData(VITE_APP_SETTINGS_API)
       .then((data) => setSettingsData(data))
-      .catch((error) => console.error('Error fetching data:', error))
+      .catch((error) =>
+        console.error('Error fetching data:', error),
+      )
   }, [])
 
   const handleUpdate = (e) => {
@@ -42,7 +48,11 @@ export const PricesProvider = ({ children }) => {
         prices: updatedPrices,
         address: settingsData.address,
       }
-      const response = await updateDataOnApi(updatedData, VITE_APP_SETTINGS_API, 'PUT')
+      const response = await updateDataOnApi(
+        updatedData,
+        VITE_APP_SETTINGS_API,
+        'PUT',
+      )
       console.log('Response status:', response.status)
       console.log('Response data:', response.data)
       if (response.status === 200) {

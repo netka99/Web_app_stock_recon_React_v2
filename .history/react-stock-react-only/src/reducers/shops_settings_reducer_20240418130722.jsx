@@ -27,14 +27,18 @@ const shopReducer = (state, action) => {
       return {
         ...state,
         shops: state.shops.map((shop) =>
-          shop.id === action.payload.id ? { ...shop, name: action.payload.name } : shop,
+          shop.id === action.payload.id
+            ? { ...shop, name: action.payload.name }
+            : shop,
         ),
       }
     }
     case actionTypes.DELETE_SHOP: {
       return {
         ...state,
-        shops: state.shops.filter((shop) => shop.id !== action.payload.id),
+        shops: state.shops.filter(
+          (shop) => shop.id !== action.payload.id,
+        ),
       }
     }
     case actionTypes.TOGGLE_EDIT: {
@@ -54,7 +58,9 @@ const shopReducer = (state, action) => {
       return {
         ...state,
         shops: state.shops.map((shop) =>
-          shop.id === action.payload.id ? { ...shop, isEditing: false } : shop,
+          shop.id === action.payload.id
+            ? { ...shop, isEditing: false }
+            : shop,
         ),
       }
     }

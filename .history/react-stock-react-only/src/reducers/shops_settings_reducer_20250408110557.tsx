@@ -1,10 +1,29 @@
+export interface Shop {
+  id: string
+  name: string
+  isEditing: boolean
+}
+
+interface State {
+  shops: Shop[]
+}
+
 const actionTypes = {
+  SET_SHOPS: 'SET_SHOPS',
   ADD_SHOP: 'ADD_SHOP',
   CHANGE_SHOP: 'CHANGE_SHOP',
   DELETE_SHOP: 'DELETE_SHOP',
   TOGGLE_EDIT: 'TOGGLE_EDIT',
   SAVE_SHOP: 'SAVE_SHOP',
 }
+
+type Action =
+  | { type: typeof actionTypes.SET_SHOPS; payload: Shop[] }
+  | { type: typeof actionTypes.ADD_SHOP; payload: { id: string; name: string } }
+  | { type: typeof actionTypes.CHANGE_SHOP; payload: { id: string; name: string } }
+  | { type: typeof actionTypes.DELETE_SHOP; payload: { id: string } }
+  | { type: typeof actionTypes.TOGGLE_EDIT; payload: { id: string } }
+  | { type: typeof actionTypes.SAVE_SHOP; payload: { id: string } }
 
 const shopReducer = (state, action) => {
   switch (action.type) {
