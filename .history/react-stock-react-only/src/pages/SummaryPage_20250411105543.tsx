@@ -42,6 +42,19 @@ const SummaryPage = () => {
     setIsOpenIndex([])
   }
 
+  // const fetchDataByAPI = async (url: string, setDatafromAPI) => {
+  //   try {
+  //     const data = await fetchData(url)
+  //     setDatafromAPI(data)
+  //     showMessage('', 0)
+  //     return data
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error)
+  //     showMessage('Problem z pobraniem danych!', 4000)
+  //     throw error
+  //   }
+  // }
+
   async function fetchDataByAPI(
     url: string,
     setDatafromAPI: React.Dispatch<React.SetStateAction<SettingsData | null>>,

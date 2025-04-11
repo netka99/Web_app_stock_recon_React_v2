@@ -1,0 +1,21 @@
+// import { useEffect } from 'react'
+// import { fetchData as fetchAPI } from '../api/fetchAPI'
+
+// const useFetchData = (url, setData, showMessage) => {
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         const data = await fetchData(url)
+//         setData(data)
+//         showMessage('')
+//         return data
+//       } catch (error) {
+//         console.error('Error fetching data:', error)
+//         showMessage('Problem z pobraniem danych!', 6000)
+//       }
+//     }
+//     fetchData()
+//   }, [url, setData, showMessage])
+// }
+
+// export default useFetchData

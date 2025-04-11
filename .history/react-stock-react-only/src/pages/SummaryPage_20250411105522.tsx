@@ -31,8 +31,8 @@ const SummaryPage = () => {
   const [sale, setSale] = useState<SaleValue[]>([])
   const [returns, setReturns] = useState<SaleValue[]>([])
   const [messageText, showMessage] = useTemporaryMessage()
-  const [showContainer, setShowContainer] = useState<boolean>(false)
-  const [loading, setLoading] = useState<boolean>(false)
+  const [showContainer, setShowContainer] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [isOpenIndex, setIsOpenIndex] = useState<number[]>([])
 
   //url addresses based on start and end date
@@ -41,6 +41,19 @@ const SummaryPage = () => {
     setSaleByProduct(productName as ProductName)
     setIsOpenIndex([])
   }
+
+  // const fetchDataByAPI = async (url: string, setDatafromAPI) => {
+  //   try {
+  //     const data = await fetchData(url)
+  //     setDatafromAPI(data)
+  //     showMessage('', 0)
+  //     return data
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error)
+  //     showMessage('Problem z pobraniem danych!', 4000)
+  //     throw error
+  //   }
+  // }
 
   async function fetchDataByAPI(
     url: string,

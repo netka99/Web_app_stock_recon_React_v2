@@ -106,11 +106,7 @@ const SummaryShopProductDetails: React.FC<SummaryShopProductDetailsProps> = ({
     setEditType(type)
   }
 
-  const updateItem = async (
-    quantity: number,
-    dateItem: string,
-    idItem: number | null,
-  ) => {
+  const updateItem = async (quantity: number, dateItem: string, idItem: number) => {
     const quantityNumber = Number(quantity)
     console.log('save button clicked', quantity, idItem)
     const urlSale = `${VITE_APP_SALES_API}/${idItem}`
