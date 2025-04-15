@@ -33,7 +33,7 @@ interface ExtraSaleProps {
     callback: (
       quantity: number,
       shopName: string,
-    ) => Promise<ApiResponse<{ message: string } | null | ErrorResponse>>, // ✅ Updated callback type
+    ) => Promise<{ status: number; data: { message: string } }>,
   ) => Promise<void>
   saleType: string
   isShopDisabled: (

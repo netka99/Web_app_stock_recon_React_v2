@@ -129,6 +129,9 @@ const SalePage = () => {
     return data?.some((s) => s.shop === shop && s.product === saleByProduct) ?? false
   }
 
+  interface SaveEntrySuccessResponse {
+    message: string
+  }
   const saveEntry = async (quantity: number, shopName: string, isExtra = false) => {
     const data = {
       id: null,

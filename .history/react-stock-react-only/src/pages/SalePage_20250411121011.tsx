@@ -10,7 +10,7 @@ import {
   Spinner,
   SummarySale,
 } from '../components/index'
-import { fetchData, updateDataOnApi } from '../api/fetchAPI.ts'
+import { fetchData, updateDataOnApi, ApiResponse } from '../api/fetchAPI.ts'
 import { pictures, units, productsData, ProductName } from '../utils/productDetails'
 const { VITE_APP_SETTINGS_API, VITE_APP_SALES_API, VITE_APP_RETURNS_API } = import.meta
   .env
@@ -129,7 +129,15 @@ const SalePage = () => {
     return data?.some((s) => s.shop === shop && s.product === saleByProduct) ?? false
   }
 
-  const saveEntry = async (quantity: number, shopName: string, isExtra = false) => {
+  interface SaveEntrySuccessResponse {
+    message: string
+  }
+
+  const saveEntry = async (
+    quantity: number,
+    shopName: string,
+    isExtra = false,
+  ): Promise<{ status: number; data: SaveEntrySuccessResponse }> => {
     const data = {
       id: null,
       product: saleByProduct,
@@ -142,11 +150,12 @@ const SalePage = () => {
     const newSaveItem = { ...data, checked: true }
 
     try {
-      const result = await updateDataOnApi<{ message: string }>(
-        data,
-        isSale ? VITE_APP_SALES_API : VITE_APP_RETURNS_API,
-        'POST',
-      )
+      const result: ApiResponse<SaveEntrySuccessResponse> =
+        await updateDataOnApi<SaveEntrySuccessResponse>(
+          data,
+          isSale ? VITE_APP_SALES_API : VITE_APP_RETURNS_API,
+          'POST',
+        )
       if (isExtra) {
         setExtraSaleValues(isSale ? [...extraSaleValues, data] : extraSaleValues)
         setExtraReturnValues(!isSale ? [...extraReturnValues, data] : extraReturnValues)

@@ -123,7 +123,7 @@ export const updateDataOnApi = async <T>(
   updatedData: ReturnUpdatePayload | SettingsUpdatePayload, // Type the updatedData based on what you expect to send
   url: string,
   method: 'PUT' | 'POST' | 'DELETE' | 'PATCH',
-): Promise<ApiResponse<T | ErrorResponse>> => {
+): Promise<T | ErrorResponse>> => {
   try {
     const response = await fetch(url, {
       method: method,

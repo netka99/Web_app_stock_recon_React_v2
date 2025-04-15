@@ -129,7 +129,15 @@ const SalePage = () => {
     return data?.some((s) => s.shop === shop && s.product === saleByProduct) ?? false
   }
 
-  const saveEntry = async (quantity: number, shopName: string, isExtra = false) => {
+  interface SaveEntrySuccessResponse {
+    message: string
+  }
+
+  const saveEntry = async (
+    quantity: number,
+    shopName: string,
+    isExtra = false,
+  ): Promise<{ status: number; data: SaveEntrySuccessResponse }> => {
     const data = {
       id: null,
       product: saleByProduct,

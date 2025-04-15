@@ -3,15 +3,6 @@ import styled from 'styled-components'
 import truck from '../assets/delivery-truck.svg'
 import { size } from '../styles/devices'
 
-interface ApiResponse<T> {
-  status: number
-  data: T | null
-}
-
-interface ErrorResponse {
-  message: string
-}
-
 interface ExtraSaleValue {
   id: number | null
   product: string
@@ -33,7 +24,7 @@ interface ExtraSaleProps {
     callback: (
       quantity: number,
       shopName: string,
-    ) => Promise<ApiResponse<{ message: string } | null | ErrorResponse>>, // ✅ Updated callback type
+    ) => Promise<{ status: number; data: { message: string } }>,
   ) => Promise<void>
   saleType: string
   isShopDisabled: (

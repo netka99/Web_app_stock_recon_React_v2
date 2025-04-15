@@ -44,7 +44,7 @@ interface ItemShopContainerProps {
   saveExtraData: (
     quantity: number,
     shopName: string,
-  ) => Promise<ApiResponse<{ message: string } | null | ErrorResponse>>
+  ) => Promise<{ status: number; data: { message: string } }>
   extraSaleValues: SaleValue[]
   extraReturnValues: SaleValue[]
   updatedSale: SaleValue[]

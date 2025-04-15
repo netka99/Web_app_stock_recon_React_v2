@@ -93,10 +93,6 @@ export type ApiResponse<T> =
   | { status: number; data: { message: string } }
   | { status: number; data: null }
 
-interface ErrorResponse {
-  message: string
-}
-
 interface ReturnUpdatePayload {
   id: null | number
   product: string
@@ -123,7 +119,7 @@ export const updateDataOnApi = async <T>(
   updatedData: ReturnUpdatePayload | SettingsUpdatePayload, // Type the updatedData based on what you expect to send
   url: string,
   method: 'PUT' | 'POST' | 'DELETE' | 'PATCH',
-): Promise<ApiResponse<T | ErrorResponse>> => {
+): Promise<ApiResponse<T>> => {
   try {
     const response = await fetch(url, {
       method: method,

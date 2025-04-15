@@ -38,13 +38,13 @@ interface ItemShopContainerProps {
     shopName: string,
     isExtra?: boolean,
     // ) => Promise<{ status: number; data: { message: string } }>
-  ) => Promise<ApiResponse<{ message: string } | null | ErrorResponse>>
+  ) => Promise<ApiResponse<{ message: string } | ErrorResponse>>
   isSale: boolean
   isShopDisabled: (shop: string, sale: SaleValue[], returns: SaleValue[]) => boolean
   saveExtraData: (
     quantity: number,
     shopName: string,
-  ) => Promise<ApiResponse<{ message: string } | null | ErrorResponse>>
+  ) => Promise<{ status: number; data: { message: string } }>
   extraSaleValues: SaleValue[]
   extraReturnValues: SaleValue[]
   updatedSale: SaleValue[]

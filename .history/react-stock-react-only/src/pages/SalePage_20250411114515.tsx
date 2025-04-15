@@ -142,7 +142,7 @@ const SalePage = () => {
     const newSaveItem = { ...data, checked: true }
 
     try {
-      const result = await updateDataOnApi<{ message: string }>(
+      const result = await updateDataOnApi(
         data,
         isSale ? VITE_APP_SALES_API : VITE_APP_RETURNS_API,
         'POST',

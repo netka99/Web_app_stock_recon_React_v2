@@ -66,7 +66,7 @@ const SettingsAddressPage = () => {
       const updatedData = {
         shops: settings.shops || [],
         prices: {
-          ...settings.prices,
+          ...settings.prices, // Spread existing prices (if any)
           Kartacze: settings.prices?.Kartacze ?? 0,
           Babka: settings.prices?.Babka ?? 0,
           Kiszka: settings.prices?.Kiszka ?? 0,

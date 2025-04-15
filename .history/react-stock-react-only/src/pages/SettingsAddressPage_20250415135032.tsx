@@ -64,13 +64,8 @@ const SettingsAddressPage = () => {
         return
       }
       const updatedData = {
-        shops: settings.shops || [],
-        prices: {
-          ...settings.prices,
-          Kartacze: settings.prices?.Kartacze ?? 0,
-          Babka: settings.prices?.Babka ?? 0,
-          Kiszka: settings.prices?.Kiszka ?? 0,
-        },
+        shops: settings?.shops,
+        prices: settings?.prices,
         address: addresses,
       }
       if (!settings) {
