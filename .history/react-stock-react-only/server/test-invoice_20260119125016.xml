@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Faktura xmlns="http://crd.gov.pl/wzor/2023/06/29/12648/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Naglowek>
+    <KodFormularza kodSystemowy="FA(3)" wersjaSchemy="1-0E">FA</KodFormularza>
+    <WariantFormularza>3</WariantFormularza>
+    <DataWytworzeniaFa>2026-01-19T11:48:23.566Z</DataWytworzeniaFa>
+    <SystemInfo>Stock Recon App v1.0</SystemInfo>
+  </Naglowek>
+  <Podmiot1>
+    <DaneIdentyfikacyjne>
+      <NIP>1234567890</NIP>
+      <Nazwa>Firma</Nazwa>
+    </DaneIdentyfikacyjne>
+    <Adres>
+      <KodKraju>PL</KodKraju>
+      <AdresL1>ul. Przykladowa 11/1</AdresL1>
+      <AdresL2>00-800 Miasto</AdresL2>
+    </Adres>
+  </Podmiot1>
+  <Podmiot2>
+    <DaneIdentyfikacyjne>
+      <NIP>1234567890</NIP>
+      <Nazwa>Test Sklep Spożywczy</Nazwa>
+    </DaneIdentyfikacyjne>
+    <Adres>
+      <KodKraju>PL</KodKraju>
+      <AdresL1>ul. Testowa 123</AdresL1>
+      <AdresL2>00-001 Warszawa</AdresL2>
+      <AdresL3>Polska</AdresL3>
+    </Adres>
+  </Podmiot2>
+  <Fa>
+    <P_1>2026-01-19</P_1>
+    <P_2>FV 001/01/2026</P_2>
+    <P_6>2026-01-19</P_6>
+    <P_13_1>138.90</P_13_1>
+    <P_14_1>11.10</P_14_1>
+    <P_15>150.00</P_15>
+  </Fa>
+  <FaWiersze>
+    <FaWiersz>
+      <NrWierszaFa>1</NrWierszaFa>
+      <P_7>Ciepłe gotowane kartacze</P_7>
+      <P_8A>szt.</P_8A>
+      <P_8B>10</P_8B>
+      <P_9A>9.26</P_9A>
+      <P_11>92.6</P_11>
+      <P_12>8</P_12>
+    </FaWiersz>
+    <FaWiersz>
+      <NrWierszaFa>2</NrWierszaFa>
+      <P_7>Ciepła babka ziemniaczana</P_7>
+      <P_8A>kg</P_8A>
+      <P_8B>2.5</P_8B>
+      <P_9A>18.52</P_9A>
+      <P_11>46.3</P_11>
+      <P_12>8</P_12>
+    </FaWiersz>
+  </FaWiersze>
+</Faktura>
