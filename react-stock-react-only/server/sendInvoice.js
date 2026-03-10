@@ -1,29 +1,18 @@
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
 import { Buffer } from 'buffer'
-import process from 'process'
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
 
 const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __dirname = dirname(__filename)
 
 // Configuration
-const INVOICE_FILE = 'test-invoice.xml'
 const NIP = '8442120248' // Your seller NIP
 const PASSPHRASE = 'Jaksiemasz123!!'
 const API_URL = 'http://localhost:8000/invoices'
 
-console.log('📄 Reading invoice XML file...')
-const invoicePath = path.join(__dirname, INVOICE_FILE)
-
-// Check if file exists
-if (!fs.existsSync(invoicePath)) {
-  console.error(`❌ File not found: ${INVOICE_FILE}`)
-  console.log('Please make sure test-invoice.xml exists in the server folder')
-  process.exit(1)
-}
-
-const invoiceXML = fs.readFileSync(invoicePath, 'utf-8')
+console.log('📄 Reading last generated invoice XML...')
+const invoiceXML = readFileSync(join(__dirname, 'last-generated-invoice.xml'), 'utf-8')
 
 console.log('🔐 Encoding invoice to base64...')
 const invoiceBase64 = Buffer.from(invoiceXML, 'utf-8').toString('base64')
