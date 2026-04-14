@@ -1,1 +1,0 @@
-import { encryptetToken } from './auth'
