@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import Big from 'big.js'
 import { size } from '../styles/devices'
 import { SaleValue } from '../types'
 
@@ -33,7 +34,7 @@ const SummarySale: React.FC<SaleProps> = ({
     return (
       saleType
         ?.filter((p) => p.product === productType)
-        ?.reduce((acc, curr) => acc + Number(curr.quantity), 0) ?? 0
+        ?.reduce((acc, curr) => Big(acc).plus(Big(curr.quantity || 0)).toNumber(), 0) ?? 0
     )
   }
 

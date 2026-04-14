@@ -230,7 +230,7 @@ const Container = styled.div`
     border-radius: 20px;
     font-size: 1rem;
     box-shadow: 2px 3px 4px 1px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(to bottom right, #5c35b6, #8461c5);
+    background: #8b5cf6;
     cursor: pointer;
   }
 
@@ -251,7 +251,7 @@ const Container = styled.div`
     border-radius: 20px;
     font-size: 1rem;
     box-shadow: 2px 3px 4px 1px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(to bottom right, #e51ead, #e086bf);
+    background: #e879f9;
     cursor: pointer;
   }
 

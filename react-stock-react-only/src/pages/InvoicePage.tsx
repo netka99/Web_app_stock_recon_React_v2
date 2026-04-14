@@ -1,5 +1,13 @@
 import * as React from 'react'
-import { useState, useEffect, useCallback, Dispatch, SetStateAction } from 'react'
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useContext,
+  Dispatch,
+  SetStateAction,
+} from 'react'
+import PricesContext from '../context/pricesContext'
 import styled from 'styled-components'
 import { Navbar, Sidebar, Footer, InvoiceLayout } from '../components/index'
 import { size } from '../styles/devices'
@@ -9,9 +17,14 @@ import Big from 'big.js'
 import useTemporaryMessage from '../hooks/useTemporaryMessage'
 import { SaleValue, SettingsData, BuyerData } from '../types'
 import { validateInvoiceData } from '../utils/invoiceValidator'
+import { saveInvoice, updateInvoiceStatus, updateInvoice } from '../utils/invoiceStorage'
+import {
+  checkKsefSession,
+  authenticateWithKsef,
+  pollInvoiceStatus,
+} from '../utils/invoiceApi'
 
-const { VITE_APP_SETTINGS_API, VITE_APP_SALES_API, VITE_APP_RETURNS_API } = import.meta
-  .env
+const { VITE_APP_SALES_API, VITE_APP_RETURNS_API } = import.meta.env
 
 const pageTitle = 'Faktury'
 
@@ -32,6 +45,7 @@ interface Product {
   totalNet: number
   totalGross: number
   id?: string // Optional unique ID
+  pkwiu?: string
 }
 
 interface InvoiceData {
@@ -57,7 +71,8 @@ const InvoicePage = () => {
   const today = new Date().toISOString().split('T')[0]
 
   const [messageText, showMessage] = useTemporaryMessage()
-  const [settings, setSettings] = useState<SettingsData | null>(null)
+  const pricesCtx = useContext(PricesContext)
+  const settings = pricesCtx?.settingsData ?? null
   // const [dates, setDates] = useState<DateObject[]>([])
   const [sale, setSale] = useState<SaleValue[] | null>(null)
   const [returns, setReturns] = useState<SaleValue[] | null>(null)
@@ -79,11 +94,21 @@ const InvoicePage = () => {
     paymentType: 'Przelew',
     seller:
       'SMACZNY KĄSEK -catering-Ewelina Radoń\nul. Sejneńska 21/1\n16-400 Suwałki\nNIP 8442120248',
-    invoiceNumber: 'FV .../01/2025',
+    invoiceNumber: 'FV .../01/2026',
     comment: '',
   }
 
   const [invoiceData, setInvoiceData] = useState<InvoiceData>(initialInvoiceData)
+  const [ksefDetails, setKsefDetails] = useState<{
+    ksefNumber?: string
+    verificationUrl?: string
+    status?: { code: number; description: string }
+  } | null>(null)
+  const [showPassphraseModal, setShowPassphraseModal] = useState(false)
+  const [passphrase, setPassphrase] = useState('')
+  const [isAuthenticating, setIsAuthenticating] = useState(false)
+  const ksefSessionRef = React.useRef<boolean | null>(null)
+  const [showPassphrase, setShowPassphrase] = useState(false)
 
   const [productsData, setProductsData] = useState<Product[]>([
     {
@@ -98,6 +123,7 @@ const InvoicePage = () => {
       grossPrice: 0,
       totalNet: 0,
       totalGross: 0,
+      pkwiu: '10.85.Z',
     },
     {
       checked: false,
@@ -111,6 +137,7 @@ const InvoicePage = () => {
       grossPrice: 0,
       totalNet: 0,
       totalGross: 0,
+      pkwiu: '10.85.Z',
     },
     {
       checked: false,
@@ -124,6 +151,7 @@ const InvoicePage = () => {
       grossPrice: 0,
       totalNet: 0,
       totalGross: 0,
+      pkwiu: '10.85.Z',
     },
   ])
 
@@ -165,12 +193,6 @@ const InvoicePage = () => {
     [showMessage],
   )
 
-  // Overload for fetching SettingsData
-  function fetchDataByAPI(
-    url: typeof VITE_APP_SETTINGS_API,
-    setDatafromAPI: (data: SettingsData) => void,
-  ): Promise<SettingsData>
-
   // Overload for fetching SaleValue[] (assuming your sales/returns endpoints return arrays)
   function fetchDataByAPI(
     url: string,
@@ -210,30 +232,23 @@ const InvoicePage = () => {
     })
   }
 
-  const loadSettings = useCallback(async () => {
-    try {
-      await fetchDataByAPI(VITE_APP_SETTINGS_API, (data) => {
-        setSettings(data)
-        // const updatedProductData = productsData.map((product) => {
-        //   const price = data.prices[product.product]
-        const updatedProductData = productsData
-          .filter((product) => product.product !== undefined)
-          .map((product) => {
-            const price = data.prices[product.product as string]
-            return {
-              ...product,
-              grossPrice:
-                price !== undefined
-                  ? Number((price / 100).toFixed(2))
-                  : product.grossPrice,
-            }
-          })
-        setProductsData(updatedProductData)
-      })
-    } catch (error) {
-      handleError(error)
-    }
-  }, [fetchDataByAPI, handleError, productsData])
+  useEffect(() => {
+    if (!settings) return
+    setProductsData((prevProducts) =>
+      prevProducts
+        .filter((product) => product.product !== undefined)
+        .map((product) => {
+          const price = settings.prices[product.product as string]
+          return {
+            ...product,
+            grossPrice:
+              price !== undefined
+                ? Big(price).div(100).round(2).toNumber()
+                : product.grossPrice,
+          }
+        }),
+    )
+  }, [settings])
 
   const dataSearchedByDates = useCallback(async () => {
     getDatesBetween(invoiceData.startDate, invoiceData.endDate)
@@ -286,7 +301,7 @@ const InvoicePage = () => {
 
   const calculateNetPrice = (grossPrice: number, vat: number): number => {
     const netPrice = Big(grossPrice).div(Big(1).plus(Big(vat).div(100)))
-    return Number(netPrice.toFixed(2))
+    return netPrice.round(2).toNumber()
   }
 
   const calculateTotalNet = (
@@ -297,12 +312,12 @@ const InvoicePage = () => {
     const grossDecimal = Big(quantity).times(grossPrice) // Convert gross to Big.js instance
     const vatMultiplier = Big(1).plus(Big(vat).div(100)) // Calculate VAT multiplier
     const net = grossDecimal.div(vatMultiplier) // Divide gross by VAT multiplier
-    return Number(net.toFixed(2)) // Round to 2 decimal places
+    return net.round(2).toNumber() // Round to 2 decimal places
   }
 
   const calculateTotalGross = (quantity: number, grossPrice: number): number => {
     const totalGross = Big(quantity).times(grossPrice)
-    return Number(totalGross.toFixed(2))
+    return totalGross.round(2).toNumber()
   }
 
   const totalsPerProduct = useCallback(() => {
@@ -448,6 +463,8 @@ const InvoicePage = () => {
   }, [])
 
   const generateKSeFInvoice = useCallback(async () => {
+    let savedInvoiceId: string | null = null
+
     try {
       const invoicePayload = {
         invoiceNumber: invoiceData.invoiceNumber,
@@ -465,7 +482,17 @@ const InvoicePage = () => {
         products: [...productsData, ...extraProduct],
       }
 
-      // STEP 1: Validate (client-side)
+      // Calculate totals
+      const checkedProducts = [...productsData, ...extraProduct].filter((p) => p.checked)
+      const totalGross = checkedProducts.reduce(
+        (sum, p) => Big(sum).plus(p.totalGross).toNumber(),
+        0,
+      )
+      const totalNet = checkedProducts.reduce(
+        (sum, p) => Big(sum).plus(p.totalNet).toNumber(),
+        0,
+      )
+      // STEP 2: Validate (client-side)
       showMessage('🔍 Sprawdzanie poprawności faktury...', 2000)
       const validation = validateInvoiceData(invoicePayload)
 
@@ -484,104 +511,303 @@ const InvoicePage = () => {
         return
       }
 
-      // STEP 2: Generate XML (client-side)
+      // STEP 3: Generate XML (client-side)
       showMessage('📄 Generowanie XML faktury...', 2000)
 
-      // Import dynamiczny xmlGenerator
       const { generateFA3Invoice } = await import('../utils/xmlGenerator.js')
       const invoiceXML = generateFA3Invoice(invoicePayload)
 
-      // Zapisz XML lokalnie (opcjonalnie, do sprawdzenia)
+      // Save XML locally with temp filename
+      const safeInvoiceNumber = invoiceData.invoiceNumber.replace(/\//g, '-')
+      const tempXmlFileName = `${safeInvoiceNumber}_draft.xml`
+
       const blob = new Blob([invoiceXML], { type: 'text/xml' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${invoiceData.invoiceNumber.replace(/\//g, '-')}.xml`
+      a.download = tempXmlFileName
       a.click()
       URL.revokeObjectURL(url)
       console.log('✅ XML saved to Downloads folder')
 
-      // STEP 3: Encode to base64
+      // STEP 3.5: Save invoice to localStorage with draft status
+      const savedInvoice = saveInvoice({
+        invoiceNumber: invoiceData.invoiceNumber,
+        shopName: invoiceData.shopName,
+        buyerNip: invoiceData.buyer_data?.nip || '',
+        invoiceDate: invoiceData.invoiceDate,
+        totalGross,
+        totalNet,
+        ksefStatus: 'draft',
+        xmlFileName: tempXmlFileName,
+      })
+      savedInvoiceId = savedInvoice.id
+      console.log('✅ Invoice saved to localStorage:', savedInvoice)
+
+      // Use cached session result if available, otherwise check now
+      let sessionActive = ksefSessionRef.current
+      if (sessionActive === null) {
+        showMessage('🔐 Sprawdzanie sesji KSeF...', 1500)
+        try {
+          const sessions = await checkKsefSession()
+          sessionActive = sessions.length > 0
+          ksefSessionRef.current = sessionActive
+        } catch {
+          sessionActive = false
+          ksefSessionRef.current = false
+        }
+      }
+
+      if (!sessionActive) {
+        // No active session - show passphrase modal to authenticate
+        console.log('⚠️ No active KSeF session, requesting passphrase')
+        setShowPassphraseModal(true)
+      } else {
+        // Session exists - directly send invoice without authentication
+        console.log('✅ Active KSeF session found, sending invoice...')
+        await handleAuthAndSend(true) // true = skip authentication (session already exists)
+      }
+    } catch (error) {
+      if (savedInvoiceId) {
+        updateInvoiceStatus(savedInvoiceId, 'error', {
+          ksefErrorMessage: (error as Error).message,
+        })
+      }
+      showMessage('❌ Błąd połączenia z serwerem', 6000)
+      console.error('Error:', error)
+    }
+  }, [invoiceData, productsData, extraProduct, showMessage])
+
+  const handleAuthAndSend = async (skipAuth: boolean = false) => {
+    setIsAuthenticating(true)
+    const sellerNip = '8442120248'
+
+    try {
+      if (!skipAuth) {
+        // Close modal immediately on submit
+        setShowPassphraseModal(false)
+        showMessage('🔐 Logowanie do KSeF...', 2000)
+
+        try {
+          await authenticateWithKsef(sellerNip, passphrase)
+        } catch (error) {
+          if (error instanceof Error && error.message.includes('w trakcie')) {
+            showMessage('⏳ Uwierzytelnianie w trakcie, ponawianie za 2s...', 3000)
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+
+            try {
+              await authenticateWithKsef(sellerNip, passphrase)
+            } catch (retryError) {
+              showMessage('❌ Nie udało się uwierzytelnić, spróbuj ponownie', 5000)
+              setShowPassphraseModal(true) // Reopen modal on failure
+              setShowPassphrase(false)
+              throw retryError
+            }
+          } else {
+            showMessage(
+              `❌ Błąd: ${error instanceof Error ? error.message : 'Nieznany błąd'}`,
+              5000,
+            )
+            setShowPassphraseModal(true) // Reopen modal on failure
+            setShowPassphrase(false)
+            throw error
+          }
+        }
+
+        setPassphrase('')
+        setShowPassphrase(false)
+        ksefSessionRef.current = true
+      } else {
+        // Session already exists, skip auth
+        console.log('ℹ️ Skipping authentication, using existing session')
+      }
+
+      // Get saved invoice ID from the most recent invoice (saved by generateKSeFInvoice)
+      const savedInvoices = JSON.parse(localStorage.getItem('invoices') || '[]')
+      const savedInvoiceId = savedInvoices[savedInvoices.length - 1]?.id || null
+
+      // Step 2: Continue with invoice sending
+      showMessage('✅ Uwierzytelniono. Wysyłanie faktury...', 2000)
+
+      // Get the invoice XML and data from state/localStorage
+      const invoicePayload = {
+        invoiceNumber: invoiceData.invoiceNumber,
+        invoiceDate: invoiceData.invoiceDate,
+        endSaleDate: invoiceData.endSaleDate,
+        city: invoiceData.city,
+        startDate: invoiceData.startDate,
+        endDate: invoiceData.endDate,
+        paymentDate: invoiceData.paymentDate,
+        paymentType: invoiceData.paymentType,
+        shopName: invoiceData.shopName,
+        seller: invoiceData.seller,
+        comment: invoiceData.comment,
+        buyer_data: invoiceData.buyer_data,
+        products: [...productsData, ...extraProduct],
+      }
+
+      const { generateFA3Invoice } = await import('../utils/xmlGenerator.js')
+      const invoiceXML = generateFA3Invoice(invoicePayload)
       const invoiceBase64 = btoa(unescape(encodeURIComponent(invoiceXML)))
 
-      // Get passphrase from env
-      const passphrase = import.meta.env.VITE_KSEF_PASSPHRASE
+      const checkedProducts = [...productsData, ...extraProduct].filter((p) => p.checked)
+      const totalGross = checkedProducts.reduce(
+        (sum, p) => Big(sum).plus(p.totalGross).toNumber(),
+        0,
+      )
+      const totalGrossCents = Big(totalGross).times(100).round(0).toNumber()
+
       const ksefApiUrl =
         import.meta.env.VITE_KSEF_API_URL || 'http://localhost:8000/invoices'
 
-      if (!passphrase) {
-        showMessage(
-          '❌ Brak hasła KSeF. Skonfiguruj VITE_KSEF_PASSPHRASE w .env.local',
-          10000,
-        )
-        return
+      // Update status to sending
+      if (savedInvoiceId) {
+        updateInvoiceStatus(savedInvoiceId, 'sending')
       }
 
-      // STEP 4: Send directly to ssapi
-      showMessage('✅ Walidacja OK. Wysyłanie faktury do KSeF...', 3000)
-
-      const sellerNip = '8442120248' // Your company NIP
-
+      // Send invoice directly — no queue, session was already verified
       const response = await fetch(ksefApiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          passphrase: passphrase,
           invoice: invoiceBase64,
           nip: sellerNip,
+          shop: invoiceData.shopName,
+          total_gross_cents: totalGrossCents,
         }),
       })
 
       const data = await response.json()
-
       const referenceNumber = data.referenceNumber || data.outcome?.referenceNumber
 
       if (response.ok && referenceNumber) {
         console.log('✅ KSeF Response:', data)
 
-        // STEP 5: Get invoice details
+        // Update invoice with KSeF reference and status
+        if (savedInvoiceId) {
+          updateInvoiceStatus(savedInvoiceId, 'sent', {
+            ksefReferenceNumber: referenceNumber,
+          })
+        }
+
+        // STEP 5: Get invoice details from KSeF
         showMessage('✅ Faktura wysłana! Pobieranie szczegółów...', 3000)
 
         try {
-          const detailsResponse = await fetch(`${ksefApiUrl}/${referenceNumber}`, {
-            method: 'GET',
-          })
+          const detailsData = await pollInvoiceStatus(referenceNumber)
 
-          const detailsData = await detailsResponse.json()
+          // Now detailsData.status.code === 200 guaranteed (processing complete)
+          console.log('✅ Invoice accepted:', detailsData)
 
-          if (detailsResponse.ok) {
+          if (detailsData.ksefNumber) {
             console.log('✅ Invoice details:', detailsData)
 
-            let successMessage = `✅ Faktura wysłana do KSeF!\n\nNumer referencyjny:\n${referenceNumber}\n\nSzczegóły pobrane!`
+            // Store KSeF details in state for invoice display
+            setKsefDetails({
+              ksefNumber: detailsData.ksefNumber,
+              verificationUrl: detailsData.qrCode?.data,
+              status: detailsData.status,
+            })
 
-            if (validation.warnings && validation.warnings.length > 0) {
-              const warningsText = validation.warnings.join('\n• ')
-              successMessage += `\n\n⚠️ Ostrzeżenia:\n• ${warningsText}`
+            // Extract KSeF invoice number
+            const ksefInvoiceNumber = detailsData.ksefNumber || 'unknown'
+
+            // Download XML with KSeF invoice number in filename
+            const safeInvoiceNumber = invoiceData.invoiceNumber.replace(/\//g, '-')
+            const finalXmlFileName = `FV_${safeInvoiceNumber}_KSeF_${ksefInvoiceNumber}.xml`
+            const blob2 = new Blob([invoiceXML], { type: 'text/xml' })
+            const url2 = URL.createObjectURL(blob2)
+            const a2 = document.createElement('a')
+            a2.href = url2
+            a2.download = finalXmlFileName
+            a2.click()
+            URL.revokeObjectURL(url2)
+
+            // Download UPO if available
+            let upoFileName: string | undefined
+            if (detailsData.upo?.xml) {
+              upoFileName = `UPO_${ksefInvoiceNumber}.xml`
+              const upoBlob = new Blob([detailsData.upo.xml], { type: 'text/xml' })
+              const upoUrl = URL.createObjectURL(upoBlob)
+              const upoA = document.createElement('a')
+              upoA.href = upoUrl
+              upoA.download = upoFileName
+              upoA.click()
+              URL.revokeObjectURL(upoUrl)
+              console.log('✅ UPO downloaded:', upoFileName)
             }
 
-            showMessage(successMessage, 15000)
+            // Determine final status based on KSeF status code
+            const statusCode = detailsData.status?.code
+            const statusDescription = detailsData.status?.description || 'Brak opisu'
+            let finalStatus: 'accepted' | 'rejected' | 'sent' = 'accepted'
+
+            if (statusCode === 200) {
+              finalStatus = 'accepted'
+            } else if (statusCode && statusCode >= 400) {
+              finalStatus = 'rejected'
+            } else {
+              finalStatus = 'sent' // Still processing (100, 150, etc.)
+            }
+
+            // Update invoice with final details
+            if (savedInvoiceId) {
+              updateInvoiceStatus(savedInvoiceId, finalStatus, {
+                ksefReferenceNumber: referenceNumber,
+              })
+              updateInvoice(savedInvoiceId, {
+                xmlFileName: finalXmlFileName,
+                upoFileName: upoFileName,
+                ksefNumber: ksefInvoiceNumber,
+              })
+            }
+
+            // Build success message with status description from API
+            const successMessage = `✅ Faktura wysłana do KSeF!\n\nNumer faktury KSeF:\n${ksefInvoiceNumber}\n\nStatus (${statusCode}): ${statusDescription}`
+
+            // Keep error messages on screen until manually closed
+            const isError = finalStatus === 'rejected'
+            showMessage(successMessage, isError ? null : 15000)
           } else {
+            // GET request succeeded but no KSeF number yet
+            const statusCode = detailsData?.status?.code || 'N/A'
+            const statusDescription =
+              detailsData?.status?.description || 'Szczegóły niedostępne'
+
             showMessage(
-              `✅ Faktura wysłana!\nNumer: ${referenceNumber}\n\n⚠️ Nie udało się pobrać szczegółów`,
-              15000,
+              `⚠️ Faktura wysłana, ale szczegóły nie są dostępne\n\nStatus (${statusCode}): ${statusDescription}\n\n(nr ref: ${referenceNumber})`,
+              null, // Stay until closed
             )
+            console.warn('⚠️ No ksefNumber in response:', detailsData)
           }
         } catch (detailsError) {
-          console.error('❌ Error:', detailsError)
-          showMessage(`✅ Faktura wysłana!\nNumer: ${referenceNumber}`, 15000)
+          console.error('❌ Error fetching invoice details:', detailsError)
+          showMessage(
+            `✅ Faktura wysłana!\n\n⚠️ Nie udało się pobrać szczegółów z KSeF\n\n(nr ref: ${referenceNumber})`,
+            null, // Stay until closed
+          )
         }
       } else {
-        showMessage(`❌ Błąd: ${data.error || 'Nieznany błąd'}`, 10000)
-        console.error('❌ KSeF Error:', data)
+        throw new Error(data.outcome || 'Błąd wysyłania faktury')
       }
     } catch (error) {
-      showMessage('❌ Błąd połączenia z serwerem', 6000)
-      console.error('Error:', error)
+      console.error('❌ Error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Nieznany błąd'
+      showMessage(`❌ Błąd: ${errorMessage}`, 10000)
+
+      // Update invoice status to error if we have savedInvoiceId
+      const savedInvoices = JSON.parse(localStorage.getItem('invoices') || '[]')
+      const savedInvoiceId = savedInvoices[savedInvoices.length - 1]?.id || null
+      if (savedInvoiceId) {
+        updateInvoiceStatus(savedInvoiceId, 'error', {
+          ksefErrorMessage: errorMessage,
+        })
+      }
+    } finally {
+      setIsAuthenticating(false)
     }
-  }, [invoiceData, productsData, extraProduct, showMessage])
-  useEffect(() => {
-    loadSettings()
-  }, [])
+  }
 
   useEffect(() => {
     if (settings || invoiceData.shopName || sale || returns) {
@@ -614,7 +840,9 @@ const InvoicePage = () => {
             ? 'success'
             : messageText.includes('⚠️')
               ? 'warning'
-              : 'error'
+              : messageText.includes('🔐') || messageText.includes('⏳')
+                ? 'info'
+                : 'error'
         }
       >
         <button className="close-btn" onClick={() => showMessage('', 0)}>
@@ -916,12 +1144,16 @@ const InvoicePage = () => {
                         >
                           <label>
                             <input
+                              type="number"
+                              step="0.01"
                               value={product.quantity}
                               onChange={(e) =>
                                 updateProductTotals(
                                   product,
                                   'quantity',
-                                  Number(e.target.value),
+                                  Big(e.target.value || 0)
+                                    .round(2)
+                                    .toNumber(),
                                   setProductsData,
                                 )
                               }
@@ -940,7 +1172,9 @@ const InvoicePage = () => {
                                 updateProductTotals(
                                   product,
                                   'vat',
-                                  parseFloat(e.target.value),
+                                  Big(e.target.value || 0)
+                                    .round(2)
+                                    .toNumber(),
                                   setProductsData,
                                 )
                               }
@@ -960,7 +1194,9 @@ const InvoicePage = () => {
                               updateProductTotals(
                                 product,
                                 'grossPrice',
-                                parseFloat(e.target.value),
+                                Big(e.target.value || 0)
+                                  .round(2)
+                                  .toNumber(),
                                 setProductsData,
                               )
                             }
@@ -1043,7 +1279,9 @@ const InvoicePage = () => {
                         value={line.quantity}
                         onChange={(e) => {
                           const updatedProducts = [...extraProduct]
-                          updatedProducts[index].quantity = Number(e.target.value)
+                          updatedProducts[index].quantity = Big(e.target.value || 0)
+                            .round(2)
+                            .toNumber()
                           setExtraProduct(updatedProducts)
                         }}
                       />
@@ -1061,7 +1299,9 @@ const InvoicePage = () => {
                           updateProductTotals(
                             line,
                             'vat',
-                            Number(e.target.value),
+                            Big(e.target.value || 0)
+                              .round(2)
+                              .toNumber(),
                             setExtraProduct,
                           )
                         }
@@ -1079,7 +1319,9 @@ const InvoicePage = () => {
                           updateProductTotals(
                             line,
                             'grossPrice',
-                            Number(e.target.value),
+                            Big(e.target.value || 0)
+                              .round(2)
+                              .toNumber(),
                             setExtraProduct,
                           )
                         }
@@ -1117,10 +1359,73 @@ const InvoicePage = () => {
             invoiceData={invoiceData}
             productsData={productsData}
             onGenerateXML={generateKSeFInvoice}
+            ksefNumber={ksefDetails?.ksefNumber}
+            verificationUrl={ksefDetails?.verificationUrl}
+            sellerNip="8442120248"
           />
         )}
       </Container>
       <Footer />
+      {showPassphraseModal && (
+        <ModalOverlay>
+          <ModalContent>
+            <ModalHeader>
+              <h2>Uwierzytelnianie KSeF</h2>
+              <CloseButton onClick={() => setShowPassphraseModal(false)}>×</CloseButton>
+            </ModalHeader>
+            <ModalBody>
+              <p>Wprowadź hasło do certyfikatu KSeF:</p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleAuthAndSend()
+                }}
+              >
+                <div style={{ position: 'relative' }}>
+                  <PasswordInput
+                    type={showPassphrase ? 'text' : 'password'}
+                    name="passphrase"
+                    autoComplete="current-password"
+                    placeholder="Hasło certyfikatu..."
+                    value={passphrase}
+                    onChange={(e) => setPassphrase(e.target.value)}
+                    autoFocus
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassphrase(!showPassphrase)}
+                    style={{
+                      position: 'absolute',
+                      right: '8px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      padding: '4px',
+                    }}
+                  >
+                    {showPassphrase ? '🙈' : '👁️'}
+                  </button>
+                </div>
+                <ModalActions>
+                  <CancelButton
+                    type="button"
+                    onClick={() => setShowPassphraseModal(false)}
+                  >
+                    Anuluj
+                  </CancelButton>
+                  <SubmitButton type="submit" disabled={isAuthenticating || !passphrase}>
+                    {isAuthenticating ? 'Uwierzytelnianie...' : 'Wyślij fakturę'}
+                  </SubmitButton>
+                </ModalActions>
+              </form>
+            </ModalBody>
+          </ModalContent>
+        </ModalOverlay>
+      )}{' '}
     </StyledMain>
   )
 }
@@ -1154,9 +1459,8 @@ const Container = styled.div`
     background-color: #f5f5f5;
     width: 40%;
     border-radius: 15px;
-    box-shadow:
-      0 4px 8px 0 rgba(0, 0, 0, 0.2),
-      0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     padding: 1rem 1rem;
     margin: auto;
   }
@@ -1222,7 +1526,7 @@ const Container = styled.div`
     textarea:focus,
     input:focus,
     select:focus {
-      border-color: #653db5; /* Border color on focus */
+      border-color: #8b5cf6; /* Border color on focus */
       outline: none; /* Remove default outline */
       box-shadow: 0 0 5px rgba(127, 127, 127, 0.5); /* Add shadow for focus effect */
     }
@@ -1263,16 +1567,15 @@ const Container = styled.div`
     text-align: center;
     display: inline-block;
     border-radius: 10px;
-    background-color: #8162c6;
+    background-color: #8b5cf6;
     font-weight: bold;
     outline: none;
     height: 100%;
     margin: 1rem auto;
     color: #fdfdfd;
     cursor: pointer;
-    box-shadow:
-      6px 6px 8px 0 rgba(0, 0, 0, 0.3),
-      -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1282,11 +1585,16 @@ const Container = styled.div`
       padding: 10px 35px;
     }
   }
+
+  .searchButton:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+  }
+
   .searchButton:active {
     border-radius: 15px;
-    box-shadow:
-      2px 2px 4px 0 rgba(0, 0, 0, 0.3),
-      -8px -8px 16px 0 rgba(255, 255, 255, 0.5);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
   }
 
   .selling-form {
@@ -1346,9 +1654,7 @@ const Container = styled.div`
       padding: 10px;
       background-color: #f9f9f9;
       border-radius: 10px;
-      box-shadow:
-        0 4px 8px 0 rgba(0, 0, 0, 0.2),
-        0 6px 20px 0 rgba(0, 0, 0, 0.19);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .values-product {
@@ -1390,7 +1696,7 @@ const Container = styled.div`
     .values-product.number[data-title='Dodaj']::before {
       content: attr(data-title);
       font-weight: bold;
-      color: #8162c6;
+      color: #8b5cf6;
       font-size: 1rem;
     }
 
@@ -1418,9 +1724,8 @@ const Container = styled.div`
     background-color: #f5f5f5;
     width: 95%;
     border-radius: 15px;
-    box-shadow:
-      0 4px 8px 0 rgba(0, 0, 0, 0.2),
-      0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     padding: 1rem 1rem;
     margin: 2rem auto 1rem auto;
     font-size: 0.9rem;
@@ -1440,20 +1745,29 @@ const Container = styled.div`
       margin: 1rem auto;
       color: #383838;
       cursor: pointer;
-      box-shadow:
-        6px 6px 8px 0 rgba(0, 0, 0, 0.3),
-        -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
       align-items: center;
       justify-content: center;
       border: none;
       padding: 0.5rem 1.5rem;
+
+      &:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        transform: translateY(0);
+      }
     }
   }
 
   .generateButton {
     button {
       border-radius: 10px;
-      background: linear-gradient(to bottom right, #c91a97, #c376a7);
+      background: #e879f9;
       font-weight: bold;
       font-size: 1rem;
       outline: none;
@@ -1461,13 +1775,22 @@ const Container = styled.div`
       margin: 1rem auto;
       color: #f3f3f3;
       cursor: pointer;
-      box-shadow:
-        6px 6px 8px 0 rgba(0, 0, 0, 0.3),
-        -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
       align-items: center;
       justify-content: center;
       border: none;
       padding: 0.5rem 4rem;
+
+      &:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        transform: translateY(0);
+      }
     }
   }
 
@@ -1512,6 +1835,11 @@ const PopupNotification = styled.div<{ $visible: boolean }>`
     background-color: #f8d7da;
   }
 
+  &.info {
+    border-left-color: #3b82f6;
+    background-color: #eff6ff;
+  }
+
   pre {
     margin: 0;
     white-space: pre-wrap;
@@ -1544,6 +1872,124 @@ const PopupNotification = styled.div<{ $visible: boolean }>`
     max-width: calc(100vw - 40px);
     left: 50%;
     transform: translateX(-50%);
+  }
+`
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+`
+const ModalContent = styled.div`
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+`
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+`
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: #333;
+  }
+`
+
+const ModalBody = styled.div`
+  padding: 2rem 1.5rem;
+
+  p {
+    margin: 0 0 1rem 0;
+    color: #666;
+  }
+`
+
+const PasswordInput = styled.input`
+  width: 80%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-family: 'Lato', sans-serif;
+  margin-right: 1.5rem;
+
+  &:focus {
+    outline: none;
+    border-color: #8b5cf6;
+  }
+`
+
+const ModalActions = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+`
+
+const CancelButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: 2px solid #e0e0e0;
+  background: white;
+  color: #666;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Lato', sans-serif;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+`
+
+const SubmitButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  background: #8b5cf6;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Lato', sans-serif;
+
+  &:hover {
+    background: #7c3aed;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
   }
 `
 export default InvoicePage

@@ -1,0 +1,218 @@
+================================================================================
+FRONTEND vs BACKEND - GAP ANALYSIS SUMMARY
+================================================================================
+
+10 CRITICAL ISSUES FOUND:
+
+1. HARDCODED BACKEND URLS (CRITICAL)
+   File: src/utils/invoiceApi.ts line 37
+   Issue: Auth URL hardcoded as string
+   Impact: Blocks production deployment
+   Fix: Use environment variables for all URLs
+
+2. NO SESSION VALIDATION BEFORE SUBMIT (CRITICAL)
+   File: src/pages/InvoicePage.tsx
+   Issue: No check if KSeF session still valid before POSTing
+   Impact: 401 errors mid-submission with no recovery
+   Fix: Add validateSession() call before submission
+
+3. INADEQUATE STATUS POLLING (CRITICAL)
+   File: src/pages/InvoicePage.tsx lines 687-705
+   Issue: Only attempts ONE GET request
+   Impact: User sees "details unavailable" if KSeF still processing
+   Fix: Implement exponential backoff polling (30 retries, 1-10s delays)
+
+4. INCOMPLETE ERROR HANDLING (CRITICAL)
+   File: src/pages/InvoicePage.tsx lines 785-797
+   Missing: 401, 403, 429, 500+, network timeouts
+   Impact: User confusion, no recovery paths
+   Fix: Add specific handlers for each HTTP status code
+
+5. INCORRECT STATUS MAPPING (HIGH)
+   File: src/pages/InvoicesHistoryPage.tsx lines 48-53
+   Issue: if (ksef_number) assumes accepted
+   Impact: Wrong status displayed to users
+   Fix: Map 100→sent, 150→sending, 200→accepted, 400+→error
+
+6. MISSING TYPE DEFINITIONS (HIGH)
+   File: src/utils/invoiceApi.ts
+   Missing: QRCodeData, UPOData, InvoiceStatus types
+   Impact: No type safety, potential runtime errors
+   Fix: Add complete interface definitions
+
+7. NO REQUEST TIMEOUT (HIGH)
+   File: src/pages/InvoicePage.tsx line 658
+   Issue: POST request can hang indefinitely
+   Impact: User stuck, must close browser
+   Fix: Add AbortController with 30s timeout
+
+8. MISSING REQUEST VALIDATION (MEDIUM)
+   Issue: No validation of total_gross_cents, shop, NIP
+   Impact: Sends bad data to backend
+   Fix: Add validateSubmissionRequest() function
+
+9. INCONSISTENT ID SCHEMES (MEDIUM)
+   Issue: Frontend UUID vs backend reference_number
+   Impact: localStorage and backend diverge
+   Fix: Use reference_number as primary key
+
+10. MISSING DELETE ENDPOINT (MEDIUM)
+    File: src/pages/InvoicesHistoryPage.tsx lines 40-44
+    Issue: Placeholder with TODO comment
+    Impact: Users cannot delete invoices
+    Fix: Implement DELETE endpoint
+
+================================================================================
+PRIORITY 1 FIXES (1-2 weeks) - MUST DO BEFORE PRODUCTION:
+================================================================================
+
+1. Environment Variables Configuration
+   Add to .env.local:
+   - VITE_KSEF_API_URL
+   - VITE_KSEF_AUTH_URL
+   - VITE_KSEF_SESSION_URL
+   - VITE_INVOICE_SUBMIT_TIMEOUT=30000
+   - VITE_INVOICE_POLL_TIMEOUT=120000
+   - VITE_INVOICE_POLL_MAX_RETRIES=30
+   - VITE_INVOICE_POLL_INITIAL_DELAY=1000
+   - VITE_INVOICE_POLL_MAX_DELAY=10000
+   - VITE_INVOICE_POLL_BACKOFF=1.5
+
+2. Session Validation Function
+   File: src/utils/invoiceApi.ts
+   Add: validateSession() returns Promise<boolean>
+   Implementation: GET /session, return response.ok
+
+3. Invoice Status Polling
+   File: src/utils/invoiceApi.ts
+   Add: pollInvoiceStatus(referenceNumber, config)
+   Features:
+   - Exponential backoff
+   - Configurable retries/timeouts
+   - Proper error handling
+   - Progress logging
+
+4. Error Handling Improvements
+   File: src/pages/InvoicePage.tsx
+   Add specific handlers for:
+   - 401: "Session expired, re-authenticate"
+   - 403: "Certificate invalid"
+   - 429: "Rate limited, retry after X"
+   - 400/422: "Validation error with details"
+   - 500+: "Server error, retry"
+   - Timeout: "Request timeout after 30s"
+
+5. Request Timeout
+   File: src/pages/InvoicePage.tsx
+   Add: AbortController with 30s timeout
+   Catch: error.name === 'AbortError'
+
+6. Remove Hardcoded URLs
+   File: src/utils/invoiceApi.ts line 37
+   Change: fetch('http://localhost:8000/ksef-authentications')
+   To: fetch(KSEF_AUTH_URL) where KSEF_AUTH_URL from env var
+
+================================================================================
+PRIORITY 2 FIXES (1-2 weeks) - HIGH IMPORTANCE:
+================================================================================
+
+1. Type Definitions
+   File: src/utils/invoiceApi.ts
+   Add interfaces:
+   - QRCodeData { type, data, url? }
+   - UPOData { xml, number?, timestamp? }
+   - InvoiceStatus { code, description, details? }
+
+2. Fix Status Mapping
+   File: src/pages/InvoicesHistoryPage.tsx
+   Create: mapKSefStatusCode(code: number) function
+   Rules:
+   - 100 → 'sent'
+   - 150 → 'sending'
+   - 200 → 'accepted'
+   - 400+ → 'error'
+
+3. Request Validation
+   File: src/pages/InvoicePage.tsx
+   Add: validateSubmissionRequest() function
+   Validate:
+   - NIP: /^\d{10}$/
+   - Shop: not empty
+   - Amount: positive integer
+   - Invoice XML: not empty
+
+4. Retry Mechanism
+   File: src/utils/invoiceApi.ts
+   Add: Exponential backoff for transient failures
+   Retry on: Network errors, 5xx responses
+
+5. Backend as Source of Truth
+   File: src/utils/invoiceStorage.ts
+   Change: Stop storing status in localStorage
+   Keep: Only draft metadata locally
+   Fetch: Fresh status from backend always
+
+================================================================================
+PRIORITY 3 FIXES (2-3 weeks) - NICE TO HAVE:
+================================================================================
+
+1. Delete Endpoint Implementation
+2. Invoice Resubmission Workflow
+3. Amendment (factura korygująca) Support
+4. Batch Invoice Submission
+5. Test Coverage Suite
+
+================================================================================
+FILES TO MODIFY:
+================================================================================
+
+CRITICAL:
+✓ src/utils/invoiceApi.ts (30% rewrite)
+✓ src/pages/InvoicePage.tsx (20% rewrite)
+✓ .env.local (new variables)
+
+IMPORTANT:
+✓ src/pages/InvoicesHistoryPage.tsx (10% rewrite)
+✓ src/utils/types.ts (add interfaces)
+✓ src/utils/invoiceStorage.ts (review)
+
+================================================================================
+ESTIMATED EFFORT:
+================================================================================
+
+Priority 1 (Critical): 10-15 hours
+Priority 2 (High): 12-16 hours
+Priority 3 (Medium): 20-30 hours
+Testing: 10-20 hours
+
+Total: 4-5 weeks
+Critical fixes only: 1-2 weeks
+
+================================================================================
+RISK IF NOT FIXED:
+================================================================================
+
+Priority 1 Not Fixed:
+- Production deployment impossible
+- User experience failures
+- Data loss on network errors
+- High support burden
+
+Priority 2 Not Fixed:
+- Edge case failures
+- Type safety issues
+- Reduced resilience
+
+Priority 3 Not Fixed:
+- Missing convenience features
+- Lower user satisfaction
+
+================================================================================
+RECOMMENDATION:
+================================================================================
+
+MUST FIX Priority 1 before production release.
+SHOULD FIX Priority 2 in first post-launch sprint.
+CAN DEFER Priority 3 to future enhancement phase.
+
+Estimated time to production-ready: 1-2 weeks.

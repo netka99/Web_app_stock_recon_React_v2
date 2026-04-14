@@ -11,6 +11,8 @@ import {
   SettingsShopsPage,
   InvoicePage,
   SettingsAddressPage,
+  SettingsCertificatePage,
+  InvoicesHistoryPage,
 } from './pages/index'
 import './App.css'
 
@@ -30,6 +32,8 @@ function App() {
         <Route path="sklepy" element={<SettingsShopsPage />} />
         <Route path="ceny" element={<SettingsPricesPage />} />
         <Route path="adresy" element={<SettingsAddressPage />} />
+        <Route path="certyfikaty" element={<SettingsCertificatePage />} />
+        <Route path="invoices-history" element={<InvoicesHistoryPage />} />
         <Route path="*" element={<ErrorPage />} />
       </Routes>
       {/* <Footer /> */}

@@ -8,6 +8,8 @@ import SettingsShopsPage from './SettingsShopsPage.jsx'
 import ErrorPage from './ErrorPage.tsx'
 import InvoicePage from './InvoicePage.tsx'
 import SettingsAddressPage from './SettingsAddressPage.tsx'
+import SettingsCertificatePage from './SettingsCertificatePage.tsx'
+import InvoicesHistoryPage from './InvoicesHistoryPage.tsx'
 // import InvoicePage2 from './InvoicesPage2'
 
 export {
@@ -21,5 +23,7 @@ export {
   ErrorPage,
   InvoicePage,
   SettingsAddressPage,
+  SettingsCertificatePage,
+  InvoicesHistoryPage,
   // InvoicePage2,
 }

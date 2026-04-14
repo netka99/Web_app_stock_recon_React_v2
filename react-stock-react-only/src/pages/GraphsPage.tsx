@@ -306,13 +306,17 @@ const Container = styled.div`
     height: 100%;
     color: #5c35b6;
     cursor: pointer;
-    box-shadow:
-      6px 6px 8px 0 rgba(0, 0, 0, 0.3),
-      -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
+
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
+    }
 
     @media screen and (max-width: ${size.tabletS}) {
       padding: 10px 35px;
@@ -320,9 +324,8 @@ const Container = styled.div`
   }
   .searchButton:active {
     border-radius: 15px;
-    box-shadow:
-      2px 2px 4px 0 rgba(0, 0, 0, 0.3),
-      -8px -8px 16px 0 rgba(255, 255, 255, 0.5);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
   }
 
   .products {
@@ -332,13 +335,17 @@ const Container = styled.div`
 
   .productButton {
     background: #fff;
-    box-shadow:
-      4px 6px 6px 1px rgba(0, 0, 0, 0.3),
-      -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
-    border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 15px;
     cursor: pointer;
     padding: 4px 8px 3px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
+    }
 
     img {
       width: 55px;

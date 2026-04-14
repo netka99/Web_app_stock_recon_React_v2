@@ -1,5 +1,16 @@
 import { BuyerData } from '../types'
 
+// Serialize all backend requests — the WSGI server is single-threaded
+let requestQueue: Promise<unknown> = Promise.resolve()
+export const enqueue = <T>(fn: () => Promise<T>): Promise<T> => {
+  const result = requestQueue.then(fn, fn)
+  requestQueue = result.then(
+    () => {},
+    () => {},
+  )
+  return result
+}
+
 // // Function to fetch data from the API
 // export const fetchData = async (url) => {
 //   try {
@@ -61,11 +72,14 @@ import { BuyerData } from '../types'
 // }
 
 // Function to fetch data from the API
-export const fetchData = async <T>(url: string): Promise<T> => {
+export const fetchData = <T>(url: string): Promise<T> =>
+  enqueue(() => fetchDataImpl<T>(url))
+
+const fetchDataImpl = async <T>(url: string): Promise<T> => {
   try {
     const response = await fetch(url, {
-      method: 'GET', // Or POST, PUT, etc.
-      // credentials: 'include',
+      method: 'GET',
+      credentials: 'include',
     })
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`
@@ -121,7 +135,14 @@ interface SettingsUpdatePayload {
 }
 
 // Function to update data on the API
-export const updateDataOnApi = async <T>(
+export const updateDataOnApi = <T>(
+  updatedData: ReturnUpdatePayload | SettingsUpdatePayload,
+  url: string,
+  method: 'PUT' | 'POST' | 'DELETE' | 'PATCH',
+): Promise<ApiResponse<T | ErrorResponse>> =>
+  enqueue(() => updateDataOnApiImpl<T>(updatedData, url, method))
+
+const updateDataOnApiImpl = async <T>(
   updatedData: ReturnUpdatePayload | SettingsUpdatePayload, // Type the updatedData based on what you expect to send
   url: string,
   method: 'PUT' | 'POST' | 'DELETE' | 'PATCH',
@@ -133,7 +154,7 @@ export const updateDataOnApi = async <T>(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(updatedData),
-      // credentials: 'include',
+      credentials: 'include',
     })
     if (!response.ok) {
       let errorMessage = `Failed to update data on API: ${response.statusText}`

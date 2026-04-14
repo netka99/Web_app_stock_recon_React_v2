@@ -1,11 +1,13 @@
 import * as React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
+import Big from 'big.js'
 // import { size } from '../styles/devices'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 import PropTypes from 'prop-types'
-import n2words from 'n2words' //*
+import n2words from 'n2words'
+import QRCode from 'qrcode'
 import signature from '../assets/signature.png'
 import logoComp from '../assets/Logo.png'
 import { BuyerData } from '../types'
@@ -50,6 +52,11 @@ interface InvoiceLayoutProps {
   productsData: ProductData[]
   extraProduct: ProductData[]
   onGenerateXML: () => Promise<void>
+  ksefNumber?: string
+  verificationUrl?: string
+  sellerNip?: string
+  autoDownloadPdf?: boolean
+  onPdfDownloaded?: () => void
 }
 
 type VatTotals = {
@@ -64,14 +71,21 @@ const InvoiceLayout = ({
   productsData,
   extraProduct,
   onGenerateXML,
+  ksefNumber,
+  verificationUrl,
+  sellerNip,
+  autoDownloadPdf,
+  onPdfDownloaded,
 }: InvoiceLayoutProps) => {
   // const [totals, setTotals] = useState([]) //*
-  const [vatTotals, setVatTotals] = useState<VatTotals>({}) //*
+  const [vatTotals, setVatTotals] = useState<VatTotals>({})
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null)
   const [vatSum, setVatSum] = useState<{ totalNet: number; totalGross: number }>({
     totalNet: 0,
     totalGross: 0,
   }) //*
   const invoiceRef = useRef<HTMLDivElement | null>(null)
+  const [pdfAutoDownloaded, setPdfAutoDownloaded] = useState(false)
 
   const formatDate = (date: string | undefined) => {
     if (!date) {
@@ -114,31 +128,84 @@ const InvoiceLayout = ({
 
     setVatTotals(vatGroups)
     setVatSum({
-      totalNet: Number(overallNetTotals) || 0,
-      totalGross: Number(overallGrossTotals) || 0,
+      totalNet: Big(overallNetTotals || 0)
+        .round(2)
+        .toNumber(),
+      totalGross: Big(overallGrossTotals || 0)
+        .round(2)
+        .toNumber(),
     })
   }
+
+  // Generate QR code when verificationUrl changes
+  useEffect(() => {
+    if (verificationUrl) {
+      QRCode.toDataURL(verificationUrl, {
+        width: 120,
+        margin: 1,
+        errorCorrectionLevel: 'M',
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF',
+        },
+      })
+        .then((url) => setQrCodeDataUrl(url))
+        .catch((err) => console.error('QR code generation error:', err))
+    } else {
+      setQrCodeDataUrl(null)
+    }
+  }, [verificationUrl])
 
   useEffect(() => {
     calculateVatTotals()
   }, [productsData, extraProduct])
 
+  // Auto-download PDF when QR code is ready
+  useEffect(() => {
+    if (qrCodeDataUrl && ksefNumber && !pdfAutoDownloaded) {
+      console.log('🔄 Auto-downloading PDF with QR code...')
+      // Wait a bit to ensure QR code is fully rendered
+      setTimeout(() => {
+        generatePdf()
+        setPdfAutoDownloaded(true)
+        console.log('✅ PDF auto-downloaded with QR code')
+      }, 1500) // 1.5 second delay
+    }
+  }, [qrCodeDataUrl, ksefNumber, pdfAutoDownloaded])
+
+  // Auto-download PDF when triggered from history page
+  useEffect(() => {
+    if (!autoDownloadPdf || pdfAutoDownloaded) return
+
+    // If there's a verificationUrl, wait for QR code to render first
+    if (verificationUrl && !qrCodeDataUrl) return
+
+    const timer = setTimeout(async () => {
+      await generatePdf()
+      setPdfAutoDownloaded(true)
+      onPdfDownloaded?.()
+    }, 1500)
+
+    return () => clearTimeout(timer)
+  }, [autoDownloadPdf, pdfAutoDownloaded, qrCodeDataUrl, verificationUrl])
+
   const generatePdf = async () => {
-    if (!invoiceRef.current) {
+    const element = invoiceRef.current
+    if (!element) {
       console.error('Invoice reference is null.')
       return
     }
     // Temporarily remove scaling styles for PDF generation
-    const originalTransform = invoiceRef.current.style.transform
-    invoiceRef.current.style.transform = 'none'
+    const originalTransform = element.style.transform
+    element.style.transform = 'none'
 
-    const canvas = await html2canvas(invoiceRef.current, {
+    const canvas = await html2canvas(element, {
       scale: 3, // Increase the scale (default is 1)
       useCORS: true, // Allow external resources like fonts and images
     })
 
     // Restore the original styles after capturing
-    invoiceRef.current.style.transform = originalTransform
+    element.style.transform = originalTransform
 
     const imgData = canvas.toDataURL('image/jpeg', 0.5)
     const pdf = new jsPDF('portrait', 'mm', 'a4') // A4 size PDF
@@ -158,7 +225,16 @@ const InvoiceLayout = ({
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
       heightLeft -= pdf.internal.pageSize.height
     }
-    pdf.save(`${invoiceData.invoiceNumber}_${invoiceData.shopName}.pdf`)
+    const safeInvoiceNumber = invoiceData.invoiceNumber
+      .replace(/\//g, '-')
+      .replace(/\s+/g, '_')
+    const safeShopName = invoiceData.shopName.replace(/\s+/g, '_')
+
+    const fileName = ksefNumber
+      ? `${safeInvoiceNumber}_${safeShopName}_KSeF_${ksefNumber}.pdf`
+      : `${safeInvoiceNumber}_${safeShopName}.pdf`
+
+    pdf.save(fileName)
   }
 
   useEffect(() => {
@@ -205,7 +281,7 @@ const InvoiceLayout = ({
     <Container>
       <div className="generate_pdf">
         <button onClick={generatePdf}>Zapisz PDF</button>
-        <button onClick={onGenerateXML}>Generuj XML dla KSeF </button>
+        <button onClick={onGenerateXML}>Wyślij fakturę do KSeF </button>
       </div>
       <div ref={invoiceRef} className="invoice-preview">
         <div className="invoice-header">
@@ -234,9 +310,11 @@ const InvoiceLayout = ({
           </div>
         </div>
         <div className="invoice-number">Faktura nr: {invoiceData.invoiceNumber}</div>
+        {ksefNumber && <div className="ksef-number">Numer KSeF: {ksefNumber}</div>}
         <div className="seller-buyer">
           <div className="seller">
             <div className="seller-title">Sprzedawca</div>
+            <div className="seller-nip">NIP: {sellerNip}</div>
             <div className="seller-address">{invoiceData.seller}</div>
           </div>
           <div className="buyer">
@@ -262,7 +340,7 @@ const InvoiceLayout = ({
                         {'\n'}
                         {invoiceData.buyer_data.podmiot3.addressL2}
                         {'\n'}
-                        ID: {invoiceData.buyer_data.podmiot3.idWew}
+                        IdWew: {invoiceData.buyer_data.podmiot3.idWew}
                       </>
                     )}
                 </>
@@ -279,6 +357,9 @@ const InvoiceLayout = ({
             <div>Nr SWIFT/BIC: </div>
             <div className="swift-number">BPKOPLPW</div>
           </div>
+        </div>
+        <div className="currency-declaration">
+          Faktura wystawiona w cenach brutto w walucie PLN
         </div>
 
         <div className="titles">
@@ -325,57 +406,105 @@ const InvoiceLayout = ({
               filteredProducts.reduce((acc, cur) => acc + cur.totalGross, 0).toFixed(2)}
           </div>
         </div>
-        <div className="totals-vat">
-          <div className="totalsVat">
-            <div className="totalsVat-title">SUMA WEDŁUG STAWEK VAT W PLN</div>
-            <div className="totalsVat-header">
-              <div className="totalsVat-vat">VAT</div>
-              <div className="totalsVat-net">Netto</div>
-              <div className="totalsVat-totalVat">Kwota VAT</div>
-              <div className="totalsVat-totalGross">Brutto</div>
+        <div className="qr-vat-container">
+          <div className="qr-code-section">
+            <div className="qr-code-header">
+              Sprawdź, czy Twoja faktura znajduje się w KSeF!
             </div>
-            {vatTotals &&
-              Object.keys(vatTotals).length > 0 &&
-              Object.keys(vatTotals).map((key) => (
-                <div key={key} className="totalsVat-values">
-                  <div className="valueTotals-vat">{key}%</div>
-                  <div className="valueTotals-net">
-                    {vatTotals[key].totalNet.toFixed(2)}
+            <div className="qr-code-container">
+              <div className="qr-code-placeholder">
+                {' '}
+                {qrCodeDataUrl ? (
+                  <img src={qrCodeDataUrl} alt="KSeF QR Code" className="qr-code-image" />
+                ) : (
+                  <div className="qr-placeholder-text">
+                    QR kod będzie dostępny po akceptacji KSeF
                   </div>
-                  <div className="valueTotals-totalVat">
-                    {(vatTotals[key].totalGross - vatTotals[key].totalNet).toFixed(2)}
-                  </div>
-                  <div className="valueTotals-totalGross">
-                    {vatTotals[key].totalGross.toFixed(2)}
-                  </div>
-                </div>
-              ))}
-            {vatSum && (
-              <div className="totals-sum">
-                <div className="totals-sum-text">Razem</div>
-                <div className="totals-sum-net">{vatSum.totalNet.toFixed(2)}</div>
-                <div className="totals-sum-vat">
-                  {isNaN(vatSum.totalGross - vatSum.totalNet)
-                    ? '0.00'
-                    : (vatSum.totalGross - vatSum.totalNet).toFixed(2)}
-                </div>
-                <div className="totals-sum-gross">{vatSum.totalGross.toFixed(2)}</div>
+                )}
               </div>
-            )}
+              <div className="qr-code-number">{ksefNumber}</div>
+            </div>
+            <div className="qr-code-text">
+              Nie możesz zeskanować kodu z obrazka? Kliknij w link weryfikacyjny i przejdź
+              do weryfikacji faktury!
+            </div>
+            <div className="qr-code-link">
+              {verificationUrl ? (
+                <a
+                  href={verificationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'block',
+                    wordBreak: 'break-all',
+                    color: '#0066cc',
+                    textDecoration: 'underline',
+                    fontSize: '0.65rem',
+                    lineHeight: '1.2',
+                  }}
+                >
+                  {verificationUrl}
+                </a>
+              ) : (
+                'Link weryfikacyjny będzie dostępny po akceptacji'
+              )}
+            </div>
           </div>
-          <div className="payment-method">
-            {`Forma płatności:  `}
-            <span className="bold-text">{invoiceData.paymentType}</span>
-          </div>
-          <div className="payment-date">
-            {`Termin płatności:  `}
-            <span className="bold-text">{formatDate(invoiceData.paymentDate)}</span>
-          </div>
-          <div className="payment-total">
-            {`Razem do zapłaty: ${vatSum.totalGross.toFixed(2)} PLN`}
-          </div>
-          <div className="payment-spelling">
-            {`Razem słownie: ${paymentSpelling()} i ${vatSum.totalGross.toString().split('.')[1] || '0'}/100 PLN`}
+          <div className="totals-vat">
+            <div className="totalsVat">
+              <div className="totalsVat-title">SUMA WEDŁUG STAWEK VAT W PLN</div>
+              <div className="totalsVat-header">
+                <div className="totalsVat-vat">VAT</div>
+                <div className="totalsVat-net">Netto</div>
+                <div className="totalsVat-totalVat">Kwota VAT</div>
+                <div className="totalsVat-totalGross">Brutto</div>
+              </div>
+              {vatTotals &&
+                Object.keys(vatTotals).length > 0 &&
+                Object.keys(vatTotals).map((key) => (
+                  <div key={key} className="totalsVat-values">
+                    <div className="valueTotals-vat">{key}%</div>
+                    <div className="valueTotals-net">
+                      {vatTotals[key].totalNet.toFixed(2)}
+                    </div>
+                    <div className="valueTotals-totalVat">
+                      {(vatTotals[key].totalGross - vatTotals[key].totalNet).toFixed(2)}
+                    </div>
+                    <div className="valueTotals-totalGross">
+                      {vatTotals[key].totalGross.toFixed(2)}
+                    </div>
+                  </div>
+                ))}
+              {vatSum && (
+                <div className="totals-sum">
+                  <div className="totals-sum-text">Razem</div>
+                  <div className="totals-sum-net">{vatSum.totalNet.toFixed(2)}</div>
+                  <div className="totals-sum-vat">
+                    {isNaN(vatSum.totalGross - vatSum.totalNet)
+                      ? '0.00'
+                      : (vatSum.totalGross - vatSum.totalNet).toFixed(2)}
+                  </div>
+                  <div className="totals-sum-gross">{vatSum.totalGross.toFixed(2)}</div>
+                </div>
+              )}
+            </div>
+            <div className="payment-method">
+              {`Forma płatności:  `}
+              <span className="bold-text">{invoiceData.paymentType}</span>
+            </div>
+            <div className="payment-status">
+              Informacja o płatności: <span className="bold-text">Brak zapłaty</span>
+            </div>
+            <div className="payment-date">
+              {`Termin płatności:  `}
+              <span className="bold-text">{formatDate(invoiceData.paymentDate)}</span>
+            </div>
+            <div className="payment-total">
+              {`Razem do zapłaty: ${vatSum.totalGross.toFixed(2)} PLN`}
+            </div>
+            <div className="payment-spelling">
+              {`Razem słownie: ${paymentSpelling()} i ${vatSum.totalGross.toString().split('.')[1] || '0'}/100 PLN`}
+            </div>
           </div>
         </div>
         <div className="comment">{invoiceData.comment}</div>
@@ -490,29 +619,26 @@ const Container = styled.div`
   margin: 1rem;
 
   .logo {
-    height: 5rem;
+    height: 4rem;
     padding-left: 1rem;
   }
 
   .invoice-preview {
-    /* width: 100%; */
-    padding: 35px;
-    /* border: 1px solid #ddd; */
-    /* margin-bottom: 20px; */
+    padding: 50px 50px;
     width: 800px;
     height: 297mm;
     background-color: white;
     position: relative;
     overflow: auto;
     margin: 0 auto 20px auto;
-    /* transform-origin: top center; */
-    transition: transform 0.3s ease; /* Smooth scaling */
+    transition: transform 0.3s ease;
+    font-size: 0.85rem;
   }
 
   .invoice-header {
     display: flex;
     justify-content: space-between;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
   }
 
   .seller-info h2 {
@@ -523,6 +649,8 @@ const Container = styled.div`
   .invoice-info {
     display: flex;
     flex-direction: column;
+    font-size: 0.75rem;
+    gap: 0.2rem;
   }
 
   .info {
@@ -539,9 +667,9 @@ const Container = styled.div`
   .invoice-number {
     border-bottom: 2px solid #818181;
     border-top: 2px solid #818181;
-    background-color: #c6e0eb;
-    padding: 10px;
-    font-size: 1.5rem;
+    background-color: #ede9fe;
+    padding: 6px;
+    font-size: 1.2rem;
     font-weight: bold;
   }
 
@@ -561,9 +689,9 @@ const Container = styled.div`
 
   .seller-title,
   .buyer-title {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: bold;
-    padding-top: 2rem;
+    padding-top: 1rem;
     border-bottom: 3px solid #818181;
   }
 
@@ -572,8 +700,9 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     white-space: pre-line;
-    font-weight: bold;
-    padding-top: 10px;
+    font-weight: normal;
+    font-size: 0.8rem;
+    padding-top: 5px;
   }
 
   .bank-account {
@@ -591,10 +720,12 @@ const Container = styled.div`
   .account-number,
   .swift-number {
     font-weight: bold;
+    padding-left: 10px;
   }
 
   .bank-account {
-    padding: 2.5rem 0 1.2rem 0;
+    padding: 1rem 0 0.5rem 0;
+    font-size: 0.8rem;
   }
 
   .invoice-body {
@@ -605,7 +736,7 @@ const Container = styled.div`
   .product-details {
     display: grid;
     grid-template-columns: [first] 3rem [line2] 30% repeat(8, 1fr);
-    font-size: 0.9rem;
+    font-size: 0.75rem;
 
     .title-table {
       display: flex;
@@ -616,7 +747,7 @@ const Container = styled.div`
     }
   }
   .titles {
-    background-color: #c6e0eb;
+    background-color: #ede9fe;
     border: 1px solid #818181;
   }
 
@@ -629,7 +760,7 @@ const Container = styled.div`
   .details {
     border-left: 1px solid #818181;
     border-bottom: 1px solid #818181;
-    padding: 3px 3px;
+    padding: 2px 2px;
   }
 
   .total-gross-details {
@@ -687,18 +818,36 @@ const Container = styled.div`
   button {
     margin-top: 20px;
     padding: 10px 15px;
-    background-color: #20a8de;
+    background-color: #8b5cf6;
     color: white;
     border: none;
     cursor: pointer;
   }
-  .totals-vat {
-    width: 50%;
+  /* QR Code + VAT Summary Container */
+  .qr-vat-container {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    justify-content: space-between;
+  }
+
+  /* QR Code Section - Left Side */
+  .qr-code-section {
+    width: 48%;
     display: flex;
     flex-direction: column;
-    margin-left: auto;
-    margin-top: 2rem;
-    font-size: 0.9rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+  }
+
+  .totals-vat {
+    width: 48%;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.75rem;
   }
 
   .totalsVat {
@@ -712,7 +861,7 @@ const Container = styled.div`
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    background-color: #c6e0eb;
+    background-color: #ede9fe;
   }
 
   .totalsVat-title {
@@ -733,7 +882,7 @@ const Container = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr; /* Match the main grid columns */
     border: 1px solid #666666;
-    background-color: #c6e0eb;
+    background-color: #ede9fe;
     font-weight: bold;
   }
 
@@ -766,20 +915,22 @@ const Container = styled.div`
 
   .payment-method,
   .payment-date {
-    margin-top: 0.5rem;
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
   }
 
   .payment-total {
-    margin-top: 1.5rem;
-    font-size: 1.2rem;
+    margin-top: 1rem;
+    font-size: 1rem;
     font-weight: bold;
     text-decoration: underline;
-    background-color: #c6e0eb;
+    background-color: #ede9fe;
     padding: 5px 0 5px 5px;
   }
 
   .payment-spelling {
-    margin-top: 0.8rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
   }
 
   .signature-seller,
@@ -787,7 +938,7 @@ const Container = styled.div`
     border-top: 1px dashed #333333;
     width: 35%;
     text-align: center;
-    padding-top: 10px;
+    padding-top: 5px;
   }
 
   .signatures {
@@ -798,12 +949,14 @@ const Container = styled.div`
     margin-top: auto;
     position: absolute;
     bottom: 5rem;
-    width: 90%;
+    left: 50px;
+    right: 50px;
+    font-size: 0.75rem;
   }
 
   .comment {
-    padding-top: 1rem;
-    font-size: 0.9rem;
+    padding-top: 0.5rem;
+    font-size: 0.75rem;
   }
 
   .generate_pdf {
@@ -821,7 +974,7 @@ const Container = styled.div`
       text-align: center;
       display: inline-block;
       border-radius: 10px;
-      background-color: #8162c6;
+      background-color: #8b5cf6;
       font-weight: bold;
       outline: none;
       height: 100%;
@@ -829,9 +982,8 @@ const Container = styled.div`
       color: #fdfdfd;
       cursor: pointer;
       font-size: 1rem;
-      box-shadow:
-        6px 6px 8px 0 rgba(0, 0, 0, 0.3),
-        -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -840,13 +992,118 @@ const Container = styled.div`
 
   .signature-container {
     display: flex;
+    justify-content: center;
+    align-items: flex-end;
     position: absolute;
-    bottom: 9rem;
-    padding-left: 4rem;
+    bottom: calc(8.2rem + 5px);
+    left: 80px;
+    width: calc((100% - 100px) * 0.35);
+    height: 3rem;
   }
 
   .signature {
-    width: 15rem;
+    width: 8rem;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .ksef-number {
+    background-color: #f5f3ff;
+    padding: 5px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-bottom: 1px solid #818181;
+  }
+
+  .seller-nip {
+    font-weight: bold;
+    padding-top: 5px;
+    font-size: 0.9rem;
+  }
+
+  .currency-declaration {
+    text-align: center;
+    font-style: italic;
+    padding: 0.3rem 0;
+    font-size: 0.75rem;
+  }
+
+  .payment-status {
+    margin-top: 0.5rem;
+  }
+
+  /* QR Code Styles */
+  .qr-code-header {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 0.8rem;
+    text-align: center;
+  }
+
+  .qr-code-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0.8rem;
+  }
+
+  .qr-code-placeholder {
+    width: 120px;
+    height: 120px;
+    border: 2px dashed #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    margin-bottom: 0.5rem;
+  }
+
+  .qr-code-number {
+    font-family: monospace;
+    font-size: 0.65rem;
+    text-align: center;
+    color: #333;
+  }
+
+  .qr-code-image {
+    width: 120px;
+    height: 120px;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .qr-placeholder-text {
+    font-size: 0.7rem;
+    color: #666;
+    text-align: center;
+    padding: 2rem 1rem;
+    font-style: italic;
+  }
+
+  .qr-code-text {
+    font-size: 0.7rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .qr-code-link {
+    font-size: 0.65rem;
+    text-align: center;
+    margin-top: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .qr-code-link a {
+    color: #0066cc;
+    text-decoration: underline;
+    word-break: break-all;
+    display: block;
+    padding: 0.3rem;
+  }
+
+  .qr-code-link a:hover {
+    background-color: #f0f0f0;
   }
 `
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
+import Big from 'big.js'
 import StoreImg from '../assets/store-img.svg'
 import Arrow from '../assets/chevron-down.svg'
 import { size } from '../styles/devices'
@@ -105,7 +106,11 @@ const ItemShopContainer: React.FC<ItemShopContainerProps> = ({
     savingData: ItemShopContainerProps['saveData'],
   ) => {
     const numericValue =
-      typeof valueofData === 'number' ? valueofData : Number(valueofData)
+      typeof valueofData === 'number'
+        ? valueofData
+        : Big(valueofData || 0)
+            .round(2)
+            .toNumber()
     const result = await savingData(numericValue, shopName)
     if (result && result.status !== 200) {
       showMessage('Problem z pobraniem danych!', 6000)
@@ -220,9 +225,8 @@ const Container = styled.div`
   background-color: #ffffff;
   border-radius: 15px;
   margin: 1rem 0rem;
-  box-shadow:
-    0 4px 8px 0 rgba(0, 0, 0, 0.2),
-    0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 
   @media screen and (max-width: ${size.tabletS}) {
     width: 95%;
@@ -265,12 +269,11 @@ const Container = styled.div`
     content: '✓';
     font-size: 1.4rem;
     padding: 5px 20px 5px 20px;
-    background: linear-gradient(to bottom right, #e51ead, #e086bf);
+    background: #e879f9;
     color: transparent;
     border-radius: 25px;
     font-weight: bold;
-    box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.3);
-
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     @media screen and (max-width: ${size.tabletS}) {
       font-size: 1rem;
     }
@@ -281,23 +284,23 @@ const Container = styled.div`
   }
 
   .accordion-open {
-    background: linear-gradient(to bottom right, #5c35b6, #8461c5);
+    background: #8b5cf6;
     padding: 2px 1.5rem 2px 1.5rem;
     border-radius: 15px;
     border: none;
-    box-shadow: 2px 3px 4px 1px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
     @media screen and (max-width: ${size.tabletS}) {
       padding: 2px 1rem 2px 1rem;
     }
 
     &:hover {
-      background: linear-gradient(to bottom right, #512fa1, #7656b0);
+      background: #7c3aed;
       cursor: pointer;
     }
 
     &:active {
-      box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -367,9 +370,9 @@ const Container = styled.div`
 
     .save-sale {
       margin-left: 18%;
-      background: linear-gradient(to bottom right, #e51ead, #e086bf);
+      background: #e879f9;
       &:hover {
-        background: linear-gradient(to bottom right, #c91a97, #c376a7);
+        background: #d946ef;
         cursor: pointer;
       }
     }

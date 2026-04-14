@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent } from 'react'
 import styled from 'styled-components'
+import Big from 'big.js'
 import { size } from '../styles/devices'
 
 interface SaleEntry {
@@ -59,8 +60,12 @@ const ItemSale: React.FC<ItemSaleProps> = ({
   }
 
   const handleBlur = () => {
-    const numericValue = parseFloat(inputValue)
-    onChange(isNaN(numericValue) ? 0 : numericValue)
+    try {
+      const numericValue = Big(inputValue || 0).round(2).toNumber()
+      onChange(numericValue)
+    } catch (error) {
+      onChange(0)
+    }
   }
 
   return (
@@ -73,7 +78,8 @@ const ItemSale: React.FC<ItemSaleProps> = ({
         <div className="item-input-container">
           <label htmlFor={`input-${shopName}`}>{saleType}</label>
           <input
-            type="text"
+            type="number"
+            step="0.01"
             value={inputValue}
             id={`input-${shopName}`}
             name={shopName}

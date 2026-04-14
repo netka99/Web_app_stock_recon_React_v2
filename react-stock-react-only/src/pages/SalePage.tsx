@@ -147,13 +147,18 @@ const SalePage = () => {
         isSale ? VITE_APP_SALES_API : VITE_APP_RETURNS_API,
         'POST',
       )
-      if (isExtra) {
-        setExtraSaleValues(isSale ? [...extraSaleValues, data] : extraSaleValues)
-        setExtraReturnValues(!isSale ? [...extraReturnValues, data] : extraReturnValues)
-      } else {
-        setUpdatedSale(isSale ? [...updatedSale, newSaveItem] : updatedSale)
-        setUpdatedReturn(!isSale ? [...updatedReturn, newSaveItem] : updatedReturn)
+
+      // Only update state if the API call was successful
+      if (result && result.status === 200) {
+        if (isExtra) {
+          setExtraSaleValues(isSale ? [...extraSaleValues, data] : extraSaleValues)
+          setExtraReturnValues(!isSale ? [...extraReturnValues, data] : extraReturnValues)
+        } else {
+          setUpdatedSale(isSale ? [...updatedSale, newSaveItem] : updatedSale)
+          setUpdatedReturn(!isSale ? [...updatedReturn, newSaveItem] : updatedReturn)
+        }
       }
+
       return result
     } catch (error) {
       console.error('Error updating data', error)
@@ -272,13 +277,17 @@ const Container = styled.div`
 
   .productButton {
     background: #fff;
-    box-shadow:
-      4px 6px 6px 1px rgba(0, 0, 0, 0.3),
-      -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
-    border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 15px;
     cursor: pointer;
     padding: 4px 8px 3px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
+    }
 
     img {
       width: 55px;
@@ -326,12 +335,21 @@ const Container = styled.div`
     outline: none;
     height: 100%;
     cursor: pointer;
-    box-shadow:
-      6px 6px 8px 0 rgba(0, 0, 0, 0.3),
-      -12px -12px 24px 0 rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      transform: translateY(0);
+    }
 
     @media screen and (max-width: ${size.tabletS}) {
       padding: 10px 35px;

@@ -1,0 +1,140 @@
+{
+  "shops": [
+    "Eden-Noniewicza",
+    "Lewiatan-Waryńskiego",
+    "Lewiatan-Sikorskiego",
+    "Lewiatan-Putry",
+    "Lewiatan-Świerkowa",
+    "Lewiatan-W.Polskiego",
+    "Stan-Maja",
+    "Lewiatan-Emili Plater",
+    "Lewiatan-OS.KAMENA-WILENSKA",
+    "Kazimierza"
+  ],
+  "prices": {
+    "Kartacze": 600,
+    "Babka": 1500,
+    "Kiszka": 2000
+  },
+  "buyer_data": {
+    "Eden-Noniewicza": {
+      "nazwa": "EDEN Stanisław Karwowski",
+      "addressL1": "ul. Noniewicza 73, 16-400 Suwałki",
+      "addressL2": "BDO 000170068",
+      "nip": "8440001120",
+      "hasPodmiot3": false
+    },
+    "Lewiatan-Waryńskiego": {
+      "nazwa": "Przedsiębiorstwo Produkcyjno-Handlowo-Usługowe \"AS\" Spółka z o.o.",
+      "addressL1": "ul. Leśna 68, 16-400 Suwałki",
+      "addressL2": "",
+      "nip": "8441867643",
+      "hasPodmiot3": true,
+      "podmiot3": {
+        "nazwa": "Sklep Lewiatan Waryńskiego",
+        "addressL1": "ul. Waryńskiego 21",
+        "addressL2": "16-400 Suwałki",
+        "idWew": "8441867643-WARYŃSKIEGO",
+        "rola": "2"
+      }
+    },
+    "Lewiatan-Sikorskiego": {
+      "nazwa": "Przedsiębiorstwo Produkcyjno-Handlowo-Usługowe \"AS\" Spółka z o.o.",
+      "addressL1": "ul. Leśna 68, 16-400 Suwałki",
+      "addressL2": "",
+      "nip": "8441867643",
+      "hasPodmiot3": true,
+      "podmiot3": {
+        "nazwa": "Sklep Lewiatan Sikorskiego",
+        "addressL1": "ul. Sikorskiego 26",
+        "addressL2": "16-400 Suwałki",
+        "idWew": "8441867643-SIKORSKIEGO",
+        "rola": "2"
+      }
+    },
+    "Lewiatan-Putry": {
+      "nazwa": "Przedsiębiorstwo Produkcyjno-Handlowo-Usługowe \"AS\" Spółka z o.o.",
+      "addressL1": "ul. Leśna 68, 16-400 Suwałki",
+      "addressL2": "",
+      "nip": "8441867643",
+      "hasPodmiot3": true,
+      "podmiot3": {
+        "nazwa": "Sklep Lewiatan Putry",
+        "addressL1": "ul. Putry 4",
+        "addressL2": "16-400 Suwałki",
+        "idWew": "8441867643-PUTRY",
+        "rola": "2"
+      }
+    },
+    "Lewiatan-Świerkowa": {
+      "nazwa": "\"AS\" BYLAK I WSPOLNICY SPOLKA JAWNA",
+      "addressL1": "ul. Leśna 68, 16-400 Suwałki",
+      "addressL2": "",
+      "nip": "8441866342",
+      "hasPodmiot3": true,
+      "podmiot3": {
+        "nazwa": "Sklep Lewiatan Świerkowa",
+        "addressL1": "ul. Świerkowa 52",
+        "addressL2": "16-400 Suwałki",
+        "idWew": "8441866342-ŚWIERKOWA",
+        "rola": "2"
+      }
+    },
+    "Lewiatan-W.Polskiego": {
+      "nazwa": "\"AS\" BYLAK I WSPOLNICY SPOLKA JAWNA",
+      "addressL1": "ul. Leśna 68, 16-400 Suwałki",
+      "addressL2": "",
+      "nip": "8441866342",
+      "hasPodmiot3": true,
+      "podmiot3": {
+        "nazwa": "Sklep nr 23 Lewiatan W.Polskiego",
+        "addressL1": "ul. Wojska Polskiego 23 ABC",
+        "addressL2": "16-400 Suwałki",
+        "idWew": "8441866342-WPOLSKIEGO",
+        "rola": "2"
+      }
+    },
+    "Stan-Maja": {
+      "nazwa": "",
+      "addressL1": "",
+      "addressL2": "",
+      "nip": "",
+      "hasPodmiot3": false
+    },
+    "Lewiatan-Emili Plater": {
+      "nazwa": "\"AS\" BYLAK I WSPOLNICY SPOLKA JAWNA",
+      "addressL1": "ul. Leśna 68, 16-400 Suwałki",
+      "addressL2": "",
+      "nip": "8441866342",
+      "hasPodmiot3": true,
+      "podmiot3": {
+        "nazwa": "Sklep Lewiatan Emili Plater",
+        "addressL1": "ul. Emili Plater 45 lok 5",
+        "addressL2": "16-400 Suwałki",
+        "idWew": "8441866342-EPLATER",
+        "rola": "2"
+      }
+    },
+    "Lewiatan-OS.KAMENA-WILENSKA": {
+      "nazwa": "\"AS\" BYLAK I WSPOLNICY SPOLKA JAWNA",
+      "addressL1": "ul. Leśna 68, 16-400 Suwałki",
+      "addressL2": "",
+      "nip": "8441866342",
+      "hasPodmiot3": true,
+      "podmiot3": {
+        "nazwa": "Sklep Lewiatan Os. Kamena-Wileńska",
+        "addressL1": "ul. Wileńska 11",
+        "addressL2": "16-400 Suwałki",
+        "idWew": "8441866342-WILENSKA",
+        "rola": "2"
+      }
+    },
+    "Kazimierza": {
+      "nazwa": "",
+      "addressL1": "",
+      "addressL2": "",
+      "nip": "",
+      "hasPodmiot3": false
+    }
+  }
+}

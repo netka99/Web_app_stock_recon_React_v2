@@ -40,20 +40,24 @@ const ButtonSection = styled.section`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 65vh;
+  min-height: 65vh;
   padding-bottom: 5rem;
 
   .labelsContainer {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+
+    @media screen and (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   .label {
-    width: 28rem;
+    width: 22rem;
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    margin: 2rem auto 1rem auto;
     padding: 1rem 1rem;
     flex-direction: row;
     background-color: #ffffff;
@@ -66,7 +70,6 @@ const ButtonSection = styled.section`
     @media screen and (max-width: 426px) {
       width: 80vw;
       padding: 0.5rem 0.5rem;
-      margin: 1rem auto 1rem auto;
     }
   }
 

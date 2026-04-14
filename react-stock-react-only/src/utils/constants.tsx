@@ -7,6 +7,7 @@ import priceTag from '../assets/price-tag.svg'
 import store from '../assets/store-img.svg'
 import address from '../assets/address.svg'
 import invoice from '../assets/invoice.svg'
+import certificate from '../assets/certificate.svg'
 
 export const homeLabels = [
   {
@@ -101,5 +102,15 @@ export const settingsLabels = [
     bcgsecondary: '#e5fbf9',
     hoverprimary: '#05a30d',
     hoversecondary: '#c3d5d3',
+  },
+  {
+    id: '4',
+    url: '/certyfikaty',
+    icon: certificate,
+    title: 'Certyfikaty',
+    bcgprimary: '#e8a006',
+    bcgsecondary: '#fef3d9',
+    hoverprimary: '#c98a05',
+    hoversecondary: '#e5dbc3',
   },
 ]

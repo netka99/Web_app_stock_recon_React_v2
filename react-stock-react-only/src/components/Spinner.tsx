@@ -64,7 +64,7 @@ const Container = styled.div`
     left: 0;
     width: 3rem;
     height: 3rem;
-    background: linear-gradient(to bottom right, #e51ead, #e086bf);
+    background: #e879f9;
     top: 25%;
     border-radius: 50%;
     animation: loading 4s infinite;

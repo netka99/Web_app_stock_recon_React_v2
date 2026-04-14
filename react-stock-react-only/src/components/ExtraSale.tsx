@@ -1,5 +1,6 @@
 import React, { useState, forwardRef, useEffect } from 'react'
 import styled from 'styled-components'
+import Big from 'big.js'
 import truck from '../assets/delivery-truck.svg'
 import { size } from '../styles/devices'
 
@@ -88,10 +89,16 @@ const ExtraSale = forwardRef<HTMLDivElement, ExtraSaleProps>(function ExtraSale(
   }
 
   const handleSave = () => {
-    const numericValue = parseFloat(extraInputValue) || 0
-    handleSaveData(numericValue, (quantity, shopName) => {
-      return saveExtraData(quantity, shopName, true) // ✅ Explicit return of a Promise
-    })
+    try {
+      const numericValue = Big(extraInputValue || 0).round(2).toNumber()
+      handleSaveData(numericValue, (quantity, shopName) => {
+        return saveExtraData(quantity, shopName, true) // ✅ Explicit return of a Promise
+      })
+    } catch (error) {
+      handleSaveData(0, (quantity, shopName) => {
+        return saveExtraData(quantity, shopName, true)
+      })
+    }
   }
 
   return (

@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
+import Big from 'big.js'
 import { units, ProductName } from '../utils/productDetails'
 import editImg from '../assets/edit.png'
 import saveImg from '../assets/save-icon.png'
@@ -111,7 +112,7 @@ const SummaryShopProductDetails: React.FC<SummaryShopProductDetailsProps> = ({
     dateItem: string,
     idItem: number | null,
   ) => {
-    const quantityNumber = Number(quantity)
+    const quantityNumber = Big(quantity || 0).round(2).toNumber()
     console.log('save button clicked', quantity, idItem)
     const urlSale = `${VITE_APP_SALES_API}/${idItem}`
     const urlReturn = `${VITE_APP_RETURNS_API}/${idItem}`
@@ -197,7 +198,7 @@ const SummaryShopProductDetails: React.FC<SummaryShopProductDetailsProps> = ({
             onClick={(e) => {
               e.stopPropagation()
               console.log('clicked')
-              updateItem(Number(editValue), item.date, item.id)
+              updateItem(Big(editValue || 0).round(2).toNumber(), item.date, item.id)
               setEditIndex(null)
             }}
           />

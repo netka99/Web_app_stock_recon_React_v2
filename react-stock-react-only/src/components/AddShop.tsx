@@ -39,8 +39,8 @@ const Container = styled.div`
     padding-left: 1rem;
     background: linear-gradient(to bottom right, #f2f2f2, #dfdfdf);
     border-radius: 20px;
-    box-shadow: 4px 6px 6px 1px rgba(0, 0, 0, 0.3);
-    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     font-size: 1rem;
     margin-bottom: 1rem;
     padding: 0 2rem 0 2rem;
@@ -59,7 +59,7 @@ const Container = styled.div`
     border-radius: 20px;
     font-size: 1rem;
     box-shadow: 2px 3px 4px 1px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(to bottom right, #5c35b6, #8461c5);
+    background: #8b5cf6;
     cursor: pointer;
 
     @media screen and (max-width: ${size.mobileL}) {
